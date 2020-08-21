@@ -1,0 +1,73 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.Bots", "DiscordBot.Bots\DiscordBot.Bots.csproj", "{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DiscordBot.Bots", "DiscordBot.Bots", "{707FD29D-6ACA-4A66-BA26-66F35058E3E4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DiscordBot.DAL", "DiscordBot.DAL", "{C161B804-6FFB-4736-BEBA-9088BE8B1CF0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.DAL", "DiscordBot.DAL\DiscordBot.DAL.csproj", "{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.DAL.Migrations", "DiscordBot.DAL.Migrations\DiscordBot.DAL.Migrations.csproj", "{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DiscordBot.Core", "DiscordBot.Core", "{C4E3FC2C-2323-49E5-AAFB-9D609B2802AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.Core", "DiscordBot.Core\DiscordBot.Core.csproj", "{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Dev_Build|Any CPU = Dev_Build|Any CPU
+		Live_Build|Any CPU = Live_Build|Any CPU
+		Test_Build|Any CPU = Test_Build|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Dev_Build|Any CPU.ActiveCfg = Dev_Build|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Dev_Build|Any CPU.Build.0 = Dev_Build|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Live_Build|Any CPU.ActiveCfg = Live_Build|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Live_Build|Any CPU.Build.0 = Live_Build|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Test_Build|Any CPU.ActiveCfg = Test_Build|Any CPU
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE}.Test_Build|Any CPU.Build.0 = Test_Build|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Dev_Build|Any CPU.ActiveCfg = Dev_Build|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Dev_Build|Any CPU.Build.0 = Dev_Build|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Live_Build|Any CPU.ActiveCfg = Live_Build|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Live_Build|Any CPU.Build.0 = Live_Build|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Test_Build|Any CPU.ActiveCfg = Test_Build|Any CPU
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF}.Test_Build|Any CPU.Build.0 = Test_Build|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Dev_Build|Any CPU.ActiveCfg = Dev_Build|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Dev_Build|Any CPU.Build.0 = Dev_Build|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Live_Build|Any CPU.ActiveCfg = Live_Build|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Live_Build|Any CPU.Build.0 = Live_Build|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Test_Build|Any CPU.ActiveCfg = Test_Build|Any CPU
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA}.Test_Build|Any CPU.Build.0 = Test_Build|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Dev_Build|Any CPU.ActiveCfg = Dev_Build|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Dev_Build|Any CPU.Build.0 = Dev_Build|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Live_Build|Any CPU.ActiveCfg = Live_Build|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Live_Build|Any CPU.Build.0 = Live_Build|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Test_Build|Any CPU.ActiveCfg = Test_Build|Any CPU
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57}.Test_Build|Any CPU.Build.0 = Test_Build|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{97ED5389-7054-4F40-8741-9BDAD6AEB8AE} = {707FD29D-6ACA-4A66-BA26-66F35058E3E4}
+		{647F76A0-0A4F-49C4-9782-7D17E1C9C2CF} = {C161B804-6FFB-4736-BEBA-9088BE8B1CF0}
+		{C5713B6B-5D85-4DCE-9736-14CE635EB4AA} = {C161B804-6FFB-4736-BEBA-9088BE8B1CF0}
+		{DD4C83B3-73FF-4361-916F-89D4E6FB6F57} = {C4E3FC2C-2323-49E5-AAFB-9D609B2802AB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F770D54E-CCCC-4FE6-814F-FAC0C29E08ED}
+	EndGlobalSection
+EndGlobal
