@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
@@ -26,23 +27,18 @@ namespace DiscordBot.Bots
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
 
-        public Bot(IServiceProvider services)
+        public Bot(IServiceProvider services, IConfiguration configuration)
         {
             _profileService = services.GetService<IProfileService>();
             _experienceService = services.GetService<IExperienceService>();
             _customCommandService = services.GetService<ICustomCommandService>();
 
-            var json = string.Empty;
-
-            using (var fs = File.OpenRead("config.json"))
-            using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
-                json = sr.ReadToEnd();
-
-            var configJson = JsonConvert.DeserializeObject<ConfigJson>(json);
+            var token = configuration["token"];
+            var prefix = configuration["prefix"];
 
             var config = new DiscordConfiguration
             {
-                Token = configJson.Token,
+                Token = token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
                 UseInternalLogHandler = true,
@@ -70,7 +66,7 @@ namespace DiscordBot.Bots
 
             var commandsConfig = new CommandsNextConfiguration
             {
-                StringPrefixes = new string[] { configJson.Prefix },
+                StringPrefixes = new string[] { prefix },
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 Services = services,

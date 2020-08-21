@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>DiscordBot</AssemblyName>
-    <Configurations>Debug;Release;Dev_Build;Test_Build;Live_Build;Azure</Configurations>
+    <Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <UserSecretsId>34b56b5f-2361-41bd-96ec-2648e2719edc</UserSecretsId>
   </PropertyGroup>
 
@@ -42,12 +42,6 @@
     <ProjectReference Include="..\DiscordBot.Core\DiscordBot.Core.csproj" />
     <ProjectReference Include="..\DiscordBot.DAL.Migrations\DiscordBot.DAL.Migrations.csproj" />
     <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="config.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

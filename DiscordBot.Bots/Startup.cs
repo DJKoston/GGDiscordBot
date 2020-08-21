@@ -1,14 +1,14 @@
-using DiscordBot.DAL;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Items;
 using DiscordBot.Core.Services.Profiles;
-using Microsoft.EntityFrameworkCore;
 using DiscordBot.Core.Services.Quotes;
+using DiscordBot.DAL;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DiscordBot.Bots
 {
@@ -40,7 +40,7 @@ namespace DiscordBot.Bots
 
             var serviceProvider = services.BuildServiceProvider();
 
-            var bot = new Bot(serviceProvider);
+            var bot = new Bot(serviceProvider, Configuration);
             services.AddSingleton(bot);
         }
 
