@@ -21,12 +21,13 @@ namespace DiscordBot.Bots
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var SqlServerConnectionString = Configuration["connectionstring"];
+
             services.AddDbContext<RPGContext>(options =>
             {
-                options.UseSqlServer("Data Source=SRV1;Initial Catalog=GGBotLive;Persist Security Info=True;User ID=sa;Password=RH14NN4k05t0n",
+                options.UseSqlServer(SqlServerConnectionString,
                    x => x.MigrationsAssembly("DiscordBot.DAL.Migrations"));
             });
             services.AddScoped<IItemService, ItemService>();
@@ -43,7 +44,6 @@ namespace DiscordBot.Bots
             services.AddSingleton(bot);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -53,7 +53,6 @@ namespace DiscordBot.Bots
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

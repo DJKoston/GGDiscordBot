@@ -1,10 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using System;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands

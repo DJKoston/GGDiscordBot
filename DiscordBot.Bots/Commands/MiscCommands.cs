@@ -2,10 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System;
-using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
-using DescriptionAttribute = DSharpPlus.CommandsNext.Attributes.DescriptionAttribute;
 
 namespace DiscordBot.Bots.Commands
 {

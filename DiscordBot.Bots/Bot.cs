@@ -13,11 +13,9 @@ using DSharpPlus.Interactivity;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots
