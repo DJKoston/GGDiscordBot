@@ -322,22 +322,6 @@ namespace DiscordBot.Bots.Commands
                     return;
                 }
 
-                if (thiefProfile.Gold <= 0)
-                {
-                    var errorEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = "Nice try!",
-                        Description = "Try making sure you have at least *some* gold yourself before trying to steal from anyone, otherwise it isn't fair!",
-                        Color = DiscordColor.IndianRed,
-                    };
-
-                    errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-
-                    await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
-
-                    return;
-                }
-
                 if (victimProfile.Gold > 0)
                 {
                     if (winOrLose == 2)
@@ -370,15 +354,10 @@ namespace DiscordBot.Bots.Commands
                     }
 
                     if (winOrLose == 1)
-                    {
-                        var rndLose = rnd.Next(0, thiefProfile.Gold);
-
-                        await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -rndLose, ctx.Member.Username);
-                        await _goldService.GrantGoldAsync(member.Id, ctx.Guild.Id, rndLose, member.Username);
-
+                    {                       
                         var loseEmbed = new DiscordEmbedBuilder
                         {
-                            Title = $"You have unsucessfully stolen from {member.DisplayName} and they kicked you right in the face taking {rndLose.ToString("###,###,###,###,###")} Gold from you!",
+                            Title = $"You have unsucessfully stolen from {member.DisplayName}",
                             Color = DiscordColor.IndianRed
                         };
 
