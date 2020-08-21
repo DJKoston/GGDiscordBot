@@ -54,7 +54,7 @@ namespace DiscordBot.Bots.Commands
             var profileEmbed = new DiscordEmbedBuilder
             {
                 Title = $"{member.DisplayName}'s Profile",
-                Color = DiscordColor.Gold
+                Color = member.Color
             };
 
             profileEmbed.WithThumbnail(member.AvatarUrl);
@@ -65,13 +65,13 @@ namespace DiscordBot.Bots.Commands
             profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"));
             profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
-            if(quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes.ToString()} Times"); }
-            if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes.ToString("###,###,###,###,###")} Time"); }
-            if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes.ToString("###,###,###,###,###")} Times"); }
+            if(quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
+            if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
+            if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
 
-            if(quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby.ToString()} Quotes"); }
-            if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby.ToString("###,###,###,###,###")} Quote"); }
-            if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby.ToString("###,###,###,###,###")} Quotes"); }
+            if(quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
+            if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
+            if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
 
             await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
         }
@@ -92,7 +92,7 @@ namespace DiscordBot.Bots.Commands
 
             var XPAddedEmbed = new DiscordEmbedBuilder
             {
-                Title = $"{xpGranted.ToString("###,###,###,###,###")} XP given to {member.DisplayName}!",
+                Title = $"{xpGranted:###,###,###,###,###} XP given to {member.DisplayName}!",
                 Color = DiscordColor.Blurple
             };
 
@@ -105,7 +105,7 @@ namespace DiscordBot.Bots.Commands
 
             var leveledUpEmbed = new DiscordEmbedBuilder
             {
-                Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level.ToString("###,###,###,###,###")}!",
+                Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
                 Color = DiscordColor.Gold,
             };
 
@@ -132,7 +132,7 @@ namespace DiscordBot.Bots.Commands
 
             var GoldAddedEmbed = new DiscordEmbedBuilder
             {
-                Title = $"{goldGranted.ToString("###,###,###,###,###")} Gold given to {member.DisplayName}!",
+                Title = $"{goldGranted:###,###,###,###,###} Gold given to {member.DisplayName}!",
                 Color = DiscordColor.Blurple
             };
 
@@ -149,7 +149,7 @@ namespace DiscordBot.Bots.Commands
                 var errorEmbed = new DiscordEmbedBuilder
                 {
                     Title = "An Error has occurred!",
-                    Description = $"It appears an error has occurred while trying to add {goldGranted.ToString("###,###,###,###,###")} gold to {member.DisplayName}",
+                    Description = $"It appears an error has occurred while trying to add {goldGranted:###,###,###,###,###} gold to {member.DisplayName}",
                     Color = DiscordColor.Red
                 };
 
@@ -175,7 +175,7 @@ namespace DiscordBot.Bots.Commands
                 var userProfileCheckFailEmbed = new DiscordEmbedBuilder
                 {
                     Title = "You can't pay that much!",
-                    Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount.ToString("###,###,###,###,###")} Gold! Try paying them a smaller amount... We have shown you how much Gold you have below!",
+                    Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount:###,###,###,###,###} Gold! Try paying them a smaller amount... We have shown you how much Gold you have below!",
                     Color = DiscordColor.IndianRed,
                 };
 
@@ -207,7 +207,7 @@ namespace DiscordBot.Bots.Commands
 
             var paidEmbed = new DiscordEmbedBuilder
             {
-                Title = $"You have paid {member.DisplayName} {payAmount.ToString("###,###,###,###,###")} Gold!",
+                Title = $"You have paid {member.DisplayName} {payAmount:###,###,###,###,###} Gold!",
                 Description = "Thank you for using the GG Bot Payment Network!",
                 Color = DiscordColor.SpringGreen,
             };
@@ -230,7 +230,7 @@ namespace DiscordBot.Bots.Commands
             var hourlyEmbed = new DiscordEmbedBuilder
             {
                 Title = "You have collected your hourly 'Tax'!",
-                Description = $"You just received {hourlyCollect.ToString("###,###,###,###,###")} Gold!",
+                Description = $"You just received {hourlyCollect:###,###,###,###,###} Gold!",
                 Color = DiscordColor.Cyan,
             };
 
@@ -252,7 +252,7 @@ namespace DiscordBot.Bots.Commands
             var dailyEmbed = new DiscordEmbedBuilder
             {
                 Title = "You have collected your Daily 'Tax'!",
-                Description = $"You just received {dailyCollect.ToString("###,###,###,###,###")} Gold!",
+                Description = $"You just received {dailyCollect:###,###,###,###,###} Gold!",
                 Color = DiscordColor.Cyan,
             };
 
@@ -333,16 +333,16 @@ namespace DiscordBot.Bots.Commands
 
                 leaderboardEmbed.WithFooter($"Leaderboard correct as of {DateTime.Now}");
                 leaderboardEmbed.WithThumbnail(member1.AvatarUrl);
-                leaderboardEmbed.AddField("1st", $"{member1.DisplayName} - {first.XP.ToString("###,###,###,###,###")} XP - Level {first.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("2nd", $"{member2.DisplayName} - {second.XP.ToString("###,###,###,###,###")} XP - Level {second.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("3rd", $"{member3.DisplayName} - {third.XP.ToString("###,###,###,###,###")} XP - Level {third.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("4th", $"{member4.DisplayName} - {fourth.XP.ToString("###,###,###,###,###")} XP - Level {fourth.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("5th", $"{member5.DisplayName} - {fifth.XP.ToString("###,###,###,###,###")} XP - Level {fifth.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("6th", $"{member6.DisplayName} - {sixth.XP.ToString("###,###,###,###,###")} XP - Level {sixth.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("7th", $"{member7.DisplayName} - {seventh.XP.ToString("###,###,###,###,###")} XP - Level {seventh.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("8th", $"{member8.DisplayName} - {eighth.XP.ToString("###,###,###,###,###")} XP - Level {eighth.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("9th", $"{member9.DisplayName} - {ninth.XP.ToString("###,###,###,###,###")} XP - Level {ninth.Level.ToString("###,###,###,###,###")}");
-                leaderboardEmbed.AddField("10th", $"{member10.DisplayName} - {tenth.XP.ToString("###,###,###,###,###")} XP - Level {tenth.Level.ToString("###,###,###,###,###")}");
+                leaderboardEmbed.AddField("1st", $"{member1.DisplayName} - {first.XP:###,###,###,###,###} XP - Level {first.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("2nd", $"{member2.DisplayName} - {second.XP:###,###,###,###,###} XP - Level {second.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("3rd", $"{member3.DisplayName} - {third.XP:###,###,###,###,###} XP - Level {third.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("4th", $"{member4.DisplayName} - {fourth.XP:###,###,###,###,###} XP - Level {fourth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("5th", $"{member5.DisplayName} - {fifth.XP:###,###,###,###,###} XP - Level {fifth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("6th", $"{member6.DisplayName} - {sixth.XP:###,###,###,###,###} XP - Level {sixth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("7th", $"{member7.DisplayName} - {seventh.XP:###,###,###,###,###} XP - Level {seventh.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("8th", $"{member8.DisplayName} - {eighth.XP:###,###,###,###,###} XP - Level {eighth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("9th", $"{member9.DisplayName} - {ninth.XP:###,###,###,###,###} XP - Level {ninth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("10th", $"{member10.DisplayName} - {tenth.XP:###,###,###,###,###} XP - Level {tenth.Level:###,###,###,###,###}");
 
                 await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
 
@@ -386,16 +386,16 @@ namespace DiscordBot.Bots.Commands
 
                 leaderboardEmbed.WithFooter($"Leaderboard correct as of {DateTime.Now}");
                 leaderboardEmbed.WithThumbnail(member1.AvatarUrl);
-                leaderboardEmbed.AddField("1st", $"{member1.DisplayName} - {first.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("2nd", $"{member2.DisplayName} - {second.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("3rd", $"{member3.DisplayName} - {third.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("4th", $"{member4.DisplayName} - {fourth.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("5th", $"{member5.DisplayName} - {fifth.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("6th", $"{member6.DisplayName} - {sixth.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("7th", $"{member7.DisplayName} - {seventh.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("8th", $"{member8.DisplayName} - {eighth.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("9th", $"{member9.DisplayName} - {ninth.Gold.ToString("###,###,###,###,###")} Gold");
-                leaderboardEmbed.AddField("10th", $"{member10.DisplayName} - {tenth.Gold.ToString("###,###,###,###,###")} Gold");
+                leaderboardEmbed.AddField("1st", $"{member1.DisplayName} - {first.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("2nd", $"{member2.DisplayName} - {second.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("3rd", $"{member3.DisplayName} - {third.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("4th", $"{member4.DisplayName} - {fourth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("5th", $"{member5.DisplayName} - {fifth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("6th", $"{member6.DisplayName} - {sixth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("7th", $"{member7.DisplayName} - {seventh.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("8th", $"{member8.DisplayName} - {eighth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("9th", $"{member9.DisplayName} - {ninth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("10th", $"{member10.DisplayName} - {tenth.Gold:###,###,###,###,###} Gold");
 
                 await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
 

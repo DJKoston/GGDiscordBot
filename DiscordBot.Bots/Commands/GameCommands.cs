@@ -91,7 +91,7 @@ namespace DiscordBot.Bots.Commands
                     var profileCheckFail = new DiscordEmbedBuilder
                     {
                         Title = "You can't bet that much!",
-                        Description = $"Seems like you're too poor to afford to bet {bet.ToString("###,###,###,###,###")} Gold! Try betting a smaller amount... We have shown you how much Gold you have below!"
+                        Description = $"Seems like you're too poor to afford to bet {bet:###,###,###,###,###} Gold! Try betting a smaller amount... We have shown you how much Gold you have below!"
                     };
 
                     if (profileCheck.Gold == 0) { profileCheckFail.AddField("Gold", profileCheck.Gold.ToString()); }
@@ -117,11 +117,9 @@ namespace DiscordBot.Bots.Commands
                     var winEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"You won the spin!",
-                        Description = $"You just won {winAmount.ToString("###,###,###,###,###")} Gold!",
+                        Description = $"You just won {winAmount:###,###,###,###,###} Gold!",
                         Color = DiscordColor.SpringGreen
                     };
-
-                    Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
                     winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
 
@@ -138,11 +136,9 @@ namespace DiscordBot.Bots.Commands
                     var loseEmbed = new DiscordEmbedBuilder
                     {
                         Title = "You lost the spin!",
-                        Description = $"You just lost {bet.ToString("###,###,###,###,###")} Gold!",
+                        Description = $"You just lost {bet:###,###,###,###,###} Gold!",
                         Color = DiscordColor.IndianRed
                     };
-
-                    Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
                     loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
 
@@ -218,11 +214,9 @@ namespace DiscordBot.Bots.Commands
                         var winEmbed = new DiscordEmbedBuilder
                         {
                             Title = $"You won the spin!",
-                            Description = $"You just won {winAmount.ToString("###,###,###,###,###")} Gold!",
+                            Description = $"You just won {winAmount:###,###,###,###,###} Gold!",
                             Color = DiscordColor.SpringGreen
                         };
-
-                        Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
 
@@ -239,11 +233,9 @@ namespace DiscordBot.Bots.Commands
                         var loseEmbed = new DiscordEmbedBuilder
                         {
                             Title = "You lost the spin!",
-                            Description = $"You just lost {bet.ToString("###,###,###,###,###")} Gold!",
+                            Description = $"You just lost {bet:###,###,###,###,###} Gold!",
                             Color = DiscordColor.IndianRed
                         };
-
-                        Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
 
@@ -333,7 +325,7 @@ namespace DiscordBot.Bots.Commands
 
                         var winEmbed = new DiscordEmbedBuilder
                         {
-                            Title = $"You successfully stole {rndSteal.ToString("###,###,###,###,###")} Gold from {member.DisplayName}!",
+                            Title = $"You successfully stole {rndSteal:###,###,###,###,###} Gold from {member.DisplayName}!",
                             Color = DiscordColor.SpringGreen
                         };
 
@@ -519,8 +511,6 @@ namespace DiscordBot.Bots.Commands
                     {
                         await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, 100, ctx.Member.Username);
 
-                        Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
-
                         var winEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Heads!",
@@ -537,7 +527,6 @@ namespace DiscordBot.Bots.Commands
 
                     if (outcome == tails)
                     {
-                        Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
                         var loseEmbed = new DiscordEmbedBuilder
                         {
@@ -560,8 +549,6 @@ namespace DiscordBot.Bots.Commands
                     {
                         await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, 100, ctx.Member.Username);
 
-                        Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
-
                         var winEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Tails!",
@@ -578,8 +565,6 @@ namespace DiscordBot.Bots.Commands
 
                     if (outcome == heads)
                     {
-                        Profile profile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
-
                         var loseEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Heads!",
