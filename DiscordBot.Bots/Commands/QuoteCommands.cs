@@ -129,7 +129,7 @@ namespace DiscordBot.Bots.Commands
             {
                 var zeroQuoteEmbed = new DiscordEmbedBuilder
                 {
-                    Title = $"There is currently {lastQuoteId.QuoteId.ToString()} quote in the bot!",
+                    Title = $"There is currently {lastQuoteId.QuoteId} quote in the bot!",
                     Color = DiscordColor.Orange,
                 };
 
@@ -142,7 +142,7 @@ namespace DiscordBot.Bots.Commands
             {
                 var zeroQuoteEmbed = new DiscordEmbedBuilder
                 {
-                    Title = $"There are currently {lastQuoteId.QuoteId.ToString()} quotes in the bot!",
+                    Title = $"There are currently {lastQuoteId.QuoteId} quotes in the bot!",
                     Color = DiscordColor.Orange,
                 };
 
@@ -161,7 +161,16 @@ namespace DiscordBot.Bots.Commands
 
             if(quote == null)
             {
-                await ctx.Channel.SendMessageAsync("There isnt a quote that exists with that quote number!").ConfigureAwait(false);
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = "There isnt a quote that exists with that quote number!"
+                };
+
+                embed.AddField("Try searching for another quote!", "For example `!deletequote 154`");
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+               
 
                 return;
             }
@@ -210,7 +219,7 @@ namespace DiscordBot.Bots.Commands
 
             var quoteAddEmbed = new DiscordEmbedBuilder
             {
-                Title = $"Quote #{quote.QuoteId.ToString()}",
+                Title = $"Quote #{quote.QuoteId}",
                 Description = $"{quote.QuoteContents} - {quotedUser.Username}",
                 Color = DiscordColor.SpringGreen,
             };
@@ -227,14 +236,31 @@ namespace DiscordBot.Bots.Commands
         [Command("quote")]
         public async Task GetQuote(CommandContext ctx, int quoteNumber)
         {
+            var quoteQuery = _context.Quotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
+            var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
+
             var quote = _quoteService.GetQuoteAsync(quoteNumber).Result;
 
             var quotedUser = ctx.Client.GetUserAsync(quote.DiscordUserQuotedId).Result;
             var quoterUser = ctx.Client.GetUserAsync(quote.AddedById).Result;
 
+            if(quoteNumber > lastQuoteId.Id)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = "There isnt a quote that exists with that quote number!"
+                };
+
+                embed.AddField("Try searching for another quote!", "For example `!quote 154`");
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
             var quoteAddEmbed = new DiscordEmbedBuilder
             {
-                Title = $"Quote #{quote.QuoteId.ToString()}",
+                Title = $"Quote #{quote.QuoteId}",
                 Description = $"{quote.QuoteContents} - {quotedUser.Username}",
                 Color = DiscordColor.SpringGreen,
             };

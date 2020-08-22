@@ -471,8 +471,8 @@ namespace DiscordBot.Bots
 
             var leveledUpEmbed = new DiscordEmbedBuilder
             {
-                Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level.ToString("###,###,###,###,###")}!",
-                Description = $"{member.DisplayName} has been given {levelUpGold.ToString("###,###,###,###,###")} Gold for Levelling Up!",
+                Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
+                Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
                 Color = DiscordColor.Gold,
             };
 
@@ -624,7 +624,7 @@ namespace DiscordBot.Bots
             var otherMembers = totalMembers - 1;
 
             joinEmbed.WithThumbnail(e.Member.AvatarUrl);
-            joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers.ToString("###,###,###,###,###")} of us!");
+            joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
 
             welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
 
