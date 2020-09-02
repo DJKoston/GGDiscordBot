@@ -174,7 +174,7 @@ namespace DiscordBot.Bots.Commands
             {
                 var userProfileCheckFailEmbed = new DiscordEmbedBuilder
                 {
-                    Title = "You can't pay that much!",
+                    Title = $"You can't pay that much {ctx.Member.DisplayName}!",
                     Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount:###,###,###,###,###} Gold! Try paying them a smaller amount... We have shown you how much Gold you have below!",
                     Color = DiscordColor.IndianRed,
                 };
@@ -192,7 +192,7 @@ namespace DiscordBot.Bots.Commands
 
                 var lessThanCheck = new DiscordEmbedBuilder
                 {
-                    Title = "You cannot pay less than 0!",
+                    Title = $"You cannot pay less than 0 {ctx.Member.DisplayName}!",
                     Description = "Nice try suckka!",
                     Color = DiscordColor.IndianRed,
                 };
@@ -208,7 +208,7 @@ namespace DiscordBot.Bots.Commands
             var paidEmbed = new DiscordEmbedBuilder
             {
                 Title = $"You have paid {member.DisplayName} {payAmount:###,###,###,###,###} Gold!",
-                Description = "Thank you for using the GG Bot Payment Network!",
+                Description = $"Thank you for using the GG Bot Payment Network {ctx.Member.DisplayName}!",
                 Color = DiscordColor.SpringGreen,
             };
 
@@ -229,7 +229,7 @@ namespace DiscordBot.Bots.Commands
 
             var hourlyEmbed = new DiscordEmbedBuilder
             {
-                Title = "You have collected your hourly 'Tax'!",
+                Title = $"{ctx.Member.DisplayName} has just collected their hourly 'Tax'!",
                 Description = $"You just received {hourlyCollect:###,###,###,###,###} Gold!",
                 Color = DiscordColor.Cyan,
             };
@@ -251,7 +251,7 @@ namespace DiscordBot.Bots.Commands
 
             var dailyEmbed = new DiscordEmbedBuilder
             {
-                Title = "You have collected your Daily 'Tax'!",
+                Title = $"{ctx.Member.DisplayName} has collected their Daily 'Tax'!",
                 Description = $"You just received {dailyCollect:###,###,###,###,###} Gold!",
                 Color = DiscordColor.Cyan,
             };
@@ -261,7 +261,7 @@ namespace DiscordBot.Bots.Commands
 
         [Command("buildprofiletable")]
         [Description("Bring all users in the server to the Profile Table")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequireRoles(RoleCheckMode.Any, "Owner of the Venue")]
         public async Task BuildProfileTable(CommandContext ctx)
         {
             var members = await ctx.Guild.GetAllMembersAsync().ConfigureAwait(false);
