@@ -75,7 +75,7 @@ namespace DiscordBot.Bots.Commands
             if(quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
             if(quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
 
-            if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You are a Discord Nitro Booster!", "You currently get 2x XP and 2x Daily and Hourly Tax!"); }
+            if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You are a Discord Nitro Booster!", "You currently get 2x XP and 2x Tax!"); }
 
             await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
         }
