@@ -44,6 +44,8 @@ namespace DiscordBot.Bots.Commands
         {
             var memberUsername = ctx.Guild.Members[memberId].Username;
 
+            var NitroBoosterRole = ctx.Guild.GetRole(585597854249123840);
+
             var quotes = _context.Quotes.Count(x => x.DiscordUserQuotedId == memberId);
             var quotesby = _context.Quotes.Count(x => x.AddedById == memberId);
 
@@ -66,12 +68,14 @@ namespace DiscordBot.Bots.Commands
             profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
             if(quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
-            if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
-            if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
+            if(quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
+            if(quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
 
             if(quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
-            if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
-            if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
+            if(quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
+            if(quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
+
+            if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You are a Discord Nitro Booster!", "You currently get 2x XP and 2x Daily and Hourly Tax!"); }
 
             await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
         }
@@ -220,21 +224,54 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 3600, CooldownBucketType.User)]
         public async Task HourlyCollect(CommandContext ctx)
         {
-            await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
+            var NitroBoosterRole = ctx.Guild.GetRole(585597854249123840);
 
-            var rndHourly = new Random();
-            var hourlyCollect = rndHourly.Next(100, 1000);
-
-            await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, hourlyCollect, ctx.Member.Username);
-
-            var hourlyEmbed = new DiscordEmbedBuilder
+            if (ctx.Member.Roles.Contains(NitroBoosterRole))
             {
-                Title = $"{ctx.Member.DisplayName} has just collected their hourly 'Tax'!",
-                Description = $"You just received {hourlyCollect:###,###,###,###,###} Gold!",
-                Color = DiscordColor.Cyan,
-            };
+                await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
-            await ctx.Channel.SendMessageAsync(embed: hourlyEmbed);
+                var rndHourly = new Random();
+                int hourlyCollect = rndHourly.Next(100, 1000);
+                int hourlyCollectNitro = hourlyCollect * 2;
+
+                await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, hourlyCollectNitro, ctx.Member.Username);
+
+                var hourlyEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{ctx.Member.DisplayName} has just collected their hourly 'Tax'!",
+                    Description = $"You just received {hourlyCollectNitro:###,###,###,###,###} Gold!",
+                    Color = DiscordColor.Cyan,
+                };
+
+                hourlyEmbed.AddField("You collected 2x Normal Tax", "Because you're a Discord Nitro Booster!");
+
+                await ctx.Channel.SendMessageAsync(embed: hourlyEmbed);
+
+                return;
+            }
+
+            else
+            {
+                await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
+
+                var rndHourly = new Random();
+                var hourlyCollect = rndHourly.Next(100, 1000);
+
+                await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, hourlyCollect, ctx.Member.Username);
+
+                var hourlyEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{ctx.Member.DisplayName} has just collected their hourly 'Tax'!",
+                    Description = $"You just received {hourlyCollect:###,###,###,###,###} Gold!",
+                    Color = DiscordColor.Cyan,
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: hourlyEmbed);
+
+                return;
+            }
+
+            
         }
 
         [Command("daily")]
@@ -242,21 +279,54 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 86400, CooldownBucketType.User)]
         public async Task DailyCollect(CommandContext ctx)
         {
-            await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
+            var NitroBoosterRole = ctx.Guild.GetRole(585597854249123840);
 
-            var rndDaily = new Random();
-            var dailyCollect = rndDaily.Next(100, 5000);
-
-            await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, dailyCollect, ctx.Member.Username);
-
-            var dailyEmbed = new DiscordEmbedBuilder
+            if (ctx.Member.Roles.Contains(NitroBoosterRole))
             {
-                Title = $"{ctx.Member.DisplayName} has collected their Daily 'Tax'!",
-                Description = $"You just received {dailyCollect:###,###,###,###,###} Gold!",
-                Color = DiscordColor.Cyan,
-            };
+                await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
 
-            await ctx.Channel.SendMessageAsync(embed: dailyEmbed);
+                var rndDaily = new Random();
+                int dailyCollect = rndDaily.Next(500, 5000);
+                int dailyCollectNitro = dailyCollect * 2;
+
+                await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, dailyCollectNitro, ctx.Member.Username);
+
+                var dailyEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{ctx.Member.DisplayName} has collected their Daily 'Tax'!",
+                    Description = $"You just received {dailyCollectNitro:###,###,###,###,###} Gold!",
+                    Color = DiscordColor.Cyan,
+                };
+
+                dailyEmbed.AddField("You collected 2x Normal Tax", "Because you're a Discord Nitro Booster!");
+
+                await ctx.Channel.SendMessageAsync(embed: dailyEmbed);
+
+                return;
+            }
+
+            else
+            {
+                await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
+
+                var rndDaily = new Random();
+                var dailyCollect = rndDaily.Next(500, 5000);
+
+                await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, dailyCollect, ctx.Member.Username);
+
+                var dailyEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{ctx.Member.DisplayName} has collected their Daily 'Tax'!",
+                    Description = $"You just received {dailyCollect:###,###,###,###,###} Gold!",
+                    Color = DiscordColor.Cyan,
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: dailyEmbed);
+
+                return;
+            }
+
+            
         }
 
         [Command("buildprofiletable")]

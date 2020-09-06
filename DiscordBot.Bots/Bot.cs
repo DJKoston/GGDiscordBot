@@ -450,37 +450,78 @@ namespace DiscordBot.Bots
 
         private async Task OnMessageCreated(MessageCreateEventArgs e)
         {
+            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+            DiscordRole NitroBooster = guild.GetRole(585597854249123840);
+            DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
+
             if (e.Author.IsBot)
             {
                 return;
             }
 
-            var member = e.Guild.Members[e.Author.Id];
-
-            var randomNumber = new Random();
-
-            int randXP = randomNumber.Next(50);
-
-            GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
-
-            if (!viewModel.LevelledUp) { return; }
-
-            Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
-
-            int levelUpGold = profile.Level * 100;
-
-            var leveledUpEmbed = new DiscordEmbedBuilder
+            if (memberCheck.Roles.Contains(NitroBooster))
             {
-                Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
-                Color = DiscordColor.Gold,
-            };
+                var member = e.Guild.Members[e.Author.Id];
 
-            leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+                var randomNumber = new Random();
 
-            await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+                int randXP = randomNumber.Next(50);
 
-            return;
+                int randXPNitro = randXP * 2;
+
+                GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXPNitro, e.Author.Username);
+
+                if (!viewModel.LevelledUp) { return; }
+
+                Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
+
+                int levelUpGold = profile.Level * 100;
+
+                var leveledUpEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
+                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
+                    Color = DiscordColor.Gold,
+                };
+
+                leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+
+                await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                var member = e.Guild.Members[e.Author.Id];
+
+                var randomNumber = new Random();
+
+                int randXP = randomNumber.Next(50);
+
+                GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
+
+                if (!viewModel.LevelledUp) { return; }
+
+                Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
+
+                int levelUpGold = (profile.Level * 100);
+
+                var leveledUpEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
+                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
+                    Color = DiscordColor.Gold,
+                };
+
+                leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+
+                await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+
+                return;
+            }
+
+            
         }
 
         private Task OnClientErrored(ClientErrorEventArgs e)
