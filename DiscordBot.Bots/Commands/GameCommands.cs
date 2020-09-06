@@ -33,7 +33,7 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
             }
@@ -64,7 +64,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     maxLimitCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    maxLimitCheck.WithFooter($"Command run by {ctx.User.Mention}");
+                    maxLimitCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: maxLimitCheck).ConfigureAwait(false);
 
@@ -82,7 +82,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     lessThanCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    lessThanCheck.WithFooter($"Command run by {ctx.User.Mention}");
+                    lessThanCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: lessThanCheck).ConfigureAwait(false);
 
@@ -101,7 +101,7 @@ namespace DiscordBot.Bots.Commands
                     if (profileCheck.Gold >= 1) { profileCheckFail.AddField("Gold", profileCheck.Gold.ToString("###,###,###,###,###")); }
 
                     profileCheckFail.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    profileCheckFail.WithFooter($"Command run by {ctx.User.Mention}");
+                    profileCheckFail.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: profileCheckFail).ConfigureAwait(false);
 
@@ -126,7 +126,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    winEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                    winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    loseEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                    loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
 
@@ -182,7 +182,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         maxLimitCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        maxLimitCheck.WithFooter($"Command run by {ctx.User.Mention}");
+                        maxLimitCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: maxLimitCheck).ConfigureAwait(false);
 
@@ -200,7 +200,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         lessThanCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        lessThanCheck.WithFooter($"Command run by {ctx.User.Mention}");
+                        lessThanCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: lessThanCheck).ConfigureAwait(false);
 
@@ -227,7 +227,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
 
@@ -247,7 +247,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
 
@@ -274,7 +274,7 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
             }           
@@ -303,7 +303,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                    errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
 
@@ -320,7 +320,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                    errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
 
@@ -352,7 +352,7 @@ namespace DiscordBot.Bots.Commands
                         if (victimLoseProfile.Gold >= 1) { winEmbed.AddField("Their Gold", victimLoseProfile.Gold.ToString("###,###,###,###,###")); }
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
 
@@ -377,7 +377,7 @@ namespace DiscordBot.Bots.Commands
                         if (victimWinProfile.Gold >= 1) { loseEmbed.AddField("Their Gold", victimWinProfile.Gold.ToString("###,###,###,###,###")); }
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
 
@@ -401,7 +401,7 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
             }
@@ -428,7 +428,7 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     maxEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    maxEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                    maxEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: maxEmbed).ConfigureAwait(false);
 
@@ -452,7 +452,7 @@ namespace DiscordBot.Bots.Commands
                     winEmbed.AddField("Your Gold:", profile.Gold.ToString());
                     winEmbed.AddField("The number has now changed!", "Can you guess it now?");
                     winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    winEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                    winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                     await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
 
@@ -467,7 +467,7 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                loseEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
             }
@@ -486,7 +486,7 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.CornflowerBlue,
                 };
 
-                errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
             }
@@ -505,7 +505,7 @@ namespace DiscordBot.Bots.Commands
                     Description = "For example `!coinflip heads`",
                     Color = DiscordColor.CornflowerBlue,
                 };
-                errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
             }
@@ -542,7 +542,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
 
@@ -560,7 +560,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
 
@@ -582,7 +582,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
 
@@ -599,7 +599,7 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                         await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
 
@@ -615,7 +615,7 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.CornflowerBlue,
                 };
 
-                errorEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
                 await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
             }

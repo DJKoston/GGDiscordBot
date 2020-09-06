@@ -41,7 +41,7 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Blurple
             };
             rolesEmbed.AddField("`!role 18+`", "Gets the 18+ Role");
-            rolesEmbed.WithFooter($"Command run by {ctx.User.Mention}");
+            rolesEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
             await ctx.Channel.SendMessageAsync(embed: rolesEmbed).ConfigureAwait(false);
         }
