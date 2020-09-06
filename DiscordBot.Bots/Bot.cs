@@ -465,11 +465,11 @@ namespace DiscordBot.Bots
 
                 var randomNumber = new Random();
 
-                int randXP = randomNumber.Next(50);
+                int randXP = randomNumber.Next(75);
 
-                int randXPNitro = randXP * 2;
+                
 
-                GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXPNitro, e.Author.Username);
+                GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
 
                 if (!viewModel.LevelledUp) { return; }
 
