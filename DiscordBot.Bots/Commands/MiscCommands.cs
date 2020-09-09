@@ -1,7 +1,10 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
@@ -54,6 +57,28 @@ namespace DiscordBot.Bots.Commands
             await ctx.Message.DeleteAsync().ConfigureAwait(false);
 
             await ctx.Channel.SendMessageAsync($"You have been banned from {ctx.Member.Mention}'s Christian Minecraft Server {member.Mention}! HOW DARE!").ConfigureAwait(false);
+        }
+
+        [Command("dadjoke")]
+        [Description("Get a Dad Joke!")]
+        public async Task DadJoke(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            WebRequest request = WebRequest.Create("https://api.scorpstuff.com/dadjokes.php");
+
+            WebResponse response = request.GetResponse();
+
+            using (Stream dataStream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(dataStream);
+
+                string responseFromServer = reader.ReadToEnd();
+
+                await ctx.Channel.SendMessageAsync(responseFromServer).ConfigureAwait(false);
+            }
+
+            response.Close();
         }
     }
 }
