@@ -3,6 +3,7 @@ using DiscordBot.DAL.Models.Quotes;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace DiscordBot.Core.Services.Quotes
     {
         Task CreateNewQuoteAsync(Quote quote);
         Task DeleteQuoteAsync(Quote quote);
-        Task<Quote> GetQuoteAsync(int quoteId);
+        Task<Quote> GetQuoteAsync(int quoteId, ulong discordId);
     }
 
     public class QuoteService : IQuoteService
@@ -42,11 +43,13 @@ namespace DiscordBot.Core.Services.Quotes
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<Quote> GetQuoteAsync(int quoteId)
+        public async Task<Quote> GetQuoteAsync(int quoteId, ulong discordId)
         {
             using var context = new RPGContext(_options);
 
-            return await context.Quotes.FirstOrDefaultAsync(x => x.QuoteId == quoteId).ConfigureAwait(false);
+            var serverQuotes = context.Quotes.Where(x => x.GuildId == discordId);
+
+            return await serverQuotes.FirstOrDefaultAsync(x => x.QuoteId == quoteId).ConfigureAwait(false);
         }
     }
 }

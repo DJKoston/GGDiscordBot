@@ -450,14 +450,14 @@ namespace DiscordBot.Bots
 
         private async Task OnMessageCreated(MessageCreateEventArgs e)
         {
-            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            DiscordRole NitroBooster = guild.GetRole(585597854249123840);
-            DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
-
             if (e.Author.IsBot)
             {
                 return;
             }
+
+            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+            DiscordRole NitroBooster = guild.GetRole(585597854249123840);
+            DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 
             if (memberCheck.Roles.Contains(NitroBooster))
             {
@@ -466,8 +466,6 @@ namespace DiscordBot.Bots
                 var randomNumber = new Random();
 
                 int randXP = randomNumber.Next(75);
-
-                
 
                 GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
 

@@ -32,7 +32,8 @@ namespace DiscordBot.Bots.Commands
         [RequireRoles(RoleCheckMode.Any, "Admin")]
         public async Task AddQuote(CommandContext ctx, DiscordMember discordMember, [RemainingText] string quote)
         {
-            var quoteQuery = _context.Quotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
+            var serverQuotes = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
+            var quoteQuery = serverQuotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
             if(lastQuoteId == null)
@@ -109,7 +110,8 @@ namespace DiscordBot.Bots.Commands
         [Command("totalquotes")]
         public async Task TotalQuotes(CommandContext ctx)
         {
-            var quoteQuery = _context.Quotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
+            var serverQuotes = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
+            var quoteQuery = serverQuotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
             if(lastQuoteId == null)
@@ -156,7 +158,7 @@ namespace DiscordBot.Bots.Commands
         [RequireRoles(RoleCheckMode.Any, "Admin")]
         public async Task DeleteQuote(CommandContext ctx, int quoteId)
         {
-            var quoteQuery = _quoteService.GetQuoteAsync(quoteId);
+            var quoteQuery = _quoteService.GetQuoteAsync(quoteId, ctx.Guild.Id);
             var quote = quoteQuery.Result;
 
             if(quote == null)
@@ -199,7 +201,8 @@ namespace DiscordBot.Bots.Commands
         [Command("quote")]
         public async Task GetQuote(CommandContext ctx)
         {
-            var quoteQuery = _context.Quotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
+            var serverQuotes = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
+            var quoteQuery = serverQuotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
             if(lastQuoteId == null)
@@ -212,7 +215,7 @@ namespace DiscordBot.Bots.Commands
             var rnd = new Random();
             int rndQuote = rnd.Next(1, lastQuoteId.QuoteId + 1);
 
-            var quote = _quoteService.GetQuoteAsync(rndQuote).Result;
+            var quote = _quoteService.GetQuoteAsync(rndQuote, ctx.Guild.Id).Result;
 
             var quotedUser = ctx.Client.GetUserAsync(quote.DiscordUserQuotedId).Result;
             var quoterUser = ctx.Client.GetUserAsync(quote.AddedById).Result;
@@ -239,7 +242,7 @@ namespace DiscordBot.Bots.Commands
             var quoteQuery = _context.Quotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
-            var quote = _quoteService.GetQuoteAsync(quoteNumber).Result;
+            var quote = _quoteService.GetQuoteAsync(quoteNumber, ctx.Guild.Id).Result;
 
             var quotedUser = ctx.Client.GetUserAsync(quote.DiscordUserQuotedId).Result;
             var quoterUser = ctx.Client.GetUserAsync(quote.AddedById).Result;
