@@ -1,6 +1,7 @@
 ﻿using DiscordBot.Bots.Commands;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
+using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.ViewModels;
 using DiscordBot.DAL.Models.Profiles;
 using DSharpPlus;
@@ -32,6 +33,7 @@ namespace DiscordBot.Bots
             _profileService = services.GetService<IProfileService>();
             _experienceService = services.GetService<IExperienceService>();
             _customCommandService = services.GetService<ICustomCommandService>();
+            _reactionRoleService = services.GetService<IReactionRoleService>();
 
             var token = configuration["token"];
             var prefix = configuration["prefix"];
@@ -83,6 +85,7 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<ModCommands>();
             Commands.RegisterCommands<ProfileCommands>();
             Commands.RegisterCommands<QuoteCommands>();
+            Commands.RegisterCommands<ReactionRoleCommands>();
             Commands.RegisterCommands<RoleCommands>();
 
             Commands.CommandErrored += OnCommandErrored;
@@ -274,6 +277,8 @@ namespace DiscordBot.Bots
             return Task.CompletedTask;
         }
 
+        private readonly IReactionRoleService _reactionRoleService;
+
         private async Task OnReactionRemoved(MessageReactionRemoveEventArgs e)
         {
             if (e.User.IsBot)
@@ -281,73 +286,15 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            var guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Name == "Generation Gamers");
-            var member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-            var channel = guild.Channels.Values.FirstOrDefault(x => x.Name == "role-management");
+            var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
 
-            DiscordMessage streamerMessage = await channel.GetMessageAsync(538530070441099278);
-            DiscordMessage platformMessage = await channel.GetMessageAsync(538530958488371204);
-            DiscordMessage announcementMessage = await channel.GetMessageAsync(612698615894245378);
+            if (reactionRole == null) { return; }
 
-            DiscordRole twitchStreamerRole = guild.GetRole(414301182136418316);
-            DiscordRole streamerRole = guild.GetRole(541321351084900382);
-            DiscordRole pcRole = guild.GetRole(513177707954307086);
-            DiscordRole xboxRole = guild.GetRole(513177622516334604);
-            DiscordRole playstationRole = guild.GetRole(513177669014388789);
-            DiscordRole announcementRole = guild.GetRole(612691988281688105);
+            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
+            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+            DiscordRole role = guild.GetRole(reactionRole.RoleId);
 
-            DiscordEmoji twitchEmoji = DiscordEmoji.FromGuildEmote(e.Client, 725823600346529795);
-            DiscordEmoji playstationEmoji = DiscordEmoji.FromGuildEmote(e.Client, 538531970343501824);
-            DiscordEmoji xboxEmoji = DiscordEmoji.FromGuildEmote(e.Client, 538531692378324997);
-            DiscordEmoji pcEmoji = DiscordEmoji.FromGuildEmote(e.Client, 538531394251653121);
-            DiscordEmoji announcementEmoji = DiscordEmoji.FromName(e.Client, ":one:");
-
-
-            if (e.Message.Id == streamerMessage.Id)
-            {
-                if (e.Emoji == twitchEmoji)
-                {
-                    await member.RevokeRoleAsync(twitchStreamerRole);
-                    await member.RevokeRoleAsync(streamerRole);
-
-                    return;
-                }
-                return;
-            }
-
-            if(e.Message.Id == platformMessage.Id)
-            {
-                if(e.Emoji == playstationEmoji)
-                {
-                    await member.RevokeRoleAsync(playstationRole);
-
-                    return;
-                }
-
-                if(e.Emoji == xboxEmoji)
-                {
-                    await member.RevokeRoleAsync(xboxRole);
-
-                    return;
-                }
-
-                if(e.Emoji == pcEmoji)
-                {
-                    await member.RevokeRoleAsync(pcRole);
-
-                    return;
-                }
-            }
-
-            if(e.Message.Id == announcementMessage.Id)
-            {
-                if (e.Emoji == announcementEmoji)
-                {
-                    await member.GrantRoleAsync(announcementRole);
-
-                    return;
-                }
-            }
+            await member.RevokeRoleAsync(role);
 
             return;
         }
@@ -359,73 +306,15 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            var guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Name == "Generation Gamers");
-            var member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-            var channel = guild.Channels.Values.FirstOrDefault(x => x.Name == "role-management");
+            var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
 
-            DiscordMessage streamerMessage = await channel.GetMessageAsync(538530070441099278);
-            DiscordMessage platformMessage = await channel.GetMessageAsync(538530958488371204);
-            DiscordMessage announcementMessage = await channel.GetMessageAsync(612698615894245378);
+            if(reactionRole == null) { return; }
 
-            DiscordRole twitchStreamerRole = guild.GetRole(414301182136418316);
-            DiscordRole streamerRole = guild.GetRole(541321351084900382);
-            DiscordRole pcRole = guild.GetRole(513177707954307086);
-            DiscordRole xboxRole = guild.GetRole(513177622516334604);
-            DiscordRole playstationRole = guild.GetRole(513177669014388789);
-            DiscordRole announcementRole = guild.GetRole(612691988281688105);
+            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
+            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+            DiscordRole role = guild.GetRole(reactionRole.RoleId);
 
-            DiscordEmoji twitchEmoji = DiscordEmoji.FromGuildEmote(e.Client, 725823600346529795);
-            DiscordEmoji playstationEmoji = DiscordEmoji.FromGuildEmote(e.Client, 538531970343501824);
-            DiscordEmoji xboxEmoji = DiscordEmoji.FromGuildEmote(e.Client, 538531692378324997);
-            DiscordEmoji pcEmoji = DiscordEmoji.FromGuildEmote(e.Client, 538531394251653121);
-            DiscordEmoji announcementEmoji = DiscordEmoji.FromName(e.Client, ":one:");
-
-
-            if (e.Message.Id == streamerMessage.Id)
-            {
-                if (e.Emoji == twitchEmoji)
-                {
-                    await member.GrantRoleAsync(twitchStreamerRole);
-                    await member.GrantRoleAsync(streamerRole);
-
-                    return;
-                }
-                return;
-            }
-
-            if (e.Message.Id == platformMessage.Id)
-            {
-                if (e.Emoji == playstationEmoji)
-                {
-                    await member.GrantRoleAsync(playstationRole);
-
-                    return;
-                }
-
-                if (e.Emoji == xboxEmoji)
-                {
-                    await member.GrantRoleAsync(xboxRole);
-
-                    return;
-                }
-
-                if (e.Emoji == pcEmoji)
-                {
-                    await member.GrantRoleAsync(pcRole);
-
-                    return;
-                }
-            }
-
-            if (e.Message.Id == announcementMessage.Id)
-            {
-                if (e.Emoji == announcementEmoji)
-                {
-                    await member.RevokeRoleAsync(announcementRole);
-
-                    return;
-                }
-            }
+            await member.GrantRoleAsync(role);
 
             return;
         }

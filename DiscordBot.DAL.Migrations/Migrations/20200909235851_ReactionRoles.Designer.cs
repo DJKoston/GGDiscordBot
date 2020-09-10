@@ -3,14 +3,16 @@ using DiscordBot.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
-    partial class RPGContextModelSnapshot : ModelSnapshot
+    [Migration("20200909235851_ReactionRoles")]
+    partial class ReactionRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,9 +162,6 @@ namespace DiscordBot.DAL.Migrations.Migrations
 
                     b.Property<decimal>("RoleId")
                         .HasColumnType("decimal(20,0)");
-
-                    b.Property<string>("UnicodeEmote")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

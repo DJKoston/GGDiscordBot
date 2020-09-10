@@ -2,6 +2,7 @@
 using DiscordBot.DAL.Models.Items;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
+using DiscordBot.DAL.Models.ReactionRoles;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.DAL
@@ -14,5 +15,6 @@ namespace DiscordBot.DAL
         public DbSet<CustomCommand> CustomCommands { get; set; }
         public DbSet<ProfileItem> ProfileItems { get; set; }
         public DbSet<Quote> Quotes { get; set; }
+        public DbSet<ReactionRole> ReactionRoles { get; set; }
     }
 }

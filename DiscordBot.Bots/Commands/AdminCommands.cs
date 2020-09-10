@@ -1,4 +1,7 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DiscordBot.Core.Services.ReactionRoles;
+using DiscordBot.DAL;
+using DiscordBot.DAL.Models.ReactionRoles;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Linq;
@@ -19,27 +22,6 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(pingtime).ConfigureAwait(false);
         }
 
-        [Command("rolereacts")]
-        public async Task RoleReacts(CommandContext ctx)
-        {
-            var roleChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "role-management");
-
-            DiscordMessage streamerRoleMessage = await roleChannel.GetMessageAsync(538530070441099278);
-            DiscordMessage gamePlatformMessage = await roleChannel.GetMessageAsync(538530958488371204);
-            DiscordMessage announcementPingMessage = await roleChannel.GetMessageAsync(612698615894245378);
-
-            DiscordEmoji twitchEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 725823600346529795);
-            DiscordEmoji playstationEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 538531970343501824);
-            DiscordEmoji xboxEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 538531692378324997);
-            DiscordEmoji pcEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 538531394251653121);
-            DiscordEmoji announcementEmoji = DiscordEmoji.FromName(ctx.Client, ":one:");
-
-            await streamerRoleMessage.CreateReactionAsync(twitchEmoji);
-            await gamePlatformMessage.CreateReactionAsync(playstationEmoji);
-            await gamePlatformMessage.CreateReactionAsync(xboxEmoji);
-            await gamePlatformMessage.CreateReactionAsync(pcEmoji);
-            await announcementPingMessage.CreateReactionAsync(announcementEmoji);
-        }
 
         [Command("dtstart")]
         public async Task DowntimeStart(CommandContext ctx, [RemainingText] string reason)
@@ -58,6 +40,12 @@ namespace DiscordBot.Bots.Commands
 
             await announcementChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
             await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+            await ctx.Client.UpdateStatusAsync(new DiscordActivity
+            {
+                ActivityType = ActivityType.Watching,
+                Name = "For my new update!",
+            }, UserStatus.DoNotDisturb);
         }
 
         [Command("dtcomplete")]

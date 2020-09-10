@@ -2,6 +2,7 @@ using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Items;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.Quotes;
+using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.DAL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +37,7 @@ namespace DiscordBot.Bots
             services.AddScoped<IGoldService, GoldService>();
             services.AddScoped<ICustomCommandService, CustomCommandService>();
             services.AddScoped<IQuoteService, QuoteService>();
+            services.AddScoped<IReactionRoleService, ReactionRoleService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();
