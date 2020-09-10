@@ -99,7 +99,8 @@ namespace DiscordBot.Bots.Commands
         [Description("Shows custom commands avaliable.")]
         public async Task ShowCommandList(CommandContext ctx)
         {
-            var listCommands = _context.CustomCommands.Where(x => x.Trigger.Contains("!")).OrderBy(x => x.Trigger);
+            var serverCommands = _context.CustomCommands.Where(x => x.GuildId == ctx.Guild.Id);
+            var listCommands = serverCommands.Where(x => x.Trigger.Contains("!")).OrderBy(x => x.Trigger);
             var listedCommands = string.Join(", ", listCommands.Select(x => x.Trigger));
 
             var customCommandEmbed = new DiscordEmbedBuilder
