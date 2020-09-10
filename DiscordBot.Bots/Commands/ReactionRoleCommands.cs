@@ -43,6 +43,8 @@ namespace DiscordBot.Bots.Commands
             await _reactionRoleService.CreateNewReactionRole(ReactionRole);
 
             await message.CreateReactionAsync(Emoji);
+
+            await ctx.Channel.SendMessageAsync("Reaction Role added!");
         }
 
         [Command("delete")]
