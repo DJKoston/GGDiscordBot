@@ -34,6 +34,8 @@ namespace DiscordBot.Bots.Commands
             commandTriggerStep.OnValidResult += (result) => command.Trigger = $"!{result}";
             commandActionStep.OnValidResult += (result) => command.Action = $"{result}";
 
+            command.GuildId = ctx.Guild.Id;
+
             var inputDialogueHandler = new DialogueHandler(
                 ctx.Client,
                 ctx.Channel,
@@ -73,7 +75,7 @@ namespace DiscordBot.Bots.Commands
 
         private async Task CommandDelete(CommandContext ctx, string customCommand)
         {
-            var command = await _customCommandService.GetCommandAsync(customCommand).ConfigureAwait(false);
+            var command = await _customCommandService.GetCommandAsync(customCommand, ctx.Guild.Id).ConfigureAwait(false);
 
             if(command == null)
             {

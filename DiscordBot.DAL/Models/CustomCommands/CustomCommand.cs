@@ -4,5 +4,6 @@
     {
         public string Trigger { get; set; }
         public string Action { get; set; }
+        public ulong GuildId { get; set; }
     }
 }

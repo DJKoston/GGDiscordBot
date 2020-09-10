@@ -1,6 +1,8 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.CustomCommands;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.CustomCommands
@@ -8,7 +10,7 @@ namespace DiscordBot.Core.Services.CustomCommands
     public interface ICustomCommandService
     {
         Task CreateNewCommandAsync(CustomCommand customCommand);
-        Task<CustomCommand> GetCommandAsync(string command);
+        Task<CustomCommand> GetCommandAsync(string command, ulong GuildId);
         Task DeleteCommandAsync(CustomCommand customCommand);
     }
     public class CustomCommandService : ICustomCommandService
@@ -38,13 +40,15 @@ namespace DiscordBot.Core.Services.CustomCommands
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<CustomCommand> GetCommandAsync(string command)
+        public async Task<CustomCommand> GetCommandAsync(string command, ulong GuildId)
         {
             using var context = new RPGContext(_options);
 
             command = command.ToLower();
 
-            return await context.CustomCommands.FirstOrDefaultAsync(x => x.Trigger.ToLower() == command).ConfigureAwait(false);
+            var GuildCommands = context.CustomCommands.Where(x => x.GuildId == GuildId);
+
+            return GuildCommands.FirstOrDefault(x => x.Trigger.ToLower() == command);
         }
     }
 }

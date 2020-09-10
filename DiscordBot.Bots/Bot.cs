@@ -428,7 +428,7 @@ namespace DiscordBot.Bots
         {
             if (e.Exception.Message is "Specified command was not found.")
             {
-                var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString()).ConfigureAwait(false);
+                var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id).ConfigureAwait(false);
 
                 if (command == null)
                 {
@@ -447,7 +447,7 @@ namespace DiscordBot.Bots
                 {
                     if (e.Exception is CommandNotFoundException)
                     {
-                        var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString()).ConfigureAwait(false);
+                        var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id).ConfigureAwait(false);
 
                         if (command == null)
                         {
