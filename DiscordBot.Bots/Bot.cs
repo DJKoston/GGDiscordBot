@@ -533,9 +533,11 @@ namespace DiscordBot.Bots
             return;
         }
 
-        private Task OnNewMember(GuildMemberAddEventArgs e)
+        private async Task OnNewMember(GuildMemberAddEventArgs e)
         {
-            _profileService.GetOrCreateProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
+            if (e.Member.IsBot) { return; }
+
+            await _profileService.GetOrCreateProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
 
             var rules = e.Guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-rules");
             var welcome = e.Guild.Channels.Values.FirstOrDefault(x => x.Name == "new-members");
@@ -554,9 +556,9 @@ namespace DiscordBot.Bots
             joinEmbed.WithThumbnail(e.Member.AvatarUrl);
             joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
 
-            welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
+            await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
 
-            return Task.CompletedTask;
+            return;
         }
 
         private Task OnMemberLeave(GuildMemberRemoveEventArgs e)
