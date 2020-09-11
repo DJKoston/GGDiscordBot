@@ -66,7 +66,7 @@ namespace DiscordBot.Bots
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
-                Timeout = TimeSpan.FromMinutes(1)
+                Timeout = TimeSpan.FromMinutes(5)
             });
 
             var commandsConfig = new CommandsNextConfiguration
@@ -107,9 +107,13 @@ namespace DiscordBot.Bots
 
         private async Task OnPresenceUpdated(PresenceUpdateEventArgs e)
         {
+            if (e.User.IsBot) { return; }
+
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
             if (guild == null) { return; }
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+            if (guild == null) { return; }
+            
 
             DiscordRole generationGamers = guild.GetRole(411304802883207169);
             DiscordRole ggNowLive = guild.GetRole(745018263456448573);
@@ -589,7 +593,8 @@ namespace DiscordBot.Bots
                     var joinEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"Welcome to the Server {e.Member.DisplayName}",
-                        ImageUrl = "https://cdn.discordapp.com/attachments/615296929995292678/615297983470239811/NiceScratchyAllensbigearedbat-size_restricted.gif",
+                        Description = $"{WMConfig.WelcomeMessage}",
+                        ImageUrl = $"{WMConfig.WelcomeImage}",
                         Color = DiscordColor.Purple,
                     };
 
@@ -609,7 +614,8 @@ namespace DiscordBot.Bots
                     var joinEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"Welcome to the Server {e.Member.DisplayName}",
-                        ImageUrl = "https://cdn.discordapp.com/attachments/615296929995292678/615297983470239811/NiceScratchyAllensbigearedbat-size_restricted.gif",
+                        Description = $"{WMConfig.WelcomeMessage}",
+                        ImageUrl = $"{WMConfig.WelcomeImage}",
                         Color = DiscordColor.Purple,
                     };
 
@@ -639,8 +645,8 @@ namespace DiscordBot.Bots
                     var leaveEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                        Description = $"Byeeeeeee, Don't let the door hit you on the way out!",
-                        ImageUrl = "https://cdn.discordapp.com/attachments/482347038734811154/612706560195428362/giphy.gif",
+                        Description = $"{WMConfig.LeaveMessage}",
+                        ImageUrl = $"{WMConfig.LeaveImage}",
                         Color = DiscordColor.Yellow,
                     };
 
@@ -656,8 +662,8 @@ namespace DiscordBot.Bots
                     var leaveEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                        Description = $"Byeeeeeee, Don't let the door hit you on the way out!",
-                        ImageUrl = "https://cdn.discordapp.com/attachments/482347038734811154/612706560195428362/giphy.gif",
+                        Description = $"{WMConfig.LeaveMessage}",
+                        ImageUrl = $"{WMConfig.LeaveImage}",
                         Color = DiscordColor.Yellow,
                     };
 

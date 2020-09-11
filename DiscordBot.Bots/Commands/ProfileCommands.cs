@@ -341,7 +341,7 @@ namespace DiscordBot.Bots.Commands
 
         [Command("buildprofiletable")]
         [Description("Bring all users in the server to the Profile Table")]
-        [RequireRoles(RoleCheckMode.Any, "Owner of the Venue")]
+        [RequirePermissions(DSharpPlus.Permissions.Administrator)]
         public async Task BuildProfileTable(CommandContext ctx)
         {
             var members = await ctx.Guild.GetAllMembersAsync().ConfigureAwait(false);

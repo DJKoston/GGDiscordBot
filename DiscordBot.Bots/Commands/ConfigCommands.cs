@@ -1,6 +1,8 @@
-﻿using DiscordBot.Core.Services.Configs;
+﻿using DiscordBot.Bots.Handlers.Dialogue.Steps;
+using DiscordBot.Core.Services.Configs;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
+using DiscordBot.Handlers.Dialogue;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -140,13 +142,33 @@ namespace DiscordBot.Bots.Commands
 
             if (config == null)
             {
-                var WMConfig = new WelcomeMessageConfig()
-                {
-                    GuildId = ctx.Guild.Id,
-                    ChannelId = channel.Id,
-                };
+                var LeaveImageStep = new welcomeChannelAddStep("What image would you like to display on the leave message?", null);
+                var LeaveMessageStep = new welcomeChannelAddStep("What will the Leave Message be?", LeaveImageStep);
+                var WelcomeImageStep = new welcomeChannelAddStep("What Image would you like to display on the welcome message?", LeaveMessageStep);
+                var WelcomeMessageStep = new welcomeChannelAddStep("What will the Welcome Message be?", WelcomeImageStep);
 
-                await _welcomeMessageConfigService.CreateNewWelcomeMessageConfig(WMConfig);
+                var WMConfig = new WelcomeMessageConfig();
+
+                WelcomeMessageStep.OnValidResult += (result) => WMConfig.WelcomeMessage = $"{result}";
+                WelcomeImageStep.OnValidResult += (result) => WMConfig.WelcomeImage = $"{result}";
+                LeaveMessageStep.OnValidResult += (result) => WMConfig.LeaveMessage = $"{result}";
+                LeaveImageStep.OnValidResult += (result) => WMConfig.LeaveImage = $"{result}";
+
+                WMConfig.GuildId = ctx.Guild.Id;
+                WMConfig.ChannelId = channel.Id;
+
+                var inputDialogueHandler = new DialogueHandler(
+                    ctx.Client,
+                    ctx.Channel,
+                    ctx.User,
+                    WelcomeMessageStep
+                    );
+
+                bool succeeded = await inputDialogueHandler.ProcessDialogue().ConfigureAwait(false);
+
+                if (!succeeded) { return; }
+
+                await _welcomeMessageConfigService.CreateNewWelcomeMessageConfig(WMConfig).ConfigureAwait(false);
 
                 var embed = new DiscordEmbedBuilder
                 {
@@ -156,7 +178,39 @@ namespace DiscordBot.Bots.Commands
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
 
-                return;
+                var WMConfig2 = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
+
+                await ctx.Channel.SendMessageAsync("Here is what your Welcome Message will look like!").ConfigureAwait(false);
+                
+                var joinEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"Welcome to the Server {ctx.Member.DisplayName}",
+                    Description = $"{WMConfig2.WelcomeMessage}",
+                    ImageUrl = $"{WMConfig2.WelcomeImage}",
+                    Color = DiscordColor.Purple,
+                };
+
+                var totalMembers = ctx.Guild.MemberCount;
+                var otherMembers = totalMembers - 1;
+
+                joinEmbed.WithThumbnail(ctx.Member.AvatarUrl);
+                joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
+
+                await ctx.Channel.SendMessageAsync(ctx.Member.Mention, embed: joinEmbed);
+
+                await ctx.Channel.SendMessageAsync("Here is what your Leave Message will look like!").ConfigureAwait(false);
+
+                var leaveEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"Big Oof! {ctx.Member.DisplayName} has just left the server!",
+                    Description = $"{WMConfig2.LeaveMessage}",
+                    ImageUrl = $"{WMConfig2.LeaveImage}",
+                    Color = DiscordColor.Yellow,
+                };
+
+                leaveEmbed.WithThumbnail(ctx.Member.AvatarUrl);
+
+                await ctx.Channel.SendMessageAsync(embed: leaveEmbed);
             }
 
             else

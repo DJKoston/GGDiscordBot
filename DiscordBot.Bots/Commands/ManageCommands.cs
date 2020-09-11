@@ -23,7 +23,7 @@ namespace DiscordBot.Bots.Commands
         }
         
         [Command("addcommand")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.Administrator)]
         public async Task AddCommand(CommandContext ctx)
         {
             var commandActionStep = new commandAddStep("What will the output of this command be?", null);
@@ -60,14 +60,14 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("deletecommand")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.Administrator)]
         public async Task Profile(CommandContext ctx)
         {
             await ctx.Channel.SendMessageAsync("You have not specified what command is to be deleted! **USAGE: `!deletecommand <!command>`**");
         }
 
         [Command("deletecommand")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.Administrator)]
         public async Task Profile(CommandContext ctx, string command)
         {
             await CommandDelete(ctx, command);

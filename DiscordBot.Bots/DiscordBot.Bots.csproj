@@ -35,10 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Handlers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Core\DiscordBot.Core.csproj" />
     <ProjectReference Include="..\DiscordBot.DAL.Migrations\DiscordBot.DAL.Migrations.csproj" />
     <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />

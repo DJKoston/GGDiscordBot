@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace DiscordBot.Bots.Commands
 {
     [Group("Admin")]
-    [RequireRoles(RoleCheckMode.Any, "Admin")]
+    [RequirePermissions(DSharpPlus.Permissions.Administrator)]
     
     public class AdminCommands : BaseCommandModule
     {

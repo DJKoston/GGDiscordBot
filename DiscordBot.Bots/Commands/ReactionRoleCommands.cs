@@ -11,7 +11,7 @@ namespace DiscordBot.Bots.Commands
 {
     [Group("rr")]
     [Aliases("ReactionRole")]
-    [RequireRoles(RoleCheckMode.Any, "Admin")]
+    [RequirePermissions(DSharpPlus.Permissions.Administrator)]
 
     public class ReactionRoleCommands : BaseCommandModule
     {
