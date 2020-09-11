@@ -1,4 +1,5 @@
-﻿using DiscordBot.DAL.Models.CustomCommands;
+﻿using DiscordBot.DAL.Models.Configs;
+using DiscordBot.DAL.Models.CustomCommands;
 using DiscordBot.DAL.Models.Items;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
@@ -16,5 +17,7 @@ namespace DiscordBot.DAL
         public DbSet<ProfileItem> ProfileItems { get; set; }
         public DbSet<Quote> Quotes { get; set; }
         public DbSet<ReactionRole> ReactionRoles { get; set; }
+        public DbSet<WelcomeMessageConfig> WelcomeMessageConfigs { get; set; }
+        public DbSet<NitroBoosterRoleConfig> NitroBoosterConfigs { get; set; }
     }
 }

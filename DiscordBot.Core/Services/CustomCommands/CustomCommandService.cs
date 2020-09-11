@@ -2,7 +2,6 @@
 using DiscordBot.DAL.Models.CustomCommands;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.CustomCommands
@@ -48,7 +47,7 @@ namespace DiscordBot.Core.Services.CustomCommands
 
             var GuildCommands = context.CustomCommands.Where(x => x.GuildId == GuildId);
 
-            return GuildCommands.FirstOrDefault(x => x.Trigger.ToLower() == command);
+            return await GuildCommands.FirstOrDefaultAsync(x => x.Trigger.ToLower() == command);
         }
     }
 }

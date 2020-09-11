@@ -1,3 +1,4 @@
+using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Items;
 using DiscordBot.Core.Services.Profiles;
@@ -38,6 +39,8 @@ namespace DiscordBot.Bots
             services.AddScoped<ICustomCommandService, CustomCommandService>();
             services.AddScoped<IQuoteService, QuoteService>();
             services.AddScoped<IReactionRoleService, ReactionRoleService>();
+            services.AddScoped<INitroBoosterRoleConfigService, NitroBoosterRoleConfigService>();
+            services.AddScoped<IWelcomeMessageConfigService, WelcomeMessageConfigService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();

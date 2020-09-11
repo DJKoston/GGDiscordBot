@@ -1,4 +1,5 @@
 ﻿using DiscordBot.Bots.Commands;
+using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.ReactionRoles;
@@ -34,6 +35,8 @@ namespace DiscordBot.Bots
             _experienceService = services.GetService<IExperienceService>();
             _customCommandService = services.GetService<ICustomCommandService>();
             _reactionRoleService = services.GetService<IReactionRoleService>();
+            _nitroBoosterRoleConfigService = services.GetService<INitroBoosterRoleConfigService>();
+            _welcomeMessageConfigService = services.GetService<IWelcomeMessageConfigService>();
 
             var token = configuration["token"];
             var prefix = configuration["prefix"];
@@ -56,10 +59,10 @@ namespace DiscordBot.Bots
             Client.GuildMemberRemoved += OnMemberLeave;
             Client.MessageReactionAdded += OnReactionAdded;
             Client.MessageReactionRemoved += OnReactionRemoved;
-            Client.ChannelCreated += OnChannelCreated;
-            Client.ChannelDeleted += OnChannelDeleted;
             Client.GuildAvailable += OnGuildAvaliable;
             Client.PresenceUpdated += OnPresenceUpdated;
+            Client.GuildCreated += OnGuildJoin;
+            Client.GuildDeleted += OnGuildLeave;
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
@@ -78,6 +81,7 @@ namespace DiscordBot.Bots
             Commands = Client.UseCommandsNext(commandsConfig);
 
             Commands.RegisterCommands<AdminCommands>();
+            Commands.RegisterCommands<ConfigCommands>();
             Commands.RegisterCommands<GameCommands>();
             Commands.RegisterCommands<LeaveRoleCommands>();
             Commands.RegisterCommands<ManageCommands>();
@@ -95,9 +99,16 @@ namespace DiscordBot.Bots
             Console.WriteLine("Connected!");
         }
 
-        private Task OnPresenceUpdated(PresenceUpdateEventArgs e)
+        private readonly IReactionRoleService _reactionRoleService;
+        private readonly IProfileService _profileService;
+        private readonly IExperienceService _experienceService;
+        private readonly INitroBoosterRoleConfigService _nitroBoosterRoleConfigService;
+        private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
+
+        private async Task OnPresenceUpdated(PresenceUpdateEventArgs e)
         {
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+            if (guild == null) { return; }
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
 
             DiscordRole generationGamers = guild.GetRole(411304802883207169);
@@ -108,12 +119,12 @@ namespace DiscordBot.Bots
             {
                 if (member.Roles.Contains(generationGamers))
                 {
-                    member.GrantRoleAsync(ggNowLive);
+                    await member.GrantRoleAsync(ggNowLive);
                 }
 
                 else
                 {
-                    member.GrantRoleAsync(NowLive);
+                    await member.GrantRoleAsync(NowLive);
                 }
                 
             }
@@ -122,162 +133,181 @@ namespace DiscordBot.Bots
             {
                 if (member.Roles.Contains(ggNowLive))
                 {
-                    member.RevokeRoleAsync(ggNowLive);
+                    await member.RevokeRoleAsync(ggNowLive);
                 }
 
                 if (member.Roles.Contains(NowLive))
                 {
-                    member.RevokeRoleAsync(NowLive);
+                    await member.RevokeRoleAsync(NowLive);
                 }
             }
 
-            return Task.CompletedTask;
+            return;
+        }
+
+        private async Task OnGuildJoin(GuildCreateEventArgs e)
+        {
+            int guilds = e.Client.Guilds.Count();
+
+            if (guilds == 1)
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = $"{guilds} Server!",
+                }, UserStatus.Online);
+            }
+
+            else
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = $"{guilds} Servers!",
+                }, UserStatus.Online);
+            }
+        }
+
+        private async Task OnGuildLeave(GuildDeleteEventArgs e)
+        {
+            int guilds = e.Client.Guilds.Count();
+
+            if (guilds == 1)
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = $"{guilds} Server!",
+                }, UserStatus.Online);
+            }
+
+            else
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = $"{guilds} Servers!",
+                }, UserStatus.Online);
+            }
+
         }
 
         private Task OnGuildAvaliable(GuildCreateEventArgs e)
         {
-            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-
-            var allMembers = guild.GetAllMembersAsync().Result;
-
-            DiscordRole generationGamers = guild.GetRole(411304802883207169);
-            DiscordRole ggNowLive = guild.GetRole(745018263456448573);
-            DiscordRole NowLive = guild.GetRole(745018328179015700);
-
-            var ggmemberslist = allMembers.Where(x => x.Roles.Contains(generationGamers));
-            var nullgg = ggmemberslist.Where(x => x.Presence == null);
-            var nullwithNowLive = nullgg.Where(x => x.Roles.Contains(ggNowLive));
-            var ggmembers = ggmemberslist.Except(nullgg);
-            var gglivemembers = ggmembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
-            var ggnotlivemembers = ggmembers.Except(gglivemembers);
-            var ggwaslive = ggnotlivemembers.Where(x => x.Roles.Contains(ggNowLive));
-
-            var othermemberslist = allMembers.Except(ggmemberslist);
-            var nullother = othermemberslist.Where(x => x.Presence == null);
-            var otherwithNowLive = nullother.Where(x => x.Roles.Contains(NowLive));
-            var othermembers = othermemberslist.Except(nullother);
-            var otherlivemembers = othermembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
-            var othernotlivemembers = othermembers.Except(otherlivemembers);
-            var otherwaslive = othernotlivemembers.Where(x => x.Roles.Contains(NowLive));
-
-            foreach (DiscordMember gglivemember in gglivemembers)
+            if (e.Guild.Id == 246691304447279104)
             {
-                if (gglivemember.Roles.Contains(ggNowLive))
+                DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+
+                var allMembers = guild.GetAllMembersAsync().Result;
+
+                DiscordRole generationGamers = guild.GetRole(411304802883207169);
+                DiscordRole ggNowLive = guild.GetRole(745018263456448573);
+                DiscordRole NowLive = guild.GetRole(745018328179015700);
+
+                var ggmemberslist = allMembers.Where(x => x.Roles.Contains(generationGamers));
+                var nullgg = ggmemberslist.Where(x => x.Presence == null);
+                var nullwithNowLive = nullgg.Where(x => x.Roles.Contains(ggNowLive));
+                var ggmembers = ggmemberslist.Except(nullgg);
+                var gglivemembers = ggmembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
+                var ggnotlivemembers = ggmembers.Except(gglivemembers);
+                var ggwaslive = ggnotlivemembers.Where(x => x.Roles.Contains(ggNowLive));
+
+                var othermemberslist = allMembers.Except(ggmemberslist);
+                var nullother = othermemberslist.Where(x => x.Presence == null);
+                var otherwithNowLive = nullother.Where(x => x.Roles.Contains(NowLive));
+                var othermembers = othermemberslist.Except(nullother);
+                var otherlivemembers = othermembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
+                var othernotlivemembers = othermembers.Except(otherlivemembers);
+                var otherwaslive = othernotlivemembers.Where(x => x.Roles.Contains(NowLive));
+
+                foreach (DiscordMember gglivemember in gglivemembers)
                 {
+                    if (gglivemember.Roles.Contains(ggNowLive))
+                    {
+
+                    }
+
+                    else
+                    {
+                        gglivemember.GrantRoleAsync(ggNowLive);
+                    }
+                }
+
+                foreach (DiscordMember nullmember in nullwithNowLive)
+                {
+                    if (nullmember.Roles.Contains(ggNowLive))
+                    {
+                        nullmember.RevokeRoleAsync(ggNowLive);
+                    }
+
+                    else
+                    {
+
+                    }
 
                 }
 
-                else
+                foreach (DiscordMember ggwaslivemember in ggwaslive)
                 {
-                    gglivemember.GrantRoleAsync(ggNowLive);
-                }
-            }
+                    if (ggwaslivemember.Roles.Contains(ggNowLive))
+                    {
+                        ggwaslivemember.RevokeRoleAsync(ggNowLive);
+                    }
 
-            foreach (DiscordMember nullmember in nullwithNowLive)
-            {
-                if (nullmember.Roles.Contains(ggNowLive))
-                {
-                    nullmember.RevokeRoleAsync(ggNowLive);
-                }
+                    else
+                    {
 
-                else
-                {
-                    
-                }
-                
-            }
-
-            foreach (DiscordMember ggwaslivemember in ggwaslive)
-            {
-                if (ggwaslivemember.Roles.Contains(ggNowLive))
-                {
-                    ggwaslivemember.RevokeRoleAsync(ggNowLive);
-                }
-
-                else
-                {
-
-                }
-                
-            }
-
-            foreach (DiscordMember otherlivemember in otherlivemembers)
-            {
-                if (otherlivemember.Roles.Contains(NowLive))
-                {
+                    }
 
                 }
 
-                else
+                foreach (DiscordMember otherlivemember in otherlivemembers)
                 {
-                    otherlivemember.GrantRoleAsync(NowLive);
-                }
-                
-            }
+                    if (otherlivemember.Roles.Contains(NowLive))
+                    {
 
-            foreach (DiscordMember nullmember in otherwithNowLive)
-            {
-                if (nullmember.Roles.Contains(NowLive))
-                {
-                    nullmember.RevokeRoleAsync(NowLive);
-                }
+                    }
 
-                else
-                {
-                    
-                }
-                
-            }
-
-            foreach (DiscordMember otherwaslivemember in otherwaslive)
-            {
-                if (otherwaslivemember.Roles.Contains(NowLive))
-                {
-                    otherwaslivemember.RevokeRoleAsync(NowLive);
-                }
-
-                else
-                {
+                    else
+                    {
+                        otherlivemember.GrantRoleAsync(NowLive);
+                    }
 
                 }
-                
+
+                foreach (DiscordMember nullmember in otherwithNowLive)
+                {
+                    if (nullmember.Roles.Contains(NowLive))
+                    {
+                        nullmember.RevokeRoleAsync(NowLive);
+                    }
+
+                    else
+                    {
+
+                    }
+
+                }
+
+                foreach (DiscordMember otherwaslivemember in otherwaslive)
+                {
+                    if (otherwaslivemember.Roles.Contains(NowLive))
+                    {
+                        otherwaslivemember.RevokeRoleAsync(NowLive);
+                    }
+
+                    else
+                    {
+
+                    }
+
+                }
+
+                return Task.CompletedTask;
             }
 
             return Task.CompletedTask;
-
         }
-
-        private Task OnChannelDeleted(ChannelDeleteEventArgs e)
-        {
-            var guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            var channels = guild.GetChannelsAsync();
-            var channelCount = channels.Result.Count();
-
-            Client.UpdateStatusAsync(new DiscordActivity
-            {
-                ActivityType = ActivityType.Watching,
-                Name = $"{channelCount} Channels in GG!",
-            }, UserStatus.Online);
-
-            return Task.CompletedTask;
-        }
-
-        private Task OnChannelCreated(ChannelCreateEventArgs e)
-        {
-            var guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            var channels = guild.GetChannelsAsync();
-            var channelCount = channels.Result.Count();
-
-            Client.UpdateStatusAsync(new DiscordActivity
-            {
-                ActivityType = ActivityType.Watching,
-                Name = $"{channelCount} Channels in GG!",
-            }, UserStatus.Online);
-
-            return Task.CompletedTask;
-        }
-
-        private readonly IReactionRoleService _reactionRoleService;
 
         private async Task OnReactionRemoved(MessageReactionRemoveEventArgs e)
         {
@@ -321,21 +351,28 @@ namespace DiscordBot.Bots
 
         private Task OnClientReady(ReadyEventArgs e)
         {
-            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            var channels = guild.GetChannelsAsync();
-            var channelCount = channels.Result.Count();
+            int guilds = e.Client.Guilds.Count();
 
-            Client.UpdateStatusAsync(new DiscordActivity
+            if(guilds == 1)
             {
-                ActivityType = ActivityType.Watching,
-                Name = $"{channelCount} Channels in GG!",
-            }, UserStatus.Online);
+                Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = $"{guilds} Server!",
+                }, UserStatus.Online);
+            }
+
+            else
+            {
+                Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = $"{guilds} Servers!",
+                }, UserStatus.Online);
+            }
 
             return Task.CompletedTask;
         }
-
-        private readonly IProfileService _profileService;
-        private readonly IExperienceService _experienceService;
 
         private async Task OnMessageCreated(MessageCreateEventArgs e)
         {
@@ -344,8 +381,10 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            DiscordRole NitroBooster = guild.GetRole(585597854249123840);
+            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(e.Guild.Id).Result;
+
+            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+            DiscordRole NitroBooster = guild.GetRole(NBConfig.RoleId);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 
             if (memberCheck.Roles.Contains(NitroBooster))
@@ -354,9 +393,11 @@ namespace DiscordBot.Bots
 
                 var randomNumber = new Random();
 
-                int randXP = randomNumber.Next(75);
+                int randXP = randomNumber.Next(50);
 
-                GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
+                int NitroXP = randXP * 2;
+
+                GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, NitroXP, e.Author.Username);
 
                 if (!viewModel.LevelledUp) { return; }
 
@@ -535,51 +576,99 @@ namespace DiscordBot.Bots
 
         private async Task OnNewMember(GuildMemberAddEventArgs e)
         {
-            if (e.Member.IsBot) { return; }
+            var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 
-            await _profileService.GetOrCreateProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
+            if(WMConfig == null) { return; }
 
-            var rules = e.Guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-rules");
-            var welcome = e.Guild.Channels.Values.FirstOrDefault(x => x.Name == "new-members");
-
-            var joinEmbed = new DiscordEmbedBuilder
+            else
             {
-                Title = $"Welcome to the Server {e.Member.DisplayName}",
-                Description = $"Please read the {rules.Mention} channel before using the discord!",
-                ImageUrl = "https://cdn.discordapp.com/attachments/615296929995292678/615297983470239811/NiceScratchyAllensbigearedbat-size_restricted.gif",
-                Color = DiscordColor.Purple,
-            };
+                DiscordChannel welcome = e.Guild.GetChannel(WMConfig.ChannelId);
 
-            var totalMembers = e.Guild.MemberCount;
-            var otherMembers = totalMembers - 1;
+                if (e.Member.IsBot)
+                {
+                    var joinEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"Welcome to the Server {e.Member.DisplayName}",
+                        ImageUrl = "https://cdn.discordapp.com/attachments/615296929995292678/615297983470239811/NiceScratchyAllensbigearedbat-size_restricted.gif",
+                        Color = DiscordColor.Purple,
+                    };
 
-            joinEmbed.WithThumbnail(e.Member.AvatarUrl);
-            joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
+                    var totalMembers = e.Guild.MemberCount;
+                    var otherMembers = totalMembers - 1;
 
-            await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
+                    joinEmbed.WithThumbnail(e.Member.AvatarUrl);
+                    joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
 
-            return;
+                    await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
+                }
+
+                else
+                {
+                    await _profileService.GetOrCreateProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
+
+                    var joinEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"Welcome to the Server {e.Member.DisplayName}",
+                        ImageUrl = "https://cdn.discordapp.com/attachments/615296929995292678/615297983470239811/NiceScratchyAllensbigearedbat-size_restricted.gif",
+                        Color = DiscordColor.Purple,
+                    };
+
+                    var totalMembers = e.Guild.MemberCount;
+                    var otherMembers = totalMembers - 1;
+
+                    joinEmbed.WithThumbnail(e.Member.AvatarUrl);
+                    joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
+
+                    await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
+                }
+            }
         }
 
-        private Task OnMemberLeave(GuildMemberRemoveEventArgs e)
+        private async Task OnMemberLeave(GuildMemberRemoveEventArgs e)
         {
-            _profileService.DeleteProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
+            var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 
-            var welcome = e.Guild.Channels.Values.FirstOrDefault(x => x.Name == "new-members");
+            if(WMConfig == null) { return; }
 
-            var leaveEmbed = new DiscordEmbedBuilder
+            else
             {
-                Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                Description = $"Byeeeeeee, Don't let the door hit you on the way out!",
-                ImageUrl = "https://cdn.discordapp.com/attachments/482347038734811154/612706560195428362/giphy.gif",
-                Color = DiscordColor.Yellow,
-            };
+                DiscordChannel welcome = e.Guild.GetChannel(WMConfig.ChannelId);
 
-            leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
+                if (e.Member.IsBot)
+                {
+                    var leaveEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
+                        Description = $"Byeeeeeee, Don't let the door hit you on the way out!",
+                        ImageUrl = "https://cdn.discordapp.com/attachments/482347038734811154/612706560195428362/giphy.gif",
+                        Color = DiscordColor.Yellow,
+                    };
 
-            welcome.SendMessageAsync(embed: leaveEmbed);
+                    leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
 
-            return Task.CompletedTask;
+                    await welcome.SendMessageAsync(embed: leaveEmbed);
+                }
+
+                else
+                {
+                    await _profileService.DeleteProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
+
+                    var leaveEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
+                        Description = $"Byeeeeeee, Don't let the door hit you on the way out!",
+                        ImageUrl = "https://cdn.discordapp.com/attachments/482347038734811154/612706560195428362/giphy.gif",
+                        Color = DiscordColor.Yellow,
+                    };
+
+                    leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
+
+                    await welcome.SendMessageAsync(embed: leaveEmbed);
+                }
+            }
+
+            
+            
         }
     }
 }

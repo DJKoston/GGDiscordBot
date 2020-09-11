@@ -1,4 +1,5 @@
-﻿using DiscordBot.Core.Services.Profiles;
+﻿using DiscordBot.Core.Services.Configs;
+using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.ViewModels;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Profiles;
@@ -19,13 +20,15 @@ namespace DiscordBot.Bots.Commands
         private readonly IProfileService _profileService;
         private readonly IExperienceService _experienceService;
         private readonly IGoldService _goldService;
+        private readonly INitroBoosterRoleConfigService _nitroBoosterRoleConfigService;
 
-        public ProfileCommands(RPGContext context, IProfileService profileService, IExperienceService experienceService, IGoldService goldService)
+        public ProfileCommands(RPGContext context, IProfileService profileService, IExperienceService experienceService, IGoldService goldService, INitroBoosterRoleConfigService nitroBoosterRoleConfigService)
         {
             _context = context;
             _profileService = profileService;
             _experienceService = experienceService;
             _goldService = goldService;
+            _nitroBoosterRoleConfigService = nitroBoosterRoleConfigService;
         }
 
         [Command("myinfo")]
@@ -42,12 +45,15 @@ namespace DiscordBot.Bots.Commands
 
         private async Task GetProfileToDisplayAsync(CommandContext ctx, ulong memberId)
         {
+            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+
             var memberUsername = ctx.Guild.Members[memberId].Username;
 
-            var NitroBoosterRole = ctx.Guild.GetRole(585597854249123840);
+            var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
 
-            var quotes = _context.Quotes.Count(x => x.DiscordUserQuotedId == memberId);
-            var quotesby = _context.Quotes.Count(x => x.AddedById == memberId);
+            var quotescount = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
+            var quotes = quotescount.Count(x => x.DiscordUserQuotedId == memberId);
+            var quotesby = quotescount.Count(x => x.AddedById == memberId);
 
             Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
 
@@ -224,7 +230,9 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 3600, CooldownBucketType.User)]
         public async Task HourlyCollect(CommandContext ctx)
         {
-            var NitroBoosterRole = ctx.Guild.GetRole(585597854249123840);
+            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+
+            var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
 
             if (ctx.Member.Roles.Contains(NitroBoosterRole))
             {
@@ -279,7 +287,9 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 86400, CooldownBucketType.User)]
         public async Task DailyCollect(CommandContext ctx)
         {
-            var NitroBoosterRole = ctx.Guild.GetRole(585597854249123840);
+            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+
+            var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
 
             if (ctx.Member.Roles.Contains(NitroBoosterRole))
             {
