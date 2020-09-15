@@ -47,43 +47,83 @@ namespace DiscordBot.Bots.Commands
         {
             var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
 
-            var memberUsername = ctx.Guild.Members[memberId].Username;
-
-            var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
-
-            var quotescount = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
-            var quotes = quotescount.Count(x => x.DiscordUserQuotedId == memberId);
-            var quotesby = quotescount.Count(x => x.AddedById == memberId);
-
-            Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
-
-            var member = ctx.Guild.Members[profile.DiscordId];
-
-            var profileEmbed = new DiscordEmbedBuilder
+            if(NBConfig == null)
             {
-                Title = $"{member.DisplayName}'s Profile",
-                Color = member.Color
-            };
+                var memberUsername = ctx.Guild.Members[memberId].Username;
 
-            profileEmbed.WithThumbnail(member.AvatarUrl);
+                var quotescount = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
+                var quotes = quotescount.Count(x => x.DiscordUserQuotedId == memberId);
+                var quotesby = quotescount.Count(x => x.AddedById == memberId);
 
-            if(profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
-            if(profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
+                Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
 
-            profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"));
-            profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
+                var member = ctx.Guild.Members[profile.DiscordId];
 
-            if(quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
-            if(quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
-            if(quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
+                var profileEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{member.DisplayName}'s Profile",
+                    Color = member.Color
+                };
 
-            if(quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
-            if(quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
-            if(quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
+                profileEmbed.WithThumbnail(member.AvatarUrl);
 
-            if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You are a Discord Nitro Booster!", "You currently get 2x XP and 2x Tax!"); }
+                if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
+                if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
 
-            await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
+                profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"));
+                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
+
+                if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
+                if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
+                if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
+
+                if (quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
+                if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
+                if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
+
+                await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
+            }
+
+            else
+            {
+                var memberUsername = ctx.Guild.Members[memberId].Username;
+
+                var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
+
+                var quotescount = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
+                var quotes = quotescount.Count(x => x.DiscordUserQuotedId == memberId);
+                var quotesby = quotescount.Count(x => x.AddedById == memberId);
+
+                Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
+
+                var member = ctx.Guild.Members[profile.DiscordId];
+
+                var profileEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"{member.DisplayName}'s Profile",
+                    Color = member.Color
+                };
+
+                profileEmbed.WithThumbnail(member.AvatarUrl);
+
+                if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
+                if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
+
+                profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"));
+                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
+
+                if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
+                if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
+                if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
+
+                if (quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
+                if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
+                if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
+
+                if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You are a Discord Nitro Booster!", "You currently get 2x XP and 2x Tax!"); }
+
+                await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
+            }
         }
 
         [Command("grantxp")]

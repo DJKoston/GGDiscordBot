@@ -4,7 +4,9 @@ using DSharpPlus.Entities;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands

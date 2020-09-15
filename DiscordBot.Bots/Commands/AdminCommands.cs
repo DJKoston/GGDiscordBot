@@ -5,12 +5,16 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
 {
+
+
     [Group("Admin")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
+
     
     public class AdminCommands : BaseCommandModule
     {
@@ -19,7 +23,7 @@ namespace DiscordBot.Bots.Commands
         {
             var pingtime = ctx.Client.Ping.ToString();
 
-            await ctx.Channel.SendMessageAsync(pingtime).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync($"Phew! I made it over the airwaves! This round trip took {pingtime}ms!").ConfigureAwait(false);
         }
 
 
@@ -35,8 +39,9 @@ namespace DiscordBot.Bots.Commands
 
             embed.AddField("Reason", reason);
 
-            DiscordChannel announcementChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "announcements");
-            DiscordChannel gamesChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
+            DiscordGuild guild = ctx.Client.Guilds.Values.FirstOrDefault(x => x.Name == "Generation Gamers");
+            DiscordChannel announcementChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "announcements");
+            DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
 
             await announcementChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
             await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
