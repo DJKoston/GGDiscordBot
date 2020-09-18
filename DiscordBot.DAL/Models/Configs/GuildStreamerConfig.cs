@@ -1,0 +1,9 @@
+﻿namespace DiscordBot.DAL.Models.Configs
+{
+    public class GuildStreamerConfig : Entity
+    {
+        public ulong GuildId { get; set; }
+        public string StreamerId { get; set; }
+        public ulong AnnounceChannelId { get; set; }
+    }
+}

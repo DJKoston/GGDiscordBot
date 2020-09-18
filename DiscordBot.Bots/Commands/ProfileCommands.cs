@@ -67,11 +67,11 @@ namespace DiscordBot.Bots.Commands
 
                 profileEmbed.WithThumbnail(member.AvatarUrl);
 
+                profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"), true);
+                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"), true);
+
                 if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
                 if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
-
-                profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"));
-                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
                 if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
                 if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }

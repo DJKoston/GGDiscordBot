@@ -4,6 +4,9 @@ using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.ViewModels;
+using DiscordBot.DAL;
+using DiscordBot.DAL.Models.Configs;
+using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -12,23 +15,32 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Text;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
+using TwitchLib.Api;
+using TwitchLib.Api.Services;
+using TwitchLib.Api.Services.Events;
+using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
 namespace DiscordBot.Bots
 {
     public class Bot
     {
+
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
+        public LiveStreamMonitorService Monitor;
+        public TwitchAPI api;
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
@@ -38,9 +50,16 @@ namespace DiscordBot.Bots
             _reactionRoleService = services.GetService<IReactionRoleService>();
             _nitroBoosterRoleConfigService = services.GetService<INitroBoosterRoleConfigService>();
             _welcomeMessageConfigService = services.GetService<IWelcomeMessageConfigService>();
+            _guildStreamerConfigService = services.GetService<IGuildStreamerConfigService>();
+            _messageStoreService = services.GetService<IMessageStoreService>();
+
+            api = new TwitchAPI();
 
             var token = configuration["token"];
             var prefix = configuration["prefix"];
+            var clientid = configuration["twitch-clientid"];
+            var accesstoken = configuration["twitch-accesstoken"];
+            var refreshtoken = configuration["twitch-refreshtoken"];
 
             var config = new DiscordConfiguration
             {
@@ -49,6 +68,9 @@ namespace DiscordBot.Bots
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
             };
+
+            api.Settings.ClientId = clientid;
+            api.Settings.AccessToken = accesstoken;
 
             Client = new DiscordClient(config);
 
@@ -63,6 +85,7 @@ namespace DiscordBot.Bots
             Client.PresenceUpdated += OnPresenceUpdated;
             Client.GuildCreated += OnGuildJoin;
             Client.GuildDeleted += OnGuildLeave;
+            Client.Heartbeated += OnHeartbeat;
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
@@ -72,10 +95,9 @@ namespace DiscordBot.Bots
             var commandsConfig = new CommandsNextConfiguration
             {
                 StringPrefixes = new string[] { prefix },
-                EnableDms = false,
+                EnableDms = true,
                 EnableMentionPrefix = true,
                 Services = services,
-
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
@@ -87,12 +109,18 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<ManageCommands>();
             Commands.RegisterCommands<MiscCommands>();
             Commands.RegisterCommands<ModCommands>();
+            Commands.RegisterCommands<NowLiveCommands>();
             Commands.RegisterCommands<ProfileCommands>();
             Commands.RegisterCommands<QuoteCommands>();
             Commands.RegisterCommands<ReactionRoleCommands>();
             Commands.RegisterCommands<RoleCommands>();
 
             Commands.CommandErrored += OnCommandErrored;
+
+            Monitor = new LiveStreamMonitorService(api, 60);
+
+            Monitor.OnStreamOnline += GGOnStreamOnline;
+            Monitor.OnStreamOffline += GGOnStreamOffline;
 
             Console.WriteLine("Connecting");
             Client.ConnectAsync();
@@ -104,23 +132,107 @@ namespace DiscordBot.Bots
         private readonly IExperienceService _experienceService;
         private readonly INitroBoosterRoleConfigService _nitroBoosterRoleConfigService;
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
+        private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+        private readonly IMessageStoreService _messageStoreService;
+
+        private Task OnHeartbeat(HeartbeatEventArgs e)
+        {
+            var lst = _guildStreamerConfigService.GetGuildStreamerList();
+
+            Monitor.SetChannelsByName(lst);
+
+            return Task.CompletedTask;
+        }
+
+        private void GGOnStreamOnline(object sender, OnStreamOnlineArgs e)
+        {
+            DiscordClient d = Client;
+
+            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserName);
+
+            foreach(GuildStreamerConfig config in configs)
+            {
+                var gsConfig = _guildStreamerConfigService.GetGuildStreamerConfig(config.StreamerId);
+
+                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, config.StreamerId).Result;
+
+                if (storedMessage != null) { continue; }
+
+                DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
+                DiscordChannel channel = guild.GetChannel(config.AnnounceChannelId);
+
+                var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
+                var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"{e.Stream.UserName} has gone live!",
+                };
+
+                embed.AddField("Game:", stream.Stream.Game, true);
+                embed.AddField("Viewers:", stream.Stream.Viewers.ToString(), true);
+                embed.AddField("Stream Description:", $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})");
+
+                embed.WithThumbnail(streamer.Logo);
+                embed.WithImageUrl(stream.Stream.Preview.Large);
+
+                DiscordMessage sentMessage = channel.SendMessageAsync(embed: embed).Result;
+
+                var messageStore = new NowLiveMessages
+                {
+                    GuildId = config.GuildId,
+                    StreamerId = config.StreamerId,
+                    AnnouncementChannelId = channel.Id,
+                    AnnouncementMessageId = sentMessage.Id,
+                };
+
+                _messageStoreService.CreateNewMessageStore(messageStore);
+            }
+
+        }
+
+        private void GGOnStreamOffline(object sender, OnStreamOfflineArgs e)
+        {
+            DiscordClient d = Client;
+
+            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserName);
+
+            foreach (GuildStreamerConfig config in configs)
+            {
+                DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
+                
+                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, e.Stream.UserName).Result;
+
+                var messageId = storedMessage.AnnouncementMessageId;
+
+                var channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                DiscordMessage message = channel.GetMessageAsync(messageId).Result;
+
+                message.DeleteAsync();
+
+                _messageStoreService.RemoveMessageStore(storedMessage);
+            }
+        }
 
         private async Task OnPresenceUpdated(PresenceUpdateEventArgs e)
         {
             if (e.User.IsBot) { return; }
 
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            if (guild == null) { return; }
-            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-            if (guild == null) { return; }
-            
 
-            DiscordRole generationGamers = guild.GetRole(411304802883207169);
-            DiscordRole ggNowLive = guild.GetRole(745018263456448573);
-            DiscordRole NowLive = guild.GetRole(745018328179015700);
+            if (guild == null) { return; }
+
+            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+
+            if (member == null) { return; }
 
             if (e.User.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
             {
+                DiscordRole generationGamers = guild.GetRole(411304802883207169);
+                DiscordRole ggNowLive = guild.GetRole(745018263456448573);
+                DiscordRole NowLive = guild.GetRole(745018328179015700);
+
                 if (member.Roles.Contains(generationGamers))
                 {
                     await member.GrantRoleAsync(ggNowLive);
@@ -135,6 +247,10 @@ namespace DiscordBot.Bots
 
             else
             {
+                DiscordRole generationGamers = guild.GetRole(411304802883207169);
+                DiscordRole ggNowLive = guild.GetRole(745018263456448573);
+                DiscordRole NowLive = guild.GetRole(745018328179015700);
+
                 if (member.Roles.Contains(ggNowLive))
                 {
                     await member.RevokeRoleAsync(ggNowLive);
@@ -195,9 +311,37 @@ namespace DiscordBot.Bots
             }
 
         }
+            
 
-        private Task OnGuildAvaliable(GuildCreateEventArgs e)
+        private async Task OnGuildAvaliable(GuildCreateEventArgs e)
         {
+            var lst = _guildStreamerConfigService.GetGuildStreamerList();
+
+            foreach (string streamerList in lst)
+            {
+                var configs = _guildStreamerConfigService.GetGuildStreamerConfig(streamerList);
+
+                var storedMessage = _messageStoreService.GetMessageStore(e.Guild.Id, streamerList).Result;
+
+                if (storedMessage == null) { continue; }
+
+                var user = await api.V5.Users.GetUserByNameAsync(streamerList);
+             
+                var isStreaming = await api.V5.Streams.BroadcasterOnlineAsync(user.Matches.First().Id);
+
+                if(isStreaming == true) { continue; }
+
+                var messageId = storedMessage.AnnouncementMessageId;
+
+                var channel = e.Guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                var message = await channel.GetMessageAsync(messageId);
+
+                await message.DeleteAsync();
+
+                await _messageStoreService.RemoveMessageStore(storedMessage);
+            }
+
             if (e.Guild.Id == 246691304447279104)
             {
                 DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
@@ -233,7 +377,7 @@ namespace DiscordBot.Bots
 
                     else
                     {
-                        gglivemember.GrantRoleAsync(ggNowLive);
+                        await gglivemember.GrantRoleAsync(ggNowLive);
                     }
                 }
 
@@ -241,7 +385,7 @@ namespace DiscordBot.Bots
                 {
                     if (nullmember.Roles.Contains(ggNowLive))
                     {
-                        nullmember.RevokeRoleAsync(ggNowLive);
+                        await nullmember.RevokeRoleAsync(ggNowLive);
                     }
 
                     else
@@ -255,7 +399,7 @@ namespace DiscordBot.Bots
                 {
                     if (ggwaslivemember.Roles.Contains(ggNowLive))
                     {
-                        ggwaslivemember.RevokeRoleAsync(ggNowLive);
+                        await ggwaslivemember.RevokeRoleAsync(ggNowLive);
                     }
 
                     else
@@ -274,7 +418,7 @@ namespace DiscordBot.Bots
 
                     else
                     {
-                        otherlivemember.GrantRoleAsync(NowLive);
+                        await otherlivemember.GrantRoleAsync(NowLive);
                     }
 
                 }
@@ -283,7 +427,7 @@ namespace DiscordBot.Bots
                 {
                     if (nullmember.Roles.Contains(NowLive))
                     {
-                        nullmember.RevokeRoleAsync(NowLive);
+                        await nullmember.RevokeRoleAsync(NowLive);
                     }
 
                     else
@@ -297,7 +441,7 @@ namespace DiscordBot.Bots
                 {
                     if (otherwaslivemember.Roles.Contains(NowLive))
                     {
-                        otherwaslivemember.RevokeRoleAsync(NowLive);
+                        await otherwaslivemember.RevokeRoleAsync(NowLive);
                     }
 
                     else
@@ -307,10 +451,10 @@ namespace DiscordBot.Bots
 
                 }
 
-                return Task.CompletedTask;
+                return;
             }
 
-            return Task.CompletedTask;
+            return;
         }
 
         private async Task OnReactionRemoved(MessageReactionRemoveEventArgs e)
@@ -353,13 +497,19 @@ namespace DiscordBot.Bots
             return;
         }
 
-        private Task OnClientReady(ReadyEventArgs e)
+        private async Task OnClientReady(ReadyEventArgs e)
         {
+            var lst = _guildStreamerConfigService.GetGuildStreamerList();
+
+            Monitor.SetChannelsByName(lst);
+
+            Monitor.Start();
+
             int guilds = e.Client.Guilds.Count();
 
             if(guilds == 1)
             {
-                Client.UpdateStatusAsync(new DiscordActivity
+                await Client.UpdateStatusAsync(new DiscordActivity
                 {
                     ActivityType = ActivityType.Watching,
                     Name = $"{guilds} Server!",
@@ -368,18 +518,20 @@ namespace DiscordBot.Bots
 
             else
             {
-                Client.UpdateStatusAsync(new DiscordActivity
+                await Client.UpdateStatusAsync(new DiscordActivity
                 {
                     ActivityType = ActivityType.Watching,
                     Name = $"{guilds} Servers!",
                 }, UserStatus.Online);
             }
 
-            return Task.CompletedTask;
+            return;
         }
 
         private async Task OnMessageCreated(MessageCreateEventArgs e)
         {
+            if (e.Channel.IsPrivate) { return; }
+
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 

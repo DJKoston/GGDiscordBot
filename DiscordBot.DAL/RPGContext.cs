@@ -4,6 +4,7 @@ using DiscordBot.DAL.Models.Items;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
 using DiscordBot.DAL.Models.ReactionRoles;
+using DiscordBot.DAL.Models.MessageStores;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.DAL
@@ -19,5 +20,7 @@ namespace DiscordBot.DAL
         public DbSet<ReactionRole> ReactionRoles { get; set; }
         public DbSet<WelcomeMessageConfig> WelcomeMessageConfigs { get; set; }
         public DbSet<NitroBoosterRoleConfig> NitroBoosterConfigs { get; set; }
+        public DbSet<GuildStreamerConfig> GuildStreamerConfigs { get; set; }
+        public DbSet<NowLiveMessages> NowLiveMessages { get; set; }
     }
 }

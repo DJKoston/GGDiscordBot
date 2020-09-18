@@ -1,18 +1,29 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DiscordBot.DAL;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using TwitchLib.Api.Services;
+using TwitchLib.Client;
 
 namespace DiscordBot.Bots.Commands
 {
     public class MiscCommands : BaseCommandModule
     {
+        private readonly RPGContext _context;
+
+        public MiscCommands(RPGContext context)
+        {
+            _context = context;
+        }
         [Command("ping")]
         [Description("Play Ping-Pong with the Bot")]
         public async Task Ping(CommandContext ctx)
@@ -82,5 +93,7 @@ namespace DiscordBot.Bots.Commands
 
             response.Close();
         }
+
+        
     }
 }

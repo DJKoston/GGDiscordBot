@@ -16,12 +16,14 @@ namespace DiscordBot.Bots
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
+
+
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -41,6 +43,8 @@ namespace DiscordBot.Bots
             services.AddScoped<IReactionRoleService, ReactionRoleService>();
             services.AddScoped<INitroBoosterRoleConfigService, NitroBoosterRoleConfigService>();
             services.AddScoped<IWelcomeMessageConfigService, WelcomeMessageConfigService>();
+            services.AddScoped<IMessageStoreService, MessageStoreService>();
+            services.AddScoped<IGuildStreamerConfigService, GuildStreamerConfigService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();
