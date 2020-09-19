@@ -159,6 +159,9 @@ namespace DiscordBot.Bots
                 if (storedMessage != null) { continue; }
 
                 DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
+
+                if(guild == null) { continue; }
+
                 DiscordChannel channel = guild.GetChannel(config.AnnounceChannelId);
 
                 var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
