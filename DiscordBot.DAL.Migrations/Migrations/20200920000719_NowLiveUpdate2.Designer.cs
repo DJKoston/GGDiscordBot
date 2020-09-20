@@ -3,14 +3,16 @@ using DiscordBot.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
-    partial class RPGContextModelSnapshot : ModelSnapshot
+    [Migration("20200920000719_NowLiveUpdate2")]
+    partial class NowLiveUpdate2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,12 +171,6 @@ namespace DiscordBot.DAL.Migrations.Migrations
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
-
-                    b.Property<string>("StreamGame")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StreamTitle")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StreamerId")
                         .HasColumnType("nvarchar(max)");

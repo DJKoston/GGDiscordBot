@@ -4,7 +4,6 @@ using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.ViewModels;
-using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
 using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
@@ -20,28 +19,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Services;
-using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
 namespace DiscordBot.Bots
 {
     public class Bot
     {
-
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
         public LiveStreamMonitorService Monitor;
         public TwitchAPI api;
 
+        
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
             _profileService = services.GetService<IProfileService>();
@@ -121,6 +115,7 @@ namespace DiscordBot.Bots
 
             Monitor.OnStreamOnline += GGOnStreamOnline;
             Monitor.OnStreamOffline += GGOnStreamOffline;
+            Monitor.OnStreamUpdate += GGOnStreamUpdate;
 
             Console.WriteLine("Connecting");
             Client.ConnectAsync();
@@ -135,13 +130,198 @@ namespace DiscordBot.Bots
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
         private readonly IMessageStoreService _messageStoreService;
 
-        private Task OnHeartbeat(HeartbeatEventArgs e)
+        private async Task OnHeartbeat(HeartbeatEventArgs e)
         {
             var lst = _guildStreamerConfigService.GetGuildStreamerList();
 
             Monitor.SetChannelsByName(lst);
 
-            return Task.CompletedTask;
+            var currentTime = DateTime.Now;
+
+            if((currentTime.Hour == 2) && (currentTime.Minute == 55))
+            {
+                DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Name == "Generation Gamers");
+                DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
+
+                DiscordMember apocalyptic = await guild.GetMemberAsync(176666155103158273);
+                DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
+
+                
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "The Bot will be unavaliable for the next 35 mins.",
+                    Description = $"The server the bot runs on is creating a backup and to prevent loss of data during the backup the bot has been shutdown.\n\nIt will automatically come back up at 3:30am (UK Time).\n\nIf it has not come back up and it is after 3:30am (UK Time). Please DM {djkoston.Mention}",
+                    Color = DiscordColor.DarkRed,
+                };
+
+                await gamesChannel.SendMessageAsync(embed: embed);
+                await djkoston.SendMessageAsync(embed: embed);
+                await apocalyptic.SendMessageAsync(embed: embed);
+
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.ListeningTo,
+                    Name = $"The Server Backup",
+                }, UserStatus.DoNotDisturb);
+
+                Environment.Exit(1);
+            }
+
+        }
+
+        private void GGOnStreamUpdate(object sender, OnStreamUpdateArgs e)
+        {
+            DiscordClient d = Client;
+
+            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserName);
+
+            foreach (GuildStreamerConfig config in configs)
+            {
+                DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
+
+                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, e.Stream.UserName).Result;
+
+                var messageId = storedMessage.AnnouncementMessageId;
+
+                var channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                DiscordMessage message = channel.GetMessageAsync(messageId).Result;
+
+                var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
+                var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
+
+                if((storedMessage.StreamGame != stream.Stream.Game) && (storedMessage.StreamTitle != e.Stream.Title))
+                {
+                    var toReplaceMessage = config.AnnouncementMessage;
+                    var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
+
+                    var color = new DiscordColor("9146FF");
+
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{e.Stream.UserName} has gone live!",
+                        Description = $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})",
+                        Color = color,
+                    };
+
+                    embed.AddField("Game:", stream.Stream.Game);
+                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+
+                    embed.WithThumbnail(streamer.Logo);
+                    embed.WithImageUrl(stream.Stream.Preview.Large);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+
+                    DiscordEmbed updatedEmbed = embed;
+
+                    message.ModifyAsync(announcementMessage, embed: updatedEmbed);
+
+                    _messageStoreService.RemoveMessageStore(storedMessage);
+
+                    var messageStore = new NowLiveMessages
+                    {
+                        GuildId = storedMessage.GuildId,
+                        StreamerId = storedMessage.StreamerId,
+                        AnnouncementChannelId = storedMessage.AnnouncementChannelId,
+                        AnnouncementMessageId = storedMessage.AnnouncementMessageId,
+                        StreamTitle = e.Stream.Title,
+                        StreamGame = stream.Stream.Game,
+                    };
+
+                    _messageStoreService.CreateNewMessageStore(messageStore);
+
+                    continue;
+                }
+
+                if(storedMessage.StreamGame != stream.Stream.Game)
+                {
+                    var toReplaceMessage = config.AnnouncementMessage;
+                    var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
+
+                    var color = new DiscordColor("9146FF");
+
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{e.Stream.UserName} has gone live!",
+                        Description = $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})",
+                        Color = color,
+                    };
+
+                    embed.AddField("Game:", stream.Stream.Game);
+                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+
+                    embed.WithThumbnail(streamer.Logo);
+                    embed.WithImageUrl(stream.Stream.Preview.Large);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+
+                    DiscordEmbed updatedEmbed = embed;
+
+                    message.ModifyAsync(announcementMessage, embed: updatedEmbed);
+
+                    _messageStoreService.RemoveMessageStore(storedMessage);
+
+                    var messageStore = new NowLiveMessages
+                    {
+                        GuildId = storedMessage.GuildId,
+                        StreamerId = storedMessage.StreamerId,
+                        AnnouncementChannelId = storedMessage.AnnouncementChannelId,
+                        AnnouncementMessageId = storedMessage.AnnouncementMessageId,
+                        StreamTitle = e.Stream.Title,
+                        StreamGame = stream.Stream.Game,
+                    };
+
+                    _messageStoreService.CreateNewMessageStore(messageStore);
+                }
+
+                if (storedMessage.StreamTitle != e.Stream.Title)
+                {
+                    var toReplaceMessage = config.AnnouncementMessage;
+                    var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
+
+                    var color = new DiscordColor("9146FF");
+
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{e.Stream.UserName} has gone live!",
+                        Description = $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})",
+                        Color = color,
+                    };
+
+                    embed.AddField("Game:", stream.Stream.Game);
+                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+
+                    embed.WithThumbnail(streamer.Logo);
+                    embed.WithImageUrl(stream.Stream.Preview.Large);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+
+                    DiscordEmbed updatedEmbed = embed;
+
+                    message.ModifyAsync(announcementMessage, embed: updatedEmbed);
+
+                    _messageStoreService.RemoveMessageStore(storedMessage);
+
+                    var messageStore = new NowLiveMessages
+                    {
+                        GuildId = storedMessage.GuildId,
+                        StreamerId = storedMessage.StreamerId,
+                        AnnouncementChannelId = storedMessage.AnnouncementChannelId,
+                        AnnouncementMessageId = storedMessage.AnnouncementMessageId,
+                        StreamTitle = e.Stream.Title,
+                        StreamGame = stream.Stream.Game,
+                    };
+
+                    _messageStoreService.CreateNewMessageStore(messageStore);
+                }
+            }
         }
 
         private void GGOnStreamOnline(object sender, OnStreamOnlineArgs e)
@@ -167,19 +347,30 @@ namespace DiscordBot.Bots
                 var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
+                var toReplaceMessage = config.AnnouncementMessage;
+                var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
+                var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
+
+                var color = new DiscordColor("9146FF");
+
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = $"{e.Stream.UserName} has gone live!",
+                    Description = $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})",
+                    Color = color,
                 };
 
-                embed.AddField("Game:", stream.Stream.Game, true);
-                embed.AddField("Viewers:", stream.Stream.Viewers.ToString(), true);
-                embed.AddField("Stream Description:", $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})");
+                embed.AddField("Game:", stream.Stream.Game);
+                embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
                 embed.WithThumbnail(streamer.Logo);
                 embed.WithImageUrl(stream.Stream.Preview.Large);
+                embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
-                DiscordMessage sentMessage = channel.SendMessageAsync(embed: embed).Result;
+
+                DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
                 var messageStore = new NowLiveMessages
                 {
@@ -187,6 +378,8 @@ namespace DiscordBot.Bots
                     StreamerId = config.StreamerId,
                     AnnouncementChannelId = channel.Id,
                     AnnouncementMessageId = sentMessage.Id,
+                    StreamTitle = e.Stream.Title,
+                    StreamGame = stream.Stream.Game,
                 };
 
                 _messageStoreService.CreateNewMessageStore(messageStore);

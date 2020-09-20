@@ -27,15 +27,29 @@ namespace DiscordBot.Bots.Commands
             _context = context;
             _messageStoreService = messageStoreService;
         }
-        
+
         [Command("addstreamer")]
         public async Task AddStreamer(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel)
+        {
+            var announcementMessage = "%USER% has gone live streaming %GAME%! You should check them out over at: %URL%";
+
+            await AddStreamerAsync(ctx, twitchStreamer, announceChannel, announcementMessage);
+        }
+
+        [Command("addstreamer")]
+        public async Task AddStreamer(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
+        {
+            await AddStreamerAsync(ctx, twitchStreamer, announceChannel, announcementMessage);
+        }
+
+        public async Task AddStreamerAsync(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
         {
             var config = new GuildStreamerConfig
             {
                 AnnounceChannelId = announceChannel.Id,
                 GuildId = ctx.Guild.Id,
                 StreamerId = twitchStreamer,
+                AnnouncementMessage = announcementMessage,
             };
 
             await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
@@ -58,7 +72,7 @@ namespace DiscordBot.Bots.Commands
             {
                 DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                embed.AddField($"{streamer.StreamerId}", $"{channel.Mention}", true);
+                embed.AddField($"{streamer.StreamerId}", $"{channel.Mention}\n{streamer.AnnouncementMessage}", true);
             }
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
