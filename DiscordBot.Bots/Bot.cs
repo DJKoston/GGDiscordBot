@@ -146,8 +146,6 @@ namespace DiscordBot.Bots
                 DiscordMember apocalyptic = await guild.GetMemberAsync(176666155103158273);
                 DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
 
-                
-
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = "The Bot will be unavaliable for the next 35 mins.",
@@ -170,7 +168,7 @@ namespace DiscordBot.Bots
 
         }
 
-        private void GGOnStreamUpdate(object sender, OnStreamUpdateArgs e)
+            private void GGOnStreamUpdate(object sender, OnStreamUpdateArgs e)
         {
             DiscordClient d = Client;
 
