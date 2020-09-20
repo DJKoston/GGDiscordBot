@@ -180,11 +180,13 @@ namespace DiscordBot.Bots
             {
                 DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
+                if(guild == null) { continue; }
+
                 var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, e.Stream.UserName).Result;
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
-                var channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+                DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
 
                 DiscordMessage message = channel.GetMessageAsync(messageId).Result;
 
@@ -194,7 +196,8 @@ namespace DiscordBot.Bots
                 if((storedMessage.StreamGame != stream.Stream.Game) && (storedMessage.StreamTitle != e.Stream.Title))
                 {
                     var toReplaceMessage = config.AnnouncementMessage;
-                    var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var userReplace = channelReplace.Replace("_", "\\_");
                     var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
@@ -239,9 +242,10 @@ namespace DiscordBot.Bots
                 if(storedMessage.StreamGame != stream.Stream.Game)
                 {
                     var toReplaceMessage = config.AnnouncementMessage;
-                    var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var userReplace = channelReplace.Replace("_", "\\_");
                     var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
-                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} "); 
 
                     var color = new DiscordColor("9146FF");
 
@@ -282,7 +286,8 @@ namespace DiscordBot.Bots
                 if (storedMessage.StreamTitle != e.Stream.Title)
                 {
                     var toReplaceMessage = config.AnnouncementMessage;
-                    var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                    var userReplace = channelReplace.Replace("_", "\\_");
                     var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
@@ -348,7 +353,8 @@ namespace DiscordBot.Bots
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
                 var toReplaceMessage = config.AnnouncementMessage;
-                var userReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
+                var userReplace = channelReplace.Replace("_", "\\_");
                 var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
                 var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
