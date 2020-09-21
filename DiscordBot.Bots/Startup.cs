@@ -45,6 +45,7 @@ namespace DiscordBot.Bots
             services.AddScoped<IWelcomeMessageConfigService, WelcomeMessageConfigService>();
             services.AddScoped<IMessageStoreService, MessageStoreService>();
             services.AddScoped<IGuildStreamerConfigService, GuildStreamerConfigService>();
+            services.AddScoped<IGameChannelConfigService, GameChannelConfigService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();

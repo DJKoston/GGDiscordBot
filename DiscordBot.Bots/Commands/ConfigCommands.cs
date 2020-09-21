@@ -17,11 +17,13 @@ namespace DiscordBot.Bots.Commands
     {
         private readonly INitroBoosterRoleConfigService _nitroBoosterRoleService;
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
+        private readonly IGameChannelConfigService _gameChannelConfigService;
 
-        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService)
+        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService, IGameChannelConfigService gameChannelConfigService)
         {
             _nitroBoosterRoleService = nitroBoosterRoleService;
             _welcomeMessageConfigService = welcomeMessageConfigService;
+            _gameChannelConfigService = gameChannelConfigService;
         }
 
         [Command("SetNitroRole")]
@@ -290,6 +292,115 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 embed.AddField("To Add the Config for the Welcome Channel", "Do `!config setwelcomechannel #channel-name`");
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+        }
+
+        [Command("SetGameChannel")]
+        public async Task CreateGameChannelConfig(CommandContext ctx, DiscordChannel channel)
+        {
+            var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var gameChannelConfig = new GameChannelConfig()
+                {
+                    GuildId = ctx.Guild.Id,
+                    ChannelId = channel.Id,
+                };
+
+                await _gameChannelConfigService.CreateGameChannelConfigService(gameChannelConfig);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"New Game Channel Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{channel.Mention} is the Game Channel for the Server! No other channel will accept commands for games."
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                DiscordChannel gameChannel = ctx.Guild.GetChannel(config.ChannelId);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is already a Game Channel Set!",
+                    Description = $"{gameChannel.Mention} is the Game Channel for the Server!"
+                };
+
+                embed.AddField("To Clear the Config for the Game Channel", "Do `!config resetgamechannel`");
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+        }
+
+        [Command("GetGameChannel")]
+        public async Task GetGameChannelConfig(CommandContext ctx)
+        {
+            var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is no Game Channel Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Game Channel Config, do `!config setgamechannel #channel-name`"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+
+            else
+            {
+                DiscordChannel channel = ctx.Guild.GetChannel(config.ChannelId);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"The Game Channel Configured\nfor {ctx.Guild.Name}",
+                    Description = $"{channel.Mention} is the Game Channel for the Server!"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+        }
+
+        [Command("ResetGameChannel")]
+        public async Task ResetGameChannelConfig(CommandContext ctx)
+        {
+            var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is no Game Channel Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Game Channel Config, do `!config setgamechannel #channel-name`"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                await _gameChannelConfigService.RemoveGameChannelConfigService(config);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"The Game Channel Config has been reset!",
+                };
+
+                embed.AddField("To Add the Config for the Game Channel", "Do `!config setgamechannel #channel-name`");
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
 

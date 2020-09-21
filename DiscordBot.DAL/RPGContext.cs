@@ -22,5 +22,6 @@ namespace DiscordBot.DAL
         public DbSet<NitroBoosterRoleConfig> NitroBoosterConfigs { get; set; }
         public DbSet<GuildStreamerConfig> GuildStreamerConfigs { get; set; }
         public DbSet<NowLiveMessages> NowLiveMessages { get; set; }
+        public DbSet<GameChannelConfig> GameChannelConfigs { get; set; }
     }
 }

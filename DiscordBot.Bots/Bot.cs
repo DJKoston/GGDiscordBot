@@ -166,9 +166,11 @@ namespace DiscordBot.Bots
                 Environment.Exit(1);
             }
 
+            
+
         }
 
-            private void GGOnStreamUpdate(object sender, OnStreamUpdateArgs e)
+        private void GGOnStreamUpdate(object sender, OnStreamUpdateArgs e)
         {
             DiscordClient d = Client;
 
@@ -184,15 +186,15 @@ namespace DiscordBot.Bots
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
-                DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
-
-                DiscordMessage message = channel.GetMessageAsync(messageId).Result;
-
                 var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
                 if((storedMessage.StreamGame != stream.Stream.Game) && (storedMessage.StreamTitle != e.Stream.Title))
                 {
+                    DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                    DiscordMessage message = channel.GetMessageAsync(messageId).Result;
+
                     var toReplaceMessage = config.AnnouncementMessage;
                     var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
                     var userReplace = channelReplace.Replace("_", "\\_");
@@ -239,6 +241,10 @@ namespace DiscordBot.Bots
 
                 if(storedMessage.StreamGame != stream.Stream.Game)
                 {
+                    DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                    DiscordMessage message = channel.GetMessageAsync(messageId).Result;
+
                     var toReplaceMessage = config.AnnouncementMessage;
                     var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
                     var userReplace = channelReplace.Replace("_", "\\_");
@@ -283,6 +289,10 @@ namespace DiscordBot.Bots
 
                 if (storedMessage.StreamTitle != e.Stream.Title)
                 {
+                    DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                    DiscordMessage message = channel.GetMessageAsync(messageId).Result;
+
                     var toReplaceMessage = config.AnnouncementMessage;
                     var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
                     var userReplace = channelReplace.Replace("_", "\\_");
@@ -546,6 +556,27 @@ namespace DiscordBot.Bots
             {
                 DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
 
+                var currentTime = DateTime.Now;
+
+                if ((currentTime.Hour == 3) && (currentTime.Minute > 30) && (currentTime.Minute < 40)) 
+                {
+                    DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
+
+                    DiscordMember apocalyptic = await guild.GetMemberAsync(176666155103158273);
+                    DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
+
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "The Bot is now back online!",
+                        Description = $"The server the bot runs on has finished the backup and the bot should now respond to requests.\n\nIf it still isnt responding, please DM {djkoston.Mention}",
+                        Color = DiscordColor.DarkGreen,
+                    };
+
+                    await gamesChannel.SendMessageAsync(embed: embed);
+                    await djkoston.SendMessageAsync(embed: embed);
+                    await apocalyptic.SendMessageAsync(embed: embed);
+                }
+
                 var allMembers = guild.GetAllMembersAsync().Result;
 
                 DiscordRole generationGamers = guild.GetRole(411304802883207169);
@@ -704,6 +735,8 @@ namespace DiscordBot.Bots
             Monitor.SetChannelsByName(lst);
 
             Monitor.Start();
+
+            
 
             int guilds = e.Client.Guilds.Count();
 

@@ -1,4 +1,5 @@
-﻿using DiscordBot.Core.Services.Profiles;
+﻿using DiscordBot.Core.Services.Configs;
+using DiscordBot.Core.Services.Profiles;
 using DiscordBot.DAL.Models.Profiles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -12,18 +13,22 @@ namespace DiscordBot.Bots.Commands
     {
         private readonly IProfileService _profileService;
         private readonly IGoldService _goldService;
+        private readonly IGameChannelConfigService _gameChannelConfigService;
 
-        public GameCommands(IProfileService profileService, IGoldService goldService)
+        public GameCommands(IProfileService profileService, IGoldService goldService, IGameChannelConfigService gameChannelConfigService)
         {
             _profileService = profileService;
             _goldService = goldService;
+            _gameChannelConfigService = gameChannelConfigService;
         }
 
         [Command("spin")]
         [Description("Spins a wheel and gets a random bonus!")]
         public async Task SpinTheWheel(CommandContext ctx)
         {
-            if(ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if(ctx.Channel.Id == configChannel.ChannelId)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
@@ -47,7 +52,9 @@ namespace DiscordBot.Bots.Commands
         
         public async Task SpinTheWheel(CommandContext ctx, int bet)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var rnd = new Random();
                 var winOrLose = rnd.Next(1, 3);
@@ -163,7 +170,9 @@ namespace DiscordBot.Bots.Commands
 
         public async Task SpinAllGold(CommandContext ctx, string commandString)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 if (commandString == "all")
                 {
@@ -264,7 +273,9 @@ namespace DiscordBot.Bots.Commands
         [Description("Steal from a specific person a random amount")]
         public async Task Steal(CommandContext ctx)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
@@ -285,7 +296,9 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task Steal(CommandContext ctx, DiscordMember member)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var rnd = new Random();
                 var winOrLose = rnd.Next(1, 3);
@@ -391,7 +404,9 @@ namespace DiscordBot.Bots.Commands
         [Description("Guess a number between 1 and 5, if you're right - Win 2500 Gold if you are right!!")]
         public async Task GuessTheNumber(CommandContext ctx)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
@@ -412,7 +427,9 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task GuessTheNumber(CommandContext ctx, int guess)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var rnd = new Random();
                 int maxNumber = 11;
@@ -477,7 +494,9 @@ namespace DiscordBot.Bots.Commands
         [Description("Guess a number between 1 and 10, if you're right - Win 2500 Gold if you are right!!")]
         public async Task GuessTheNumber(CommandContext ctx, string text)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
@@ -497,7 +516,9 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task FlipACoin(CommandContext ctx)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
@@ -517,7 +538,9 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task FlipACoin(CommandContext ctx, string guess)
         {
-            if (ctx.Channel.Name == "discord-games")
+            var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
                 await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -50, ctx.Member.Username);
