@@ -769,13 +769,13 @@ namespace DiscordBot.Bots
         {
             if (e.Channel.IsPrivate) { return; }
 
-            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
-            DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
-
             if (e.Author.IsBot)
             {
                 return;
             }
+
+            DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+            DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 
             var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(e.Guild.Id).Result;
 

@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
@@ -33,11 +34,44 @@ namespace DiscordBot.Bots.Commands
         {
             var suggestion = await _communityStreamerService.GetStreamer(ctx.Guild.Id, suggestionId);
 
-            if (suggestion == null) { await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false); return; }
+            if (suggestion == null) 
+            {
+                await ctx.Message.DeleteAsync();
 
-            if (suggestion.DealtWith == "APPROVED") { await ctx.Channel.SendMessageAsync("This request has already been approved!").ConfigureAwait(false); return; };
+                var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false);
 
-            if (suggestion.DealtWith == "DENIED") { await ctx.Channel.SendMessageAsync("This request has already been rejected!").ConfigureAwait(false); return; };
+                Thread.Sleep(5000);
+
+                await approveRespnse.DeleteAsync();
+                
+                return;
+            }
+
+            if (suggestion.DealtWith == "APPROVED")
+            {
+                await ctx.Message.DeleteAsync();
+
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This request has already been approved!").ConfigureAwait(false);
+
+                Thread.Sleep(5000);
+
+                await approvedResponse.DeleteAsync();
+                
+                return;
+            };
+
+            if (suggestion.DealtWith == "DENIED") 
+            {
+                await ctx.Message.DeleteAsync();
+
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This request has already been rejected!").ConfigureAwait(false);
+
+                Thread.Sleep(5000);
+
+                await approvedResponse.DeleteAsync();
+
+                return;
+            }
 
             DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.requestorId);
 
@@ -76,7 +110,15 @@ namespace DiscordBot.Bots.Commands
 
             await message.ModifyAsync(embed: newEmbed).ConfigureAwait(false);
 
-            await ctx.Channel.SendMessageAsync($"Request {suggestion.Id} has been approved!").ConfigureAwait(false);
+            await ctx.Message.DeleteAsync();
+
+            var response = await ctx.Channel.SendMessageAsync($"Request {suggestion.Id} has been approved!").ConfigureAwait(false);
+
+            Thread.Sleep(5000);
+
+            await response.DeleteAsync();
+
+
         }
 
         [Command("reject")]
@@ -84,11 +126,44 @@ namespace DiscordBot.Bots.Commands
         {
             var suggestion = await _communityStreamerService.GetStreamer(ctx.Guild.Id, suggestionId);
 
-            if (suggestion == null) { await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false); return; }
+            if (suggestion == null)
+            {
+                await ctx.Message.DeleteAsync();
 
-            if (suggestion.DealtWith == "APPROVED") { await ctx.Channel.SendMessageAsync("This request has already been approved!").ConfigureAwait(false); return; };
+                var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false);
 
-            if (suggestion.DealtWith == "DENIED") { await ctx.Channel.SendMessageAsync("This request has already been rejected!").ConfigureAwait(false); return; };
+                Thread.Sleep(5000);
+
+                await approveRespnse.DeleteAsync();
+
+                return;
+            }
+
+            if (suggestion.DealtWith == "APPROVED")
+            {
+                await ctx.Message.DeleteAsync();
+
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This request has already been approved!").ConfigureAwait(false);
+
+                Thread.Sleep(5000);
+
+                await approvedResponse.DeleteAsync();
+
+                return;
+            };
+
+            if (suggestion.DealtWith == "DENIED")
+            {
+                await ctx.Message.DeleteAsync();
+
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This request has already been rejected!").ConfigureAwait(false);
+
+                Thread.Sleep(5000);
+
+                await approvedResponse.DeleteAsync();
+
+                return;
+            }
 
             DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.requestorId);
 
@@ -123,6 +198,7 @@ namespace DiscordBot.Bots.Commands
             };
 
             suggestionEmbed.AddField("This request Was Rejected by:", $"{ctx.Member.Mention}");
+            suggestionEmbed.AddField("Reason:", reason);
 
             suggestionEmbed.WithFooter($"Request: {suggestion.Id}");
 
@@ -131,7 +207,13 @@ namespace DiscordBot.Bots.Commands
 
             await message.ModifyAsync(embed: newEmbed).ConfigureAwait(false);
 
-            await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been rejected!").ConfigureAwait(false);
+            await ctx.Message.DeleteAsync();
+
+            var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been rejected!").ConfigureAwait(false);
+
+            Thread.Sleep(5000);
+
+            await response.DeleteAsync();
         }
 
     }
