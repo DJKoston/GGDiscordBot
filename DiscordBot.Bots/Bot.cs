@@ -108,6 +108,8 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<QuoteCommands>();
             Commands.RegisterCommands<ReactionRoleCommands>();
             Commands.RegisterCommands<RoleCommands>();
+            Commands.RegisterCommands<StreamerCommands>();
+            Commands.RegisterCommands<SuggestionCommands>();
 
             Commands.CommandErrored += OnCommandErrored;
 
@@ -410,6 +412,8 @@ namespace DiscordBot.Bots
             foreach (GuildStreamerConfig config in configs)
             {
                 DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
+
+                if(guild == null) { continue; }
                 
                 var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, e.Stream.UserName).Result;
 
@@ -558,7 +562,7 @@ namespace DiscordBot.Bots
 
                 var currentTime = DateTime.Now;
 
-                if ((currentTime.Hour == 3) && (currentTime.Minute > 30) && (currentTime.Minute < 40)) 
+                if ((currentTime.Hour == 3) && (currentTime.Minute > 29) && (currentTime.Minute < 41)) 
                 {
                     DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
 

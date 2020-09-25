@@ -1,9 +1,11 @@
+using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Items;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.Quotes;
 using DiscordBot.Core.Services.ReactionRoles;
+using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.DAL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,6 +48,8 @@ namespace DiscordBot.Bots
             services.AddScoped<IMessageStoreService, MessageStoreService>();
             services.AddScoped<IGuildStreamerConfigService, GuildStreamerConfigService>();
             services.AddScoped<IGameChannelConfigService, GameChannelConfigService>();
+            services.AddScoped<ICommunityStreamerService, CommunityStreamerService>();
+            services.AddScoped<ISuggestionService, SuggestionService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();

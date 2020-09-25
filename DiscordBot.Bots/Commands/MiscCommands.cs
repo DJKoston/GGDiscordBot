@@ -1,29 +1,33 @@
-﻿using DiscordBot.DAL;
-using DSharpPlus;
+﻿using DiscordBot.Core.Services.CommunityStreamers;
+using DiscordBot.Core.Services.Suggestions;
+using DiscordBot.DAL;
+using DiscordBot.DAL.Models.CommunityStreamers;
+using DiscordBot.DAL.Models.ReactionRoles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using TwitchLib.Api.Services;
-using TwitchLib.Client;
+using TwitchLib.Api;
 
 namespace DiscordBot.Bots.Commands
 {
     public class MiscCommands : BaseCommandModule
     {
         private readonly RPGContext _context;
+        private readonly ISuggestionService _suggestionService;
+        private readonly ICommunityStreamerService _communityStreamerService;
 
-        public MiscCommands(RPGContext context)
+        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService)
         {
             _context = context;
+            _suggestionService = suggestionService;
+            _communityStreamerService = communityStreamerService;
         }
+
         [Command("ping")]
         [Description("Play Ping-Pong with the Bot")]
         public async Task Ping(CommandContext ctx)
@@ -94,6 +98,101 @@ namespace DiscordBot.Bots.Commands
             response.Close();
         }
 
-        
+        [Command("suggest")]
+        [Description("Make a suggestion")]
+        public async Task Suggest(CommandContext ctx, [RemainingText] string suggestion)
+        {
+            var suggestionChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "suggestions-log");
+
+            if(suggestionChannel == null) { await ctx.Channel.SendMessageAsync("An Error has occured while trying to log your suggestion. Please contact an Admin and ask them to ensure the Suggestion-Log channel is set up.").ConfigureAwait(false); return; }
+
+            var newSuggestion = new Suggestion
+            {
+                GuildId = ctx.Guild.Id,
+                SuggestorId = ctx.Member.Id,
+                SuggestionText = suggestion,
+                RespondedTo = "NO",
+            };
+
+            await _suggestionService.CreateNewSuggestion(newSuggestion);
+
+            var suggestionEmbed = new DiscordEmbedBuilder
+            {
+                Title = $"Suggestion Created by: {ctx.Member.DisplayName}",
+                Description = suggestion,
+                Color = DiscordColor.HotPink,
+            };
+
+            suggestionEmbed.AddField("To Approve this suggestion:", $"`!suggestion approve {newSuggestion.Id}`");
+            suggestionEmbed.AddField("To Decline this suggestion:", $"`!suggestion reject {newSuggestion.Id}`");
+
+            suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
+
+            var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
+
+            newSuggestion.SuggestionEmbedMessage = message.Id;
+
+            await _suggestionService.EditSuggestion(newSuggestion);
+
+            await ctx.Channel.SendMessageAsync("Your suggestion has been logged!").ConfigureAwait(false);
+        }
+
+        [Command("ImAStreamer")]
+        [Description("Let us Know Your Streamer Tag!")]
+        public async Task StreamerTag(CommandContext ctx)
+        {
+            await ctx.Channel.SendMessageAsync("To let us know your're a streamer, please do the following command `!imastreamer YourTwitchUserName`");
+        }
+
+        [Command("TwitchChannel")]
+        [Description("Let us Know Your Streamer Tag!")]
+        public async Task StreamerTag(CommandContext ctx, [RemainingText] string twitchUserName)
+        {
+            var api = new TwitchAPI();
+
+            var clientid = "gp762nuuoqcoxypju8c569th9wz7q5";
+            var accesstoken = "j1oz9yx9b07c8j22vym2oba32qwnhb";
+
+            api.Settings.ClientId = clientid;
+            api.Settings.AccessToken = accesstoken;
+
+            var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchUserName);
+
+            if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchUserName}."); return; }
+
+            var streamerChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "streamers-to-approve");
+
+            if (streamerChannel == null) { await ctx.Channel.SendMessageAsync("An Error has occured while trying to log your request. Please contact an Admin and ask them to ensure the streamers-to-approve channel is set up.").ConfigureAwait(false); return; }
+
+            var newStreamer = new CommunityStreamer
+            {
+                GuildId = ctx.Guild.Id,
+                requestorId = ctx.Member.Id,
+                streamerName = twitchUserName,
+                DealtWith = "NO",
+            };
+
+            await _communityStreamerService.CreateNewStreamer(newStreamer);
+
+            var suggestionEmbed = new DiscordEmbedBuilder
+            {
+                Title = $"New Streamer Request Created by: {ctx.Member.DisplayName}",
+                Description = twitchUserName,
+                Color = DiscordColor.HotPink,
+            };
+
+            suggestionEmbed.AddField("To Approve this streamer:", $"`!streamer approve {newStreamer.Id}` #channel-name");
+            suggestionEmbed.AddField("To Decline this streamer:", $"`!streamer reject {newStreamer.Id}`");
+
+            suggestionEmbed.WithFooter($"Suggestion: {newStreamer.Id}");
+
+            var message = await streamerChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
+
+            newStreamer.RequestMessage = message.Id;
+
+            await _communityStreamerService.EditStreamer(newStreamer);
+
+            await ctx.Channel.SendMessageAsync("Your request has been logged!").ConfigureAwait(false);
+        }
     }
 }

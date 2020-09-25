@@ -3,47 +3,22 @@ using DiscordBot.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
-    partial class RPGContextModelSnapshot : ModelSnapshot
+    [Migration("20200925031924_SuggestionAdd2")]
+    partial class SuggestionAdd2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("DiscordBot.DAL.Models.CommunityStreamers.CommunityStreamer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("DealtWith")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal>("RequestMessage")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal>("requestorId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<string>("streamerName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CommunityStreamers");
-                });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Configs.GameChannelConfig", b =>
                 {
@@ -287,6 +262,30 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Quotes");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.ReactionRoles.CommunityStreamer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("DealtWith")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("requestorId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<string>("streamerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CommunityStreamers");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.ReactionRoles.ReactionRole", b =>

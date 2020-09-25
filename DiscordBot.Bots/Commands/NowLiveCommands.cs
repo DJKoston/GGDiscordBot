@@ -22,7 +22,6 @@ namespace DiscordBot.Bots.Commands
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
         private readonly RPGContext _context;
         private readonly IMessageStoreService _messageStoreService;
-        private readonly IConfiguration configuration;
 
         public NowLiveCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService)
         {

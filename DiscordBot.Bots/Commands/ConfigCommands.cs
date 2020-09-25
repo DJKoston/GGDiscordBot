@@ -407,5 +407,22 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
         }
+
+        [Command("SetUpSuggestionChannel")]
+        public async Task SetUpSuggestionChannel(CommandContext ctx)
+        {
+            var suggestionChannel = await ctx.Guild.CreateChannelAsync("suggestions-log", DSharpPlus.ChannelType.Text, null, "This is where the Suggestions Live!");
+
+            await ctx.Channel.SendMessageAsync($"Suggestion Channel Created! {suggestionChannel.Mention}\n\nPlease do not rename this channel as the bot will not know where to post suggestions for your admins to approve!\n\nYou may move the channel to another tab, just ensure {ctx.Client.CurrentUser.Mention} has permissions to access the channel and send messages to it!");
+        }
+
+        [Command("SetUpStreamerChannel")]
+        public async Task SetUpStreamerLogChannel(CommandContext ctx)
+        {
+            var suggestionChannel = await ctx.Guild.CreateChannelAsync("streamers-to-approve", DSharpPlus.ChannelType.Text, null, "This is where the streamers to approve Live!");
+
+            await ctx.Channel.SendMessageAsync($"Streamer Log Channel Created! {suggestionChannel.Mention}\n\nPlease do not rename this channel as the bot will not know where to post streamers for your admins to approve!\n\nYou may move the channel to another tab, just ensure {ctx.Client.CurrentUser.Mention} has permissions to access the channel and send messages to it!");
+        }
+
     }
 }

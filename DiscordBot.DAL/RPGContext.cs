@@ -1,10 +1,11 @@
-﻿using DiscordBot.DAL.Models.Configs;
+﻿using DiscordBot.DAL.Models.CommunityStreamers;
+using DiscordBot.DAL.Models.Configs;
 using DiscordBot.DAL.Models.CustomCommands;
 using DiscordBot.DAL.Models.Items;
+using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
 using DiscordBot.DAL.Models.ReactionRoles;
-using DiscordBot.DAL.Models.MessageStores;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.DAL
@@ -23,5 +24,7 @@ namespace DiscordBot.DAL
         public DbSet<GuildStreamerConfig> GuildStreamerConfigs { get; set; }
         public DbSet<NowLiveMessages> NowLiveMessages { get; set; }
         public DbSet<GameChannelConfig> GameChannelConfigs { get; set; }
+        public DbSet<CommunityStreamer> CommunityStreamers { get; set; }
+        public DbSet <Suggestion> Suggestions { get; set; }
     }
 }

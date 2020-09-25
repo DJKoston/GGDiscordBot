@@ -1,0 +1,126 @@
+﻿using DiscordBot.Core.Services.CommunityStreamers;
+using DiscordBot.Core.Services.Suggestions;
+using DiscordBot.DAL;
+using DiscordBot.DAL.Models.ReactionRoles;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace DiscordBot.Bots.Commands
+{
+    [Group("suggestion")]
+    [RequirePermissions(DSharpPlus.Permissions.Administrator)]
+
+    public class SuggestionCommands : BaseCommandModule
+    {
+        private readonly RPGContext _context;
+        private readonly ISuggestionService _suggestionService;
+        private readonly ICommunityStreamerService _communityStreamerService;
+
+        public SuggestionCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService)
+        {
+            _context = context;
+            _suggestionService = suggestionService;
+            _communityStreamerService = communityStreamerService;
+        }
+
+        [Command("approve")]
+        public async Task ApproveSuggestion(CommandContext ctx, int suggestionId)
+        {
+            var suggestion = await _suggestionService.GetSuggestion(ctx.Guild.Id, suggestionId);
+
+            if (suggestion == null) { await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false); return; }
+
+            if (suggestion.RespondedTo == "APPROVED") { await ctx.Channel.SendMessageAsync("This suggestion has already been approved!").ConfigureAwait(false); return; };
+
+            if (suggestion.RespondedTo == "DENIED") { await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!").ConfigureAwait(false); return; };
+
+            DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.SuggestorId);
+
+            if(suggestor != null) { await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been approved in the {ctx.Guild.Name} server!"); }
+
+            suggestion.RespondedTo = "APPROVED";
+
+            await _suggestionService.EditSuggestion(suggestion);
+
+            DiscordChannel channel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "suggestions-log");
+
+            DiscordMessage message = await channel.GetMessageAsync(suggestion.SuggestionEmbedMessage);
+
+            var suggestionEmbed = new DiscordEmbedBuilder
+            {
+                Title = $"Suggestion Created by: {suggestor.DisplayName}",
+                Description = suggestion.SuggestionText,
+                Color = DiscordColor.Green,
+            };
+
+            suggestionEmbed.AddField("This Suggestion Was Approved by:", $"{ctx.Member.Mention}");
+
+            suggestionEmbed.WithFooter($"Suggestion: {suggestion.Id}");
+
+            DiscordEmbed newEmbed = suggestionEmbed;
+
+            await message.ModifyAsync(embed: newEmbed).ConfigureAwait(false);
+
+            await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been approved!").ConfigureAwait(false);
+        }
+
+        [Command("reject")]
+        public async Task Reject(CommandContext ctx, int suggestionId, [RemainingText] string reason)
+        {
+            var suggestion = await _suggestionService.GetSuggestion(ctx.Guild.Id, suggestionId);
+
+            if (suggestion == null) { await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false); return; }
+
+            if (suggestion.RespondedTo == "APPROVED") { await ctx.Channel.SendMessageAsync("This suggestion has already been approved!").ConfigureAwait(false); return; };
+
+            if (suggestion.RespondedTo == "DENIED") { await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!").ConfigureAwait(false); return; };
+
+            DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.SuggestorId);
+
+            if(reason == null) {}
+
+            if (suggestor != null)
+            {
+                if(reason == null)
+                {
+                    await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been rejected in the {ctx.Guild.Name} server for the following reason:\n\n No reason given.");
+                }
+                else
+                {
+                    await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been rejected in the {ctx.Guild.Name} server for the following reason:\n\n {reason}");
+                }
+                
+            }
+
+            suggestion.RespondedTo = "DENIED";
+
+            await _suggestionService.EditSuggestion(suggestion);
+
+            DiscordChannel channel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "suggestions-log");
+
+            DiscordMessage message = await channel.GetMessageAsync(suggestion.SuggestionEmbedMessage);
+
+            var suggestionEmbed = new DiscordEmbedBuilder
+            {
+                Title = $"Suggestion Created by: {suggestor.DisplayName}",
+                Description = suggestion.SuggestionText,
+                Color = DiscordColor.Red,
+            };
+
+            suggestionEmbed.AddField("This Suggestion Was Rejected by:", $"{ctx.Member.Mention}");
+            suggestionEmbed.AddField("Reason:", reason);
+
+            suggestionEmbed.WithFooter($"Suggestion: {suggestion.Id}");
+
+            DiscordEmbed newEmbed = suggestionEmbed;
+
+            await message.ModifyAsync(embed: newEmbed).ConfigureAwait(false);
+
+            await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been rejected!").ConfigureAwait(false);
+        }
+
+    }
+}
