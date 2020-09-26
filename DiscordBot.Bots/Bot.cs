@@ -434,7 +434,7 @@ namespace DiscordBot.Bots
             if (e.User.IsBot) { return; }
 
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-
+            
             if (guild == null) { return; }
 
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
@@ -446,6 +446,10 @@ namespace DiscordBot.Bots
                 DiscordRole generationGamers = guild.GetRole(411304802883207169);
                 DiscordRole ggNowLive = guild.GetRole(745018263456448573);
                 DiscordRole NowLive = guild.GetRole(745018328179015700);
+
+                if (member.Roles.Contains(ggNowLive)) { return; }
+
+                if (member.Roles.Contains(NowLive)) { return; }
 
                 if (member.Roles.Contains(generationGamers))
                 {
