@@ -895,6 +895,8 @@ namespace DiscordBot.Bots
 
         private async Task OnCommandErrored(CommandErrorEventArgs e)
         {
+            Console.WriteLine(e.Exception.Message);
+
             if (e.Exception.Message is "Specified command was not found.")
             {
                 var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id).ConfigureAwait(false);

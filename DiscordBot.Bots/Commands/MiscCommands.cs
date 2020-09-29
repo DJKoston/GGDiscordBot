@@ -6,10 +6,14 @@ using DiscordBot.DAL.Models.ReactionRoles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using GiphyDotNet.Manager;
+using GiphyDotNet.Model.Parameters;
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 
@@ -193,6 +197,57 @@ namespace DiscordBot.Bots.Commands
             await _communityStreamerService.EditStreamer(newStreamer);
 
             await ctx.Channel.SendMessageAsync("Your request has been logged!").ConfigureAwait(false);
+        }
+
+        [Command("gifme")]
+        public async Task GifMe(CommandContext ctx)
+        {
+            var search = "";
+
+            await GifMeTask(ctx, search);
+        }
+
+        [Command("gifme")]
+        public async Task GifMe(CommandContext ctx, [RemainingText] string search)
+        {
+            await GifMeTask(ctx, search);
+        }
+
+
+
+        public async Task GifMeTask(CommandContext ctx, [RemainingText] string search)
+        {
+            var giphy = new Giphy("FJVImvbQp1Uj2X9byEKyleHJChuvzZD0");
+
+            if(search == "")
+            {
+                var result = await giphy.RandomGif(new RandomParameter()
+                {
+                    Rating = Rating.R
+                });
+
+                await ctx.Channel.SendMessageAsync(result.Data.ImageUrl);
+            }
+            else
+            {
+                var searchParams = new SearchParameter()
+                {
+                    Query = search,
+                    Rating = Rating.R,
+                };
+
+                var searchResult = await giphy.GifSearch(searchParams);
+
+                var searchCount = searchResult.Data.Count();
+
+                var rand = new Random();
+                var randomElement = rand.Next(0, searchCount +1);
+
+                var result = searchResult.Data.ElementAt(randomElement);
+
+                await ctx.Channel.SendMessageAsync(result.Images.Original.Url);
+            }
+            
         }
     }
 }
