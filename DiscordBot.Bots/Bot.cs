@@ -136,7 +136,7 @@ namespace DiscordBot.Bots
         {
             var lst = _guildStreamerConfigService.GetGuildStreamerList();
 
-            Monitor.SetChannelsByName(lst);
+            Monitor.SetChannelsById(lst);
 
             var currentTime = DateTime.Now;
 
@@ -343,7 +343,7 @@ namespace DiscordBot.Bots
         {
             DiscordClient d = Client;
 
-            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserName);
+            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
 
             foreach(GuildStreamerConfig config in configs)
             {
@@ -543,9 +543,9 @@ namespace DiscordBot.Bots
 
                 if (storedMessage == null) { continue; }
 
-                var user = await api.V5.Users.GetUserByNameAsync(streamerList);
+                var user = await api.V5.Users.GetUserByIDAsync(streamerList);
              
-                var isStreaming = await api.V5.Streams.BroadcasterOnlineAsync(user.Matches.First().Id);
+                var isStreaming = await api.V5.Streams.BroadcasterOnlineAsync(user.Id);
 
                 if(isStreaming == true) { continue; }
 
@@ -773,10 +773,9 @@ namespace DiscordBot.Bots
         {
             if (e.Channel.IsPrivate) { return; }
 
-            if (e.Author.IsBot)
-            {
-                return;
-            }
+            if (e.Author.IsBot) { return; }
+
+            if(e.Message.Content.Contains("!")) { return; }
 
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
