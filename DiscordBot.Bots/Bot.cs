@@ -176,7 +176,15 @@ namespace DiscordBot.Bots
         {
             DiscordClient d = Client;
 
-            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserName);
+            var streamUser = api.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
+
+            var streamResults = streamUser.Matches.FirstOrDefault();
+
+            var streamerId = streamResults.Id;
+
+            var getStreamId = api.V5.Channels.GetChannelByIDAsync(streamerId).Result;
+
+            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(getStreamId.Id);
 
             foreach (GuildStreamerConfig config in configs)
             {
@@ -184,7 +192,7 @@ namespace DiscordBot.Bots
 
                 if(guild == null) { continue; }
 
-                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, e.Stream.UserName).Result;
+                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, getStreamId.Id).Result;
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
@@ -407,7 +415,15 @@ namespace DiscordBot.Bots
         {
             DiscordClient d = Client;
 
-            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserName);
+            var streamUser = api.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
+
+            var streamResults = streamUser.Matches.FirstOrDefault();
+
+            var streamerId = streamResults.Id;
+
+            var getStreamId = api.V5.Channels.GetChannelByIDAsync(streamerId).Result;
+
+            var configs = _guildStreamerConfigService.GetGuildStreamerConfig(getStreamId.Id);
 
             foreach (GuildStreamerConfig config in configs)
             {
@@ -415,7 +431,7 @@ namespace DiscordBot.Bots
 
                 if(guild == null) { continue; }
                 
-                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, e.Stream.UserName).Result;
+                var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, getStreamId.Id).Result;
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
