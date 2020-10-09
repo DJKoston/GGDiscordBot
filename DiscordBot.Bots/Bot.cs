@@ -23,6 +23,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Services;
+using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
 namespace DiscordBot.Bots
@@ -33,9 +34,17 @@ namespace DiscordBot.Bots
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
         public LiveStreamMonitorService Monitor;
+        public LiveStreamMonitorService Monitor2;
+        public LiveStreamMonitorService Monitor3;
+        public LiveStreamMonitorService Monitor4;
+        public LiveStreamMonitorService Monitor5;
+        public LiveStreamMonitorService Monitor6;
+        public LiveStreamMonitorService Monitor7;
+        public LiveStreamMonitorService Monitor8;
+        public LiveStreamMonitorService Monitor9;
+        public LiveStreamMonitorService Monitor10;
         public TwitchAPI api;
 
-        
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
             _profileService = services.GetService<IProfileService>();
@@ -136,17 +145,40 @@ namespace DiscordBot.Bots
         {
             var lst = _guildStreamerConfigService.GetGuildStreamerList();
 
-            Monitor.SetChannelsById(lst);
+            var streamerList = _guildStreamerConfigService.GetAllStreamers();
+
+            foreach(GuildStreamerConfig streamer in streamerList)
+            {
+                var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                if(stream.DisplayName == streamer.StreamerName)
+                {
+                    continue;
+                }
+
+                else
+                {
+                    streamer.StreamerName = stream.DisplayName;
+
+                    await _guildStreamerConfigService.EditUser(streamer);
+
+                    Console.WriteLine($"{streamer.StreamerId}'s name has been set to {stream.DisplayName}");
+                }
+            }
+
+            if (lst.Count() != 0) { Monitor.SetChannelsById(lst); }
+
+            if (lst.Count() != 0 && Monitor.Enabled == false) { Monitor.Start(); Console.WriteLine($"Twitch Monitor 1 has started monitoring {lst.Count} Channels."); }
 
             var currentTime = DateTime.Now;
 
-            if((currentTime.Hour == 2) && (currentTime.Minute == 55))
+            if ((currentTime.Hour == 2) && (currentTime.Minute == 55))
             {
-                DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Name == "Generation Gamers");
+                DiscordGuild guild = Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
                 DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
 
-                DiscordMember apocalyptic = await guild.GetMemberAsync(176666155103158273);
-                DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
+                DiscordMember apocalyptic = guild.GetMemberAsync(176666155103158273).Result;
+                DiscordMember djkoston = guild.GetMemberAsync(331933713816616961).Result;
 
                 var embed = new DiscordEmbedBuilder
                 {
@@ -155,9 +187,9 @@ namespace DiscordBot.Bots
                     Color = DiscordColor.DarkRed,
                 };
 
-                await gamesChannel.SendMessageAsync(embed: embed);
-                await djkoston.SendMessageAsync(embed: embed);
-                await apocalyptic.SendMessageAsync(embed: embed);
+                await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await djkoston.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await apocalyptic.SendMessageAsync(embed: embed).ConfigureAwait(false);
 
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
@@ -167,9 +199,7 @@ namespace DiscordBot.Bots
 
                 Environment.Exit(1);
             }
-
-            
-
+            return;
         }
 
         private void GGOnStreamUpdate(object sender, OnStreamUpdateArgs e)
@@ -190,7 +220,7 @@ namespace DiscordBot.Bots
             {
                 DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
-                if(guild == null) { continue; }
+                if (guild == null) { continue; }
 
                 var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, getStreamId.Id).Result;
 
@@ -199,7 +229,7 @@ namespace DiscordBot.Bots
                 var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
-                if((storedMessage.StreamGame != stream.Stream.Game) && (storedMessage.StreamTitle != e.Stream.Title))
+                if ((storedMessage.StreamGame != stream.Stream.Game) && (storedMessage.StreamTitle != e.Stream.Title))
                 {
                     DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
 
@@ -249,7 +279,7 @@ namespace DiscordBot.Bots
                     continue;
                 }
 
-                if(storedMessage.StreamGame != stream.Stream.Game)
+                if (storedMessage.StreamGame != stream.Stream.Game)
                 {
                     DiscordChannel channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
 
@@ -259,7 +289,7 @@ namespace DiscordBot.Bots
                     var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
                     var userReplace = channelReplace.Replace("_", "\\_");
                     var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
-                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} "); 
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
                     var color = new DiscordColor("9146FF");
 
@@ -353,7 +383,7 @@ namespace DiscordBot.Bots
 
             var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
 
-            foreach(GuildStreamerConfig config in configs)
+            foreach (GuildStreamerConfig config in configs)
             {
                 var gsConfig = _guildStreamerConfigService.GetGuildStreamerConfig(config.StreamerId);
 
@@ -363,7 +393,7 @@ namespace DiscordBot.Bots
 
                 DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
-                if(guild == null) { continue; }
+                if (guild == null) { continue; }
 
                 DiscordChannel channel = guild.GetChannel(config.AnnounceChannelId);
 
@@ -429,8 +459,8 @@ namespace DiscordBot.Bots
             {
                 DiscordGuild guild = d.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
-                if(guild == null) { continue; }
-                
+                if (guild == null) { continue; }
+
                 var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, getStreamId.Id).Result;
 
                 var messageId = storedMessage.AnnouncementMessageId;
@@ -450,7 +480,7 @@ namespace DiscordBot.Bots
             if (e.User.IsBot) { return; }
 
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            
+
             if (guild == null) { return; }
 
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
@@ -476,7 +506,7 @@ namespace DiscordBot.Bots
                 {
                     await member.GrantRoleAsync(NowLive);
                 }
-                
+
             }
 
             else
@@ -545,7 +575,7 @@ namespace DiscordBot.Bots
             }
 
         }
-            
+
 
         private async Task OnGuildAvaliable(GuildCreateEventArgs e)
         {
@@ -560,10 +590,10 @@ namespace DiscordBot.Bots
                 if (storedMessage == null) { continue; }
 
                 var user = await api.V5.Users.GetUserByIDAsync(streamerList);
-             
+
                 var isStreaming = await api.V5.Streams.BroadcasterOnlineAsync(user.Id);
 
-                if(isStreaming == true) { continue; }
+                if (isStreaming == true) { continue; }
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
@@ -582,7 +612,7 @@ namespace DiscordBot.Bots
 
                 var currentTime = DateTime.Now;
 
-                if ((currentTime.Hour == 3) && (currentTime.Minute > 29) && (currentTime.Minute < 41)) 
+                if ((currentTime.Hour == 3) && (currentTime.Minute > 29) && (currentTime.Minute < 41))
                 {
                     DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
 
@@ -601,7 +631,7 @@ namespace DiscordBot.Bots
                     await apocalyptic.SendMessageAsync(embed: embed);
                 }
 
-                var allMembers = guild.GetAllMembersAsync().Result;
+                var allMembers = guild.Members.Values;
 
                 DiscordRole generationGamers = guild.GetRole(411304802883207169);
                 DiscordRole ggNowLive = guild.GetRole(745018263456448573);
@@ -741,7 +771,7 @@ namespace DiscordBot.Bots
 
             var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
 
-            if(reactionRole == null) { return; }
+            if (reactionRole == null) { return; }
 
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
@@ -754,17 +784,9 @@ namespace DiscordBot.Bots
 
         private async Task OnClientReady(ReadyEventArgs e)
         {
-            var lst = _guildStreamerConfigService.GetGuildStreamerList();
-
-            Monitor.SetChannelsByName(lst);
-
-            Monitor.Start();
-
-            
-
             int guilds = e.Client.Guilds.Count();
 
-            if(guilds == 1)
+            if (guilds == 1)
             {
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
@@ -791,14 +813,14 @@ namespace DiscordBot.Bots
 
             if (e.Author.IsBot) { return; }
 
-            if(e.Message.Content.Contains("!")) { return; }
+            if (e.Message.Content.Contains("!")) { return; }
 
             DiscordGuild guild = e.Client.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 
             var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(e.Guild.Id).Result;
 
-            if(NBConfig == null)
+            if (NBConfig == null)
             {
                 var member = e.Guild.Members[e.Author.Id];
 
@@ -892,7 +914,7 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            
+
         }
 
         private Task OnClientErrored(ClientErrorEventArgs e)
@@ -1023,7 +1045,7 @@ namespace DiscordBot.Bots
         {
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 
-            if(WMConfig == null) { return; }
+            if (WMConfig == null) { return; }
 
             else
             {
@@ -1075,7 +1097,7 @@ namespace DiscordBot.Bots
         {
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 
-            if(WMConfig == null) { return; }
+            if (WMConfig == null) { return; }
 
             else
             {
@@ -1114,8 +1136,8 @@ namespace DiscordBot.Bots
                 }
             }
 
-            
-            
+
+
         }
     }
 }

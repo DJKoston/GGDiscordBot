@@ -14,6 +14,8 @@ namespace DiscordBot.Core.Services.Configs
         List<string> GetGuildStreamerList();
         List<GuildStreamerConfig> GetGuildStreamerConfig(string streamerName);
         Task<GuildStreamerConfig> GetConfigToDelete(ulong GuildId, string twitchName);
+        List<GuildStreamerConfig> GetAllStreamers();
+        Task EditUser(GuildStreamerConfig config);
     }
     public class GuildStreamerConfigService : IGuildStreamerConfigService
     {
@@ -79,6 +81,31 @@ namespace DiscordBot.Core.Services.Configs
             using var context = new RPGContext(_options);
 
             return await context.GuildStreamerConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId && x.StreamerId == twitchName);
+        }
+
+        public List<GuildStreamerConfig> GetAllStreamers()
+        {
+            using var context = new RPGContext(_options);
+
+            var streamers = context.GuildStreamerConfigs.Where(x => x.StreamerId != null);
+
+            var list = new List<GuildStreamerConfig> { };
+
+            foreach (GuildStreamerConfig streamer in streamers)
+            {
+                list.Add(streamer);
+            }
+
+            return list;
+        }
+
+        public async Task EditUser(GuildStreamerConfig config)
+        {
+            using var context = new RPGContext(_options);
+
+            context.Update(config);
+
+            await context.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

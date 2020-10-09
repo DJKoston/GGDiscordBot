@@ -4,12 +4,13 @@ using DiscordBot.DAL.Models.Configs;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Api;
-using TwitchLib.Api.V5.Models.Search;
-using TwitchLib.Client;
+using TwitchLib.Api.Helix.Models.Analytics;
 
 namespace DiscordBot.Bots.Commands
 {
@@ -76,6 +77,7 @@ namespace DiscordBot.Bots.Commands
                 GuildId = ctx.Guild.Id,
                 StreamerId = getStreamId.Id,
                 AnnouncementMessage = announcementMessage,
+                StreamerName = getStreamId.DisplayName
             };
 
             await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
@@ -86,7 +88,12 @@ namespace DiscordBot.Bots.Commands
         [Command("liststreamers")]
         public async Task ListStreamers(CommandContext ctx)
         {
-            var streamers = _context.GuildStreamerConfigs.Where(x => x.GuildId == ctx.Guild.Id);
+            var streamers = _context.GuildStreamerConfigs.Where(x => x.GuildId == ctx.Guild.Id).OrderBy(x => x.StreamerName);
+
+            var streamerspage1 = streamers.Take(24);
+            var streamerspage2 = streamers.Skip(24).Take(24);
+            var streamerspage3 = streamers.Skip(48).Take(24);
+            var streamerspage4 = streamers.Skip(72).Take(24);
 
             var api = new TwitchAPI();
 
@@ -96,20 +103,107 @@ namespace DiscordBot.Bots.Commands
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
 
+            if(streamerspage1 != null) 
+            {
+                var embed1 = new DiscordEmbedBuilder
+                {
+                    Title = $"Streamers to announce in {ctx.Guild.Name}",
+                    Color = DiscordColor.Purple
+                };
+
+                foreach (GuildStreamerConfig streamer in streamerspage1)
+                {
+                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                    embed1.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                }
+
+                if (embed1.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed1).ConfigureAwait(false); }
+            }
+
+            if (streamerspage2 != null)
+            {
+                var embed2 = new DiscordEmbedBuilder
+                {
+                    Title = $"Streamers to announce in {ctx.Guild.Name}",
+                    Color = DiscordColor.Purple
+                };
+
+                foreach (GuildStreamerConfig streamer in streamerspage2)
+                {
+                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                    embed2.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                }
+
+                if (embed2.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed2).ConfigureAwait(false); }
+            }
+
+            if (streamerspage3 != null)
+            {
+                var embed3 = new DiscordEmbedBuilder
+                {
+                    Title = $"Streamers to announce in {ctx.Guild.Name}",
+                    Color = DiscordColor.Purple
+                };
+
+                foreach (GuildStreamerConfig streamer in streamerspage3)
+                {
+                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                    embed3.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                }
+
+                if(embed3.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed3).ConfigureAwait(false); }
+            }
+
+            if (streamerspage4 != null)
+            {
+                var embed4 = new DiscordEmbedBuilder
+                {
+                    Title = $"Streamers to announce in {ctx.Guild.Name}",
+                    Color = DiscordColor.Purple
+                };
+
+                foreach (GuildStreamerConfig streamer in streamerspage4)
+                {
+                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                    embed4.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                }
+
+                if (embed4.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed4).ConfigureAwait(false); }
+            }
+            
+
+        }
+
+        [Command("monitor")]
+        public async Task ViewMonitorLoads(CommandContext ctx)
+        {
+            var firstlst = _guildStreamerConfigService.GetGuildStreamerList();
+
+            var lst = firstlst.Distinct();
+
             var embed = new DiscordEmbedBuilder
             {
-                Title = $"Streamers to announce in {ctx.Guild.Name}",
-                Color = DiscordColor.Purple
+                Title = "GG-Bot Twitch Monitor Loadbalancing",
+                Color = DiscordColor.Orange,
             };
 
-            foreach(GuildStreamerConfig streamer in streamers)
-            {
-                DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+            if(lst.Count() == 0) { embed.AddField("Monitor 1:", "Offline"); }
+            else { embed.AddField("Monitor 1:", $"Monitoring {lst.Count()} Channels"); }
 
-                var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
 
-                embed.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
-            }
+            embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }

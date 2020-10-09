@@ -39,7 +39,7 @@ namespace DiscordBot.Bots.Commands
 
             embed.AddField("Reason", reason);
 
-            DiscordGuild guild = ctx.Client.Guilds.Values.FirstOrDefault(x => x.Name == "Generation Gamers");
+            DiscordGuild guild = ctx.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
             DiscordChannel announcementChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "announcements");
             DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
 
