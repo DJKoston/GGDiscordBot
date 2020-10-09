@@ -4,13 +4,11 @@ using DiscordBot.DAL.Models.Configs;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Api;
-using TwitchLib.Api.Helix.Models.Analytics;
 
 namespace DiscordBot.Bots.Commands
 {
@@ -23,12 +21,14 @@ namespace DiscordBot.Bots.Commands
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
         private readonly RPGContext _context;
         private readonly IMessageStoreService _messageStoreService;
+        private readonly IConfiguration _configuration;
 
-        public NowLiveCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService)
+        public NowLiveCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
         {
             _guildStreamerConfigService = guildStreamerConfigService;
             _context = context;
             _messageStoreService = messageStoreService;
+            _configuration = configuration;
         }
 
         [Command("addstreamer")]
@@ -47,10 +47,11 @@ namespace DiscordBot.Bots.Commands
 
         public async Task AddStreamerAsync(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
         {
+
             var api = new TwitchAPI();
 
-            var clientid = "CLIENTID";
-            var accesstoken = "ACCESSTOKEN";
+            var clientid = _configuration["twitch-clientid"];
+            var accesstoken = _configuration["twitch-accesstoken"];
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
@@ -97,8 +98,8 @@ namespace DiscordBot.Bots.Commands
 
             var api = new TwitchAPI();
 
-            var clientid = "CLIENTID";
-            var accesstoken = "ACCESSTOKEN";
+            var clientid = _configuration["twitch-clientid"];
+            var accesstoken = _configuration["twitch-accesstoken"];
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
@@ -213,8 +214,8 @@ namespace DiscordBot.Bots.Commands
         {
             var api = new TwitchAPI();
 
-            var clientid = "CLIENTID";
-            var accesstoken = "ACCESSTOKEN";
+            var clientid = _configuration["twitch-clientid"];
+            var accesstoken = _configuration["twitch-accesstoken"];
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
