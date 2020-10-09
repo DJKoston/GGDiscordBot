@@ -49,8 +49,8 @@ namespace DiscordBot.Bots.Commands
         {
             var api = new TwitchAPI();
 
-            var clientid = "gp762nuuoqcoxypju8c569th9wz7q5";
-            var accesstoken = "j1oz9yx9b07c8j22vym2oba32qwnhb";
+            var clientid = "CLIENTID";
+            var accesstoken = "ACCESSTOKEN";
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
@@ -97,8 +97,8 @@ namespace DiscordBot.Bots.Commands
 
             var api = new TwitchAPI();
 
-            var clientid = "gp762nuuoqcoxypju8c569th9wz7q5";
-            var accesstoken = "j1oz9yx9b07c8j22vym2oba32qwnhb";
+            var clientid = "CLIENTID";
+            var accesstoken = "ACCESSTOKEN";
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
@@ -213,8 +213,8 @@ namespace DiscordBot.Bots.Commands
         {
             var api = new TwitchAPI();
 
-            var clientid = "gp762nuuoqcoxypju8c569th9wz7q5";
-            var accesstoken = "j1oz9yx9b07c8j22vym2oba32qwnhb";
+            var clientid = "CLIENTID";
+            var accesstoken = "ACCESSTOKEN";
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
