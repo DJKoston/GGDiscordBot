@@ -1,4 +1,5 @@
 ﻿using DiscordBot.Core.Services.CommunityStreamers;
+using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.CommunityStreamers;
@@ -8,13 +9,13 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using GiphyDotNet.Manager;
 using GiphyDotNet.Model.Parameters;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using TwitchLib.Api;
 
 namespace DiscordBot.Bots.Commands
@@ -24,12 +25,16 @@ namespace DiscordBot.Bots.Commands
         private readonly RPGContext _context;
         private readonly ISuggestionService _suggestionService;
         private readonly ICommunityStreamerService _communityStreamerService;
+        private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+        private readonly IConfiguration _configuration;
 
-        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService)
+        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService, IConfiguration configuration)
         {
             _context = context;
             _suggestionService = suggestionService;
             _communityStreamerService = communityStreamerService;
+            _guildStreamerConfigService = guildStreamerConfigService;
+            _configuration = configuration;
         }
 
         [Command("ping")]
@@ -145,7 +150,7 @@ namespace DiscordBot.Bots.Commands
         [Description("Let us Know Your Streamer Tag!")]
         public async Task StreamerTag(CommandContext ctx)
         {
-            await ctx.Channel.SendMessageAsync("To let us know your're a streamer, please do the following command `!imastreamer YourTwitchUserName`");
+            await ctx.Channel.SendMessageAsync("To let us know your're a streamer, please do the following command `!twitchchannel YourTwitchUserName`");
         }
 
         [Command("TwitchChannel")]
@@ -154,8 +159,8 @@ namespace DiscordBot.Bots.Commands
         {
             var api = new TwitchAPI();
 
-            var clientid = "gp762nuuoqcoxypju8c569th9wz7q5";
-            var accesstoken = "j1oz9yx9b07c8j22vym2oba32qwnhb";
+            var clientid = _configuration["twitch-clientid"];
+            var accesstoken = _configuration["twitch-accesstoken"];
 
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
@@ -217,7 +222,7 @@ namespace DiscordBot.Bots.Commands
 
         public async Task GifMeTask(CommandContext ctx, [RemainingText] string search)
         {
-            var giphy = new Giphy("FJVImvbQp1Uj2X9byEKyleHJChuvzZD0");
+            var giphy = new Giphy(_configuration["giphy-accesstoken"]);
 
             if(search == "")
             {
@@ -248,6 +253,51 @@ namespace DiscordBot.Bots.Commands
                 await ctx.Channel.SendMessageAsync(result.Images.Original.Url);
             }
             
+        }
+
+        [Command("stats")]
+        public async Task BotStats(CommandContext ctx)
+        {
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "GG-Bot Stats",
+                Color = ctx.Guild.CurrentMember.Color,
+            };
+
+            var guilds = ctx.Client.Guilds.Values;
+
+            int channelCount = new int();
+
+            foreach(DiscordGuild guild in guilds)
+            {
+                var thisGuildsChannels = guild.Channels.Count();
+
+                channelCount = thisGuildsChannels + channelCount;
+            }
+
+            int memberCount = new int();
+
+            foreach(DiscordGuild guild in guilds)
+            {
+                var thisGuildsMembers = guild.MemberCount;
+
+                memberCount = thisGuildsMembers + memberCount;
+            }
+
+            var guildCount = ctx.Client.Guilds.Count();
+
+            var nowLiveChannelCount = _guildStreamerConfigService.GetAllStreamers().Count();
+
+            embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
+
+            embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
+            embed.AddField("Discord Guilds:", guildCount.ToString("###,###,###,###"), false);
+            embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false);
+            embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false);
+            embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
+            embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
     }
 }
