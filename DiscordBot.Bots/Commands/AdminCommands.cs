@@ -1,9 +1,12 @@
-﻿using DiscordBot.Core.Services.ReactionRoles;
+﻿using DiscordBot.Core.Services.Configs;
+using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.DAL;
+using DiscordBot.DAL.Models.Configs;
 using DiscordBot.DAL.Models.ReactionRoles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -18,6 +21,21 @@ namespace DiscordBot.Bots.Commands
     
     public class AdminCommands : BaseCommandModule
     {
+        private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+        private readonly RPGContext _context;
+        private readonly IMessageStoreService _messageStoreService;
+        private readonly IConfiguration _configuration;
+        private readonly IGameChannelConfigService _gameChannelConfigService;
+
+        public AdminCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration, IGameChannelConfigService gameChannelConfigService)
+        {
+            _guildStreamerConfigService = guildStreamerConfigService;
+            _context = context;
+            _messageStoreService = messageStoreService;
+            _configuration = configuration;
+            _gameChannelConfigService = gameChannelConfigService;
+        }
+
         [Command("ping")]
         public async Task PingTime(CommandContext ctx)
         {
@@ -39,12 +57,20 @@ namespace DiscordBot.Bots.Commands
 
             embed.AddField("Reason", reason);
 
-            DiscordGuild guild = ctx.Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
-            DiscordChannel announcementChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "announcements");
-            DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
+            var configuredGamesChannels = _context.GameChannelConfigs.Where(x => x.ChannelId != 0);
 
-            await announcementChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            foreach(GameChannelConfig channel in configuredGamesChannels)
+            {
+                DiscordGuild guild = ctx.Client.Guilds.Values.FirstOrDefault(x => x.Id == channel.GuildId);
+
+                if(guild == null) { continue; }
+
+                DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Id == channel.ChannelId);
+
+                if(gamesChannel == null) { continue; }
+
+                await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
 
             await ctx.Client.UpdateStatusAsync(new DiscordActivity
             {
@@ -65,12 +91,20 @@ namespace DiscordBot.Bots.Commands
 
             embed.AddField("Updates", update);
 
-            DiscordChannel announcementChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "announcements");
-            DiscordChannel gamesChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "discord-games");
+            var configuredGamesChannels = _context.GameChannelConfigs.Where(x => x.ChannelId != 0);
 
+            foreach (GameChannelConfig channel in configuredGamesChannels)
+            {
+                DiscordGuild guild = ctx.Client.Guilds.Values.FirstOrDefault(x => x.Id == channel.GuildId);
 
-            await announcementChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                if (guild == null) { continue; }
+
+                DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Id == channel.ChannelId);
+
+                if (gamesChannel == null) { continue; }
+
+                await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
         }
     }
 }

@@ -158,8 +158,7 @@ namespace DiscordBot.Bots.Commands
         [RequireRoles(RoleCheckMode.Any, "Admin")]
         public async Task DeleteQuote(CommandContext ctx, int quoteId)
         {
-            var quoteQuery = _quoteService.GetQuoteAsync(quoteId, ctx.Guild.Id);
-            var quote = quoteQuery.Result;
+            var quote = await _quoteService.GetQuoteAsync(quoteId, ctx.Guild.Id);
 
             if(quote == null)
             {
@@ -215,10 +214,10 @@ namespace DiscordBot.Bots.Commands
             var rnd = new Random();
             int rndQuote = rnd.Next(1, lastQuoteId.QuoteId + 1);
 
-            var quote = _quoteService.GetQuoteAsync(rndQuote, ctx.Guild.Id).Result;
+            var quote = await _quoteService.GetQuoteAsync(rndQuote, ctx.Guild.Id);
 
-            var quotedUser = ctx.Client.GetUserAsync(quote.DiscordUserQuotedId).Result;
-            var quoterUser = ctx.Client.GetUserAsync(quote.AddedById).Result;
+            var quotedUser = await ctx.Client.GetUserAsync(quote.DiscordUserQuotedId);
+            var quoterUser = await ctx.Client.GetUserAsync(quote.AddedById);
 
             var quoteAddEmbed = new DiscordEmbedBuilder
             {
@@ -242,10 +241,10 @@ namespace DiscordBot.Bots.Commands
             var quoteQuery = _context.Quotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
-            var quote = _quoteService.GetQuoteAsync(quoteNumber, ctx.Guild.Id).Result;
+            var quote = await _quoteService.GetQuoteAsync(quoteNumber, ctx.Guild.Id);
 
-            var quotedUser = ctx.Client.GetUserAsync(quote.DiscordUserQuotedId).Result;
-            var quoterUser = ctx.Client.GetUserAsync(quote.AddedById).Result;
+            var quotedUser = await ctx.Client.GetUserAsync(quote.DiscordUserQuotedId);
+            var quoterUser = await ctx.Client.GetUserAsync(quote.AddedById);
 
             if(quoteNumber > lastQuoteId.Id)
             {
@@ -260,6 +259,36 @@ namespace DiscordBot.Bots.Commands
 
                 return;
             }
+
+            var quoteAddEmbed = new DiscordEmbedBuilder
+            {
+                Title = $"Quote #{quote.QuoteId}",
+                Description = $"{quote.QuoteContents} - {quotedUser.Username}",
+                Color = DiscordColor.SpringGreen,
+            };
+
+            quoteAddEmbed.WithThumbnail(quotedUser.AvatarUrl);
+            quoteAddEmbed.AddField("Quoted By:", quoterUser.Username);
+            quoteAddEmbed.AddField("Channel Quoted in:", quote.ChannelQuotedIn);
+            quoteAddEmbed.WithFooter(quote.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
+
+            await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+        }
+
+        [Command("quote")]
+        public async Task GetQuote(CommandContext ctx, DiscordMember discordMember)
+        {
+            var userQuotes = _context.Quotes.Where(x => x.DiscordUserQuotedId == discordMember.Id && x.GuildId == ctx.Guild.Id);
+
+            var rnd = new Random();
+            int rndQuote = rnd.Next(0, userQuotes.Count() + 1);
+
+            var quote = userQuotes.Skip(rndQuote).Take(1).FirstOrDefault();
+            
+            if(quote == null) { await ctx.Channel.SendMessageAsync("We cannot find any quotes! Please try again or try another user."); return; }
+
+            var quotedUser = await ctx.Client.GetUserAsync(quote.DiscordUserQuotedId);
+            var quoterUser = await ctx.Client.GetUserAsync(quote.AddedById);
 
             var quoteAddEmbed = new DiscordEmbedBuilder
             {

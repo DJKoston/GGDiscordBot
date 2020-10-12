@@ -1,6 +1,8 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.Configs
@@ -10,6 +12,7 @@ namespace DiscordBot.Core.Services.Configs
         Task CreateGameChannelConfigService(GameChannelConfig config);
         Task RemoveGameChannelConfigService(GameChannelConfig config);
         Task<GameChannelConfig> GetGameChannelConfigService(ulong GuildId);
+        List<GameChannelConfig> GetGameChannelConfigs();
     }
     public class GameChannelConfigService : IGameChannelConfigService
     {
@@ -43,6 +46,22 @@ namespace DiscordBot.Core.Services.Configs
             using var context = new RPGContext(_options);
 
             return await context.GameChannelConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId);
+        }
+
+        public List<GameChannelConfig> GetGameChannelConfigs()
+        {
+            using var context = new RPGContext(_options);
+
+            var gameChannels = context.GameChannelConfigs.Where(x => x.Id > 0);
+
+            var list = new List<GameChannelConfig> {  };
+
+            foreach (GameChannelConfig config in gameChannels)
+            {
+                list.Add(config);
+            }
+
+            return list;
         }
     }
 }
