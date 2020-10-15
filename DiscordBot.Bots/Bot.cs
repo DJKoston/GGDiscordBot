@@ -14,6 +14,7 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -594,6 +595,8 @@ namespace DiscordBot.Bots
                     if (gamesChannel != null) { await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false); }
                 }
 
+                Console.WriteLine($"{e.Guild.Name} is now Avaliable");
+
             }).Start();
 
             return Task.CompletedTask;
@@ -661,7 +664,7 @@ namespace DiscordBot.Bots
                 }, UserStatus.Online);
             }
 
-            return;
+            Console.WriteLine($"{c.CurrentUser.Username} is Ready");
         }
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)
