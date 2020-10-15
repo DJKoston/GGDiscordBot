@@ -108,7 +108,7 @@ namespace DiscordBot.Bots.Commands
             {
                 var embed1 = new DiscordEmbedBuilder
                 {
-                    Title = $"Streamers to announce in {ctx.Guild.Name}",
+                    Title = $"{streamers.Count()} Streamers to announce in {ctx.Guild.Name}",
                     Color = DiscordColor.Purple
                 };
 

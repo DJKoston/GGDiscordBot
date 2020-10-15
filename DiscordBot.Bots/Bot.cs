@@ -4,7 +4,6 @@ using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.ViewModels;
-using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
 using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
@@ -145,12 +144,12 @@ namespace DiscordBot.Bots
                 // Sets the channels the bot needs to monitor.
                 if (lst.Count() != 0) { Monitor.SetChannelsById(lst); }
 
-                //If the Monitor is disabled - It will enable the monitor.
+                // If the Monitor is disabled - It will enable the monitor.
                 if (lst.Count() != 0 && Monitor.Enabled == false) { Monitor.Start(); Console.WriteLine($"Twitch Monitor 1 has started monitoring {lst.Count} Channels."); }
 
                 var currentTime = DateTime.Now;
 
-                if ((currentTime.Hour == 3) && (currentTime.Minute == 55))
+                if ((currentTime.Hour == 2) && (currentTime.Minute == 55))
                 {
                     DiscordGuild guild = Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
 
@@ -216,8 +215,10 @@ namespace DiscordBot.Bots
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
                 var toReplaceMessage = config.AnnouncementMessage;
+
                 var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
                 var userReplace = channelReplace.Replace("_", "\\_");
+
                 var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
                 var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
@@ -226,18 +227,21 @@ namespace DiscordBot.Bots
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = $"{e.Stream.UserName} has gone live!",
-                    Description = $"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})",
                     Color = color,
                 };
 
-                embed.AddField("Game:", stream.Stream.Game);
+                if(e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
+                else { embed.WithDescription($"[https://twitch.tv/{streamer.Name}](https://twitch.tv/{streamer.Name})"); }
+
+                if (stream.Stream.Game != null) { embed.AddField("Game:", stream.Stream.Game); }
+                else { embed.AddField("Game:", "No Game Selected"); }
+
                 embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
                 embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
                 embed.WithThumbnail(streamer.Logo);
                 embed.WithImageUrl(stream.Stream.Preview.Large);
                 embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
-
 
                 DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
