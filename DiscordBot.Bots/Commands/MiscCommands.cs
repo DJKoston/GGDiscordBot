@@ -218,8 +218,6 @@ namespace DiscordBot.Bots.Commands
             await GifMeTask(ctx, search);
         }
 
-
-
         public async Task GifMeTask(CommandContext ctx, [RemainingText] string search)
         {
             var giphy = new Giphy(_configuration["giphy-accesstoken"]);
