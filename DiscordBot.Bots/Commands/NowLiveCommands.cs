@@ -253,6 +253,5 @@ namespace DiscordBot.Bots.Commands
                 await _messageStoreService.RemoveMessageStore(messages);
             }
         }
-
     }
 }

@@ -29,7 +29,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("addquote")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task AddQuote(CommandContext ctx, DiscordMember discordMember, [RemainingText] string quote)
         {
             var serverQuotes = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
@@ -155,7 +155,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("deletequote")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task DeleteQuote(CommandContext ctx, int quoteId)
         {
             var quote = await _quoteService.GetQuoteAsync(quoteId, ctx.Guild.Id);

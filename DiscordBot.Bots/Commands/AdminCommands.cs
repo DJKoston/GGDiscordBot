@@ -14,12 +14,9 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
 {
-
-
     [Group("Admin")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
 
-    
     public class AdminCommands : BaseCommandModule
     {
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
@@ -36,15 +33,6 @@ namespace DiscordBot.Bots.Commands
             _configuration = configuration;
             _gameChannelConfigService = gameChannelConfigService;
         }
-
-        [Command("ping")]
-        public async Task PingTime(CommandContext ctx)
-        {
-            var pingtime = ctx.Client.Ping.ToString();
-
-            await ctx.Channel.SendMessageAsync($"Phew! I made it over the airwaves! This round trip took {pingtime}ms!").ConfigureAwait(false);
-        }
-
 
         [Command("dtstart")]
         public async Task DowntimeStart(CommandContext ctx, [RemainingText] string reason)

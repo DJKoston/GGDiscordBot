@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
 {
-    [RequirePermissions(DSharpPlus.Permissions.Administrator)]
+    [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
     public class ModCommands : BaseCommandModule
     {
         [Command("purge")]

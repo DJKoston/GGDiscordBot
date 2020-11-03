@@ -284,7 +284,7 @@ namespace DiscordBot.Bots.Commands
 
             var guildCount = ctx.Client.Guilds.Count();
 
-            var nowLiveChannelCount = _guildStreamerConfigService.GetAllStreamers().Count();
+            var nowLiveChannelCount = _guildStreamerConfigService.GetGuildStreamerList().Count();
 
             embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
 

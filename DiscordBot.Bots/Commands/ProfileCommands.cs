@@ -67,7 +67,9 @@ namespace DiscordBot.Bots.Commands
 
                 profileEmbed.WithThumbnail(member.AvatarUrl);
 
-                profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"), true);
+                var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
+
+                profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}", true);
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"), true);
 
                 if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
@@ -127,7 +129,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("grantxp")]
-        [RequireRoles(RoleCheckMode.Any,"Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task GrantXp(CommandContext ctx, DiscordMember member, int number)
         {
             await GiveXp(ctx, member.Id, number);
@@ -165,7 +167,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("givegold")]
-        [RequireRoles(RoleCheckMode.Any, "Admin")]
+        [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task GiveGold(CommandContext ctx, DiscordMember member, int number)
         {
             await GiveGold(ctx, member.Id, number);

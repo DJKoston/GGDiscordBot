@@ -26,5 +26,6 @@ namespace DiscordBot.DAL
         public DbSet<GameChannelConfig> GameChannelConfigs { get; set; }
         public DbSet<CommunityStreamer> CommunityStreamers { get; set; }
         public DbSet <Suggestion> Suggestions { get; set; }
+        public DbSet <ToNextXP> ToNextXP { get; set; }
     }
 }

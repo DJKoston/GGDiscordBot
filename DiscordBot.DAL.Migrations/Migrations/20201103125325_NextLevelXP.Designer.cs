@@ -3,14 +3,16 @@ using DiscordBot.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
-    partial class RPGContextModelSnapshot : ModelSnapshot
+    [Migration("20201103125325_NextLevelXP")]
+    partial class NextLevelXP
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -257,24 +259,6 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Profiles");
-                });
-
-            modelBuilder.Entity("DiscordBot.DAL.Models.Profiles.ToNextXP", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
-
-                    b.Property<int>("XPAmount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ToNextXP");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Quotes.Quote", b =>

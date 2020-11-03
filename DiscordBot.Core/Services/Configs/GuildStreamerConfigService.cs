@@ -54,6 +54,8 @@ namespace DiscordBot.Core.Services.Configs
 
             foreach (GuildStreamerConfig streamer in streamers)
             {
+                if (list.Contains(streamer.StreamerId)) { continue; }
+
                 list.Add(streamer.StreamerId);
             }
 

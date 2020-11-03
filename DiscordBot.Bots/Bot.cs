@@ -20,12 +20,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DiscordBot.Bots
 {
@@ -135,69 +137,67 @@ namespace DiscordBot.Bots
         private readonly ICustomCommandService _customCommandService;
         private readonly IGameChannelConfigService _gameChannelConfigService;
 
-        private Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
+        private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
-            new Thread(async () =>
+            // pull list of streamers in NL feature from DB
+            var lst = _guildStreamerConfigService.GetGuildStreamerList();
+
+            // Sets the channels the bot needs to monitor.
+            if (lst.Count() != 0) { Monitor.SetChannelsById(lst); }
+
+            // If the Monitor is disabled - It will enable the monitor.
+            if (lst.Count() != 0 && Monitor.Enabled == false) { Monitor.Start(); Console.WriteLine($"Twitch Monitor 1 has started monitoring {lst.Count} Channels."); }
+
+            var currentTime = DateTime.Now;
+
+            if ((currentTime.Hour == 2) && (currentTime.Minute == 55))
             {
-                // pull list of streamers in NL feature from DB
-                var lst = _guildStreamerConfigService.GetGuildStreamerList();
+                DiscordGuild guild = Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
 
-                // Sets the channels the bot needs to monitor.
-                if (lst.Count() != 0) { Monitor.SetChannelsById(lst); }
+                DiscordMember apocalyptic = guild.GetMemberAsync(176666155103158273).Result;
+                DiscordMember djkoston = guild.GetMemberAsync(331933713816616961).Result;
 
-                // If the Monitor is disabled - It will enable the monitor.
-                if (lst.Count() != 0 && Monitor.Enabled == false) { Monitor.Start(); Console.WriteLine($"Twitch Monitor 1 has started monitoring {lst.Count} Channels."); }
-
-                var currentTime = DateTime.Now;
-
-                if ((currentTime.Hour == 2) && (currentTime.Minute == 55))
+                var embed = new DiscordEmbedBuilder
                 {
-                    DiscordGuild guild = Client.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+                    Title = "The Bot will be unavaliable for the next 15-60 mins.",
+                    Description = $"The server the bot runs on is creating a backup and to prevent loss of data during the backup the bot has been shutdown.\n\nDepending on what time the backup completes it will automatically come back up between 3:10am and 4:00am (UK Time).\n\nIf it has not come back up by 4:00am (UK Time). Please DM {djkoston.Mention}",
+                    Color = DiscordColor.DarkRed,
+                };
 
-                    DiscordMember apocalyptic = guild.GetMemberAsync(176666155103158273).Result;
-                    DiscordMember djkoston = guild.GetMemberAsync(331933713816616961).Result;
+                var configuredGamesChannels = _gameChannelConfigService.GetGameChannelConfigs();
 
-                    var embed = new DiscordEmbedBuilder
-                    {
-                        Title = "The Bot will be unavaliable for the next 35 mins.",
-                        Description = $"The server the bot runs on is creating a backup and to prevent loss of data during the backup the bot has been shutdown.\n\nIt will automatically come back up at 3:30am (UK Time).\n\nIf it has not come back up and it is after 3:30am (UK Time). Please DM ",
-                        Color = DiscordColor.DarkRed,
-                    };
+                foreach (GameChannelConfig channel in configuredGamesChannels)
+                {
+                    DiscordGuild guild1 = c.Guilds.Values.FirstOrDefault(x => x.Id == channel.GuildId);
 
-                    var configuredGamesChannels = _gameChannelConfigService.GetGameChannelConfigs();
+                    if (guild1 == null) { continue; }
 
-                    foreach (GameChannelConfig channel in configuredGamesChannels)
-                    {
-                        DiscordGuild guild1 = c.Guilds.Values.FirstOrDefault(x => x.Id == channel.GuildId);
+                    DiscordChannel gamesChannel = guild1.Channels.Values.FirstOrDefault(x => x.Id == channel.ChannelId);
 
-                        if (guild1 == null) { continue; }
+                    if (gamesChannel == null) { continue; }
 
-                        DiscordChannel gamesChannel = guild1.Channels.Values.FirstOrDefault(x => x.Id == channel.ChannelId);
-
-                        if (gamesChannel == null) { continue; }
-
-                        await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-                    }
-
-                    await djkoston.SendMessageAsync(embed: embed).ConfigureAwait(false);
-                    await apocalyptic.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                    await Client.UpdateStatusAsync(new DiscordActivity
-                    {
-                        ActivityType = ActivityType.ListeningTo,
-                        Name = $"The Server Backup",
-                    }, UserStatus.DoNotDisturb);
-
-                    Environment.Exit(1);
+                    await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
                 }
 
-            }).Start();
+                await djkoston.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await apocalyptic.SendMessageAsync(embed: embed).ConfigureAwait(false);
 
-            return Task.CompletedTask;
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.ListeningTo,
+                    Name = $"The Server Backup",
+                }, UserStatus.DoNotDisturb);
+
+                Environment.Exit(1);
+            }
+
+            return;
         }
 
         private void GGOnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            Console.WriteLine($"{e.Stream.UserName} just went Live!");
+            
             var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
 
             foreach (GuildStreamerConfig config in configs)
@@ -218,58 +218,113 @@ namespace DiscordBot.Bots
                 var toReplaceMessage = config.AnnouncementMessage;
 
                 var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
-                var userReplace = channelReplace.Replace("_", "\\_");
 
-                var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
-                var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
-
-                var color = new DiscordColor("9146FF");
-
-                var embed = new DiscordEmbedBuilder
+                if (e.Stream.UserName.Contains("_"))
                 {
-                    Title = $"{e.Stream.UserName} has gone live!",
-                    Color = color,
-                };
+                    var userReplace = channelReplace.Replace("_", "\\_");
 
-                if(e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
-                else { embed.WithDescription($"[https://twitch.tv/{streamer.Name}](https://twitch.tv/{streamer.Name})"); }
+                    var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
-                if (stream.Stream.Game != null) { embed.AddField("Game:", stream.Stream.Game); }
-                else { embed.AddField("Game:", "No Game Selected"); }
+                    var color = new DiscordColor("9146FF");
 
-                embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
-                embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{e.Stream.UserName} has gone live!",
+                        Color = color,
+                    };
 
-                embed.WithThumbnail(streamer.Logo);
-                embed.WithImageUrl(stream.Stream.Preview.Large);
-                embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
 
-                DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
+                    if (stream.Stream.Game != null) { embed.AddField("Game:", stream.Stream.Game); }
 
-                var messageStore = new NowLiveMessages
-                {
-                    GuildId = config.GuildId,
-                    StreamerId = config.StreamerId,
-                    AnnouncementChannelId = channel.Id,
-                    AnnouncementMessageId = sentMessage.Id,
-                    StreamTitle = e.Stream.Title,
-                    StreamGame = stream.Stream.Game,
-                };
+                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
-                _messageStoreService.CreateNewMessageStore(messageStore);
+                    embed.WithThumbnail(streamer.Logo);
+                    embed.WithImageUrl(stream.Stream.Preview.Large);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
-                if (streamer.DisplayName == config.StreamerName)
-                {
-                    continue;
+                    DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
+
+                    var messageStore = new NowLiveMessages
+                    {
+                        GuildId = config.GuildId,
+                        StreamerId = config.StreamerId,
+                        AnnouncementChannelId = channel.Id,
+                        AnnouncementMessageId = sentMessage.Id,
+                        StreamTitle = e.Stream.Title,
+                        StreamGame = stream.Stream.Game,
+                    };
+
+                    _messageStoreService.CreateNewMessageStore(messageStore);
+
+                    if (streamer.DisplayName == config.StreamerName)
+                    {
+                        continue;
+                    }
+
+                    else
+                    {
+                        config.StreamerName = streamer.DisplayName;
+
+                        _guildStreamerConfigService.EditUser(config);
+
+                        Console.WriteLine($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
+                    }
                 }
 
                 else
                 {
-                    config.StreamerName = streamer.DisplayName;
+                    var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
+                    var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
-                    _guildStreamerConfigService.EditUser(config);
+                    var color = new DiscordColor("9146FF");
 
-                    Console.WriteLine($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{e.Stream.UserName} has gone live!",
+                        Color = color,
+                    };
+
+                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
+
+                    if (stream.Stream.Game != "\"\"") { embed.AddField("Game:", stream.Stream.Game); }
+
+                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+
+                    embed.WithThumbnail(streamer.Logo);
+                    embed.WithImageUrl(stream.Stream.Preview.Large);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+
+                    DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
+
+                    var messageStore = new NowLiveMessages
+                    {
+                        GuildId = config.GuildId,
+                        StreamerId = config.StreamerId,
+                        AnnouncementChannelId = channel.Id,
+                        AnnouncementMessageId = sentMessage.Id,
+                        StreamTitle = e.Stream.Title,
+                        StreamGame = stream.Stream.Game,
+                    };
+
+                    _messageStoreService.CreateNewMessageStore(messageStore);
+
+                    if (streamer.DisplayName == config.StreamerName)
+                    {
+                        continue;
+                    }
+
+                    else
+                    {
+                        config.StreamerName = streamer.DisplayName;
+
+                        _guildStreamerConfigService.EditUser(config);
+
+                        Console.WriteLine($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
+                    }
                 }
             }
 
@@ -277,6 +332,8 @@ namespace DiscordBot.Bots
 
         private void GGOnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
+            Console.WriteLine($"{e.Stream.UserName} just went Offline!");
+
             var streamUser = api.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
 
             var streamResults = streamUser.Matches.FirstOrDefault();
@@ -448,7 +505,7 @@ namespace DiscordBot.Bots
 
                     DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
 
-                    if ((currentTime1.Hour == 03) && (currentTime1.Minute > 29) && (currentTime1.Minute < 36))
+                    if ((currentTime1.Hour == 03) && (currentTime1.Minute > 09) && (currentTime1.Minute < 60))
                     {
                         DiscordMember apocalyptic = await guild.GetMemberAsync(176666155103158273);
                         DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
@@ -573,7 +630,7 @@ namespace DiscordBot.Bots
 
                 var currentTime = DateTime.Now;
 
-                if ((currentTime.Hour == 03) && (currentTime.Minute > 29) && (currentTime.Minute < 36))
+                if ((currentTime.Hour == 03) && (currentTime.Minute > 09) && (currentTime.Minute < 60))
                 {
                     GameChannelConfig channel = await _gameChannelConfigService.GetGameChannelConfigService(e.Guild.Id);
 
@@ -662,6 +719,15 @@ namespace DiscordBot.Bots
                     ActivityType = ActivityType.Watching,
                     Name = $"{guilds} Servers!",
                 }, UserStatus.Online);
+            }
+
+            if(Environment.MachineName == "HAYDON-PC")
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Watching,
+                    Name = "the latest test build",
+                }, UserStatus.Idle);
             }
 
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
