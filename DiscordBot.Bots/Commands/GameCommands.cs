@@ -423,7 +423,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("guess")]
-        [Description("Guess a number between 1 and 5, if you're right - Win 2,500 Gold if you are right!!")]
+        [Description("Guess a number between 1 and 10, if you're right - Win 2,500 Gold if you are right!!")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task GuessTheNumber(CommandContext ctx, int guess)
         {

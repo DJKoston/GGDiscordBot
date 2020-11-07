@@ -7,9 +7,11 @@ using DiscordBot.DAL.Models.ReactionRoles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchLib.Api;
 
 namespace DiscordBot.Bots.Commands
 {
@@ -21,12 +23,14 @@ namespace DiscordBot.Bots.Commands
         private readonly RPGContext _context;
         private readonly ICommunityStreamerService _communityStreamerService;
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+        private readonly IConfiguration _configuration;
 
-        public StreamerCommands(RPGContext context, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService)
+        public StreamerCommands(RPGContext context, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService, IConfiguration configuration)
         {
             _context = context;
             _communityStreamerService = communityStreamerService;
             _guildStreamerConfigService = guildStreamerConfigService;
+            _configuration = configuration;
         }
 
         [Command("approve")]
@@ -75,14 +79,39 @@ namespace DiscordBot.Bots.Commands
 
             DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.requestorId);
 
-            if(suggestor != null) { await suggestor.SendMessageAsync($"Your Request to add `{suggestion.streamerName}` to the Now Live bot has been approved in the {ctx.Guild.Name} server!"); }
+            var api = new TwitchAPI();
+
+            var clientid = _configuration["twitch-clientid"];
+            var accesstoken = _configuration["twitch-accesstoken"];
+
+            api.Settings.ClientId = clientid;
+            api.Settings.AccessToken = accesstoken;
+
+            var searchStreamer = await api.V5.Search.SearchChannelsAsync(suggestion.streamerName);
+
+            if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.streamerName}."); return; }
+
+            var stream = await api.V5.Users.GetUserByNameAsync(suggestion.streamerName);
+
+            if (stream.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.streamerName}."); return; }
+
+            var streamResults = stream.Matches.FirstOrDefault();
+
+            if (streamResults.DisplayName.ToLower() != suggestion.streamerName.ToLower()) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.streamerName}."); return; }
+
+            var streamerId = streamResults.Id;
+
+            var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
+
+            var announcementMessage = "%USER% has gone live streaming %GAME%! You should check them out over at: %URL%";
 
             var config = new GuildStreamerConfig
             {
                 AnnounceChannelId = announceChannel.Id,
                 GuildId = ctx.Guild.Id,
-                StreamerId = suggestion.streamerName,
-                AnnouncementMessage = "%USER% has gone live streaming %GAME%! You should check them out over at: %URL%",
+                StreamerId = getStreamId.Id,
+                AnnouncementMessage = announcementMessage,
+                StreamerName = getStreamId.DisplayName
             };
 
             await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
