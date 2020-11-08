@@ -32,7 +32,6 @@ namespace DiscordBot.Core.Services.Profiles
             context.Profiles.Update(profile);
 
             await context.SaveChangesAsync().ConfigureAwait(false);
-
         }
     }
 }

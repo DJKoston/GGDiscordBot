@@ -20,14 +20,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DiscordBot.Bots
 {
@@ -50,6 +48,7 @@ namespace DiscordBot.Bots
             _guildStreamerConfigService = services.GetService<IGuildStreamerConfigService>();
             _messageStoreService = services.GetService<IMessageStoreService>();
             _gameChannelConfigService = services.GetService<IGameChannelConfigService>();
+            _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
 
             api = new TwitchAPI();
 
@@ -84,6 +83,7 @@ namespace DiscordBot.Bots
             Client.PresenceUpdated += OnPresenceUpdated;
             Client.GuildCreated += OnGuildJoin;
             Client.GuildDeleted += OnGuildLeave;
+            Client.GuildUnavailable += OnGuildUnAvaliable;
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
@@ -136,9 +136,14 @@ namespace DiscordBot.Bots
         private readonly IMessageStoreService _messageStoreService;
         private readonly ICustomCommandService _customCommandService;
         private readonly IGameChannelConfigService _gameChannelConfigService;
+        private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
 
         private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Heartbeated. Ping: {e.Ping}ms");
+            Console.ResetColor();
+
             // pull list of streamers in NL feature from DB
             var lst = _guildStreamerConfigService.GetGuildStreamerList();
 
@@ -146,7 +151,7 @@ namespace DiscordBot.Bots
             if (lst.Count() != 0) { Monitor.SetChannelsById(lst); }
 
             // If the Monitor is disabled - It will enable the monitor.
-            if (lst.Count() != 0 && Monitor.Enabled == false) { Monitor.Start(); Console.WriteLine($"Twitch Monitor 1 has started monitoring {lst.Count} Channels."); }
+            if (lst.Count() != 0 && Monitor.Enabled == false) { Monitor.Start(); Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine($"Twitch Monitor 1 has started monitoring {lst.Count} Channels."); Console.ResetColor(); }
 
             var currentTime = DateTime.Now;
 
@@ -196,7 +201,9 @@ namespace DiscordBot.Bots
 
         private void GGOnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Live!");
+            Console.ResetColor();
             
             var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
 
@@ -332,7 +339,9 @@ namespace DiscordBot.Bots
 
         private void GGOnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Offline!");
+            Console.ResetColor();
 
             var streamUser = api.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
 
@@ -370,50 +379,39 @@ namespace DiscordBot.Bots
         {
             if (e.User.IsBot) { return; }
 
-            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+            var configs = _nowLiveRoleConfigService.GetAllConfigs();
 
-            if (guild == null) { return; }
-
-            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-
-            if (member == null) { return; }
-
-            if (e.User.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
+            foreach(NowLiveRoleConfig config in configs)
             {
-                DiscordRole generationGamers = guild.GetRole(411304802883207169);
-                DiscordRole ggNowLive = guild.GetRole(745018263456448573);
-                DiscordRole NowLive = guild.GetRole(745018328179015700);
+                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
-                if (member.Roles.Contains(ggNowLive)) { return; }
+                if (guild == null) { return; }
 
-                if (member.Roles.Contains(NowLive)) { return; }
+                DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
 
-                if (member.Roles.Contains(generationGamers))
+                if (member == null) { return; }
+
+                if (e.User.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                 {
-                    await member.GrantRoleAsync(ggNowLive);
+                    DiscordRole NowLive = guild.GetRole(745018328179015700);
+
+                    if (member.Roles.Contains(NowLive)) { return; }
+
+                    else
+                    {
+                        await member.GrantRoleAsync(NowLive);
+                    }
+
                 }
 
                 else
                 {
-                    await member.GrantRoleAsync(NowLive);
-                }
+                    DiscordRole NowLive = guild.GetRole(config.RoleId);
 
-            }
-
-            else
-            {
-                DiscordRole generationGamers = guild.GetRole(411304802883207169);
-                DiscordRole ggNowLive = guild.GetRole(745018263456448573);
-                DiscordRole NowLive = guild.GetRole(745018328179015700);
-
-                if (member.Roles.Contains(ggNowLive))
-                {
-                    await member.RevokeRoleAsync(ggNowLive);
-                }
-
-                if (member.Roles.Contains(NowLive))
-                {
-                    await member.RevokeRoleAsync(NowLive);
+                    if (member.Roles.Contains(NowLive))
+                    {
+                        await member.RevokeRoleAsync(NowLive);
+                    }
                 }
             }
 
@@ -467,6 +465,15 @@ namespace DiscordBot.Bots
 
         }
 
+        private Task OnGuildUnAvaliable(DiscordClient c, GuildDeleteEventArgs e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"{e.Guild.Name} is now Unavaliable");
+            Console.ResetColor();
+
+            return Task.CompletedTask;
+        }
+
         private Task OnGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
         {
             new Thread(async () =>
@@ -500,15 +507,14 @@ namespace DiscordBot.Bots
 
                 if (e.Guild.Id == 246691304447279104)
                 {
-
                     var currentTime1 = DateTime.Now;
 
-                    DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
+                    DiscordGuild guild1 = c.Guilds.Values.FirstOrDefault(x => x.Id == 246691304447279104);
 
                     if ((currentTime1.Hour == 03) && (currentTime1.Minute > 09) && (currentTime1.Minute < 60))
                     {
-                        DiscordMember apocalyptic = await guild.GetMemberAsync(176666155103158273);
-                        DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
+                        DiscordMember apocalyptic = await guild1.GetMemberAsync(176666155103158273);
+                        DiscordMember djkoston = await guild1.GetMemberAsync(331933713816616961);
 
                         var embed = new DiscordEmbedBuilder
                         {
@@ -522,110 +528,6 @@ namespace DiscordBot.Bots
                         if (apocalyptic != null) { await apocalyptic.SendMessageAsync(embed: embed).ConfigureAwait(false); }
                     }
 
-                    var allMembers = await guild.GetAllMembersAsync();
-
-                    DiscordRole generationGamers = guild.GetRole(411304802883207169);
-                    DiscordRole ggNowLive = guild.GetRole(745018263456448573);
-                    DiscordRole NowLive = guild.GetRole(745018328179015700);
-
-                    var ggmemberslist = allMembers.Where(x => x.Roles.Contains(generationGamers));
-                    var nullgg = ggmemberslist.Where(x => x.Presence == null);
-                    var nullwithNowLive = nullgg.Where(x => x.Roles.Contains(ggNowLive));
-                    var ggmembers = ggmemberslist.Except(nullgg);
-                    var gglivemembers = ggmembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
-                    var ggnotlivemembers = ggmembers.Except(gglivemembers);
-                    var ggwaslive = ggnotlivemembers.Where(x => x.Roles.Contains(ggNowLive));
-
-                    var othermemberslist = allMembers.Except(ggmemberslist);
-                    var nullother = othermemberslist.Where(x => x.Presence == null);
-                    var otherwithNowLive = nullother.Where(x => x.Roles.Contains(NowLive));
-                    var othermembers = othermemberslist.Except(nullother);
-                    var otherlivemembers = othermembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
-                    var othernotlivemembers = othermembers.Except(otherlivemembers);
-                    var otherwaslive = othernotlivemembers.Where(x => x.Roles.Contains(NowLive));
-
-                    foreach (DiscordMember gglivemember in gglivemembers)
-                    {
-                        if (gglivemember.Roles.Contains(ggNowLive))
-                        {
-
-                        }
-
-                        else
-                        {
-                            await gglivemember.GrantRoleAsync(ggNowLive);
-                        }
-                    }
-
-                    foreach (DiscordMember nullmember in nullwithNowLive)
-                    {
-                        if (nullmember.Roles.Contains(ggNowLive))
-                        {
-                            await nullmember.RevokeRoleAsync(ggNowLive);
-                        }
-
-                        else
-                        {
-
-                        }
-
-                    }
-
-                    foreach (DiscordMember ggwaslivemember in ggwaslive)
-                    {
-                        if (ggwaslivemember.Roles.Contains(ggNowLive))
-                        {
-                            await ggwaslivemember.RevokeRoleAsync(ggNowLive);
-                        }
-
-                        else
-                        {
-
-                        }
-
-                    }
-
-                    foreach (DiscordMember otherlivemember in otherlivemembers)
-                    {
-                        if (otherlivemember.Roles.Contains(NowLive))
-                        {
-
-                        }
-
-                        else
-                        {
-                            await otherlivemember.GrantRoleAsync(NowLive);
-                        }
-
-                    }
-
-                    foreach (DiscordMember nullmember in otherwithNowLive)
-                    {
-                        if (nullmember.Roles.Contains(NowLive))
-                        {
-                            await nullmember.RevokeRoleAsync(NowLive);
-                        }
-
-                        else
-                        {
-
-                        }
-
-                    }
-
-                    foreach (DiscordMember otherwaslivemember in otherwaslive)
-                    {
-                        if (otherwaslivemember.Roles.Contains(NowLive))
-                        {
-                            await otherwaslivemember.RevokeRoleAsync(NowLive);
-                        }
-
-                        else
-                        {
-
-                        }
-
-                    }
                 }
 
                 var currentTime = DateTime.Now;
@@ -636,9 +538,9 @@ namespace DiscordBot.Bots
 
                     if (channel == null) { return; }
 
-                    DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == channel.GuildId);
+                    DiscordGuild guild2 = c.Guilds.Values.FirstOrDefault(x => x.Id == channel.GuildId);
 
-                    DiscordMember djkoston = await guild.GetMemberAsync(331933713816616961);
+                    DiscordMember djkoston = await guild2.GetMemberAsync(331933713816616961);
 
                     var embed = new DiscordEmbedBuilder
                     {
@@ -647,12 +549,73 @@ namespace DiscordBot.Bots
                         Color = DiscordColor.DarkGreen,
                     };
 
-                    DiscordChannel gamesChannel = guild.Channels.Values.FirstOrDefault(x => x.Id == channel.ChannelId);
+                    DiscordChannel gamesChannel = guild2.Channels.Values.FirstOrDefault(x => x.Id == channel.ChannelId);
 
                     if (gamesChannel != null) { await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false); }
                 }
 
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"{e.Guild.Name} is now Avaliable");
+                Console.ResetColor();
+
+                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+
+                var config = await _nowLiveRoleConfigService.GetNowLiveRoleConfig(e.Guild.Id);
+
+                if(config == null) { return; }
+
+                var allMembers = await guild.GetAllMembersAsync();
+
+                DiscordRole NowLive = guild.GetRole(config.RoleId);
+
+                var nullother = allMembers.Where(x => x.Presence == null);
+                var otherwithNowLive = nullother.Where(x => x.Roles.Contains(NowLive));
+                var othermembers = allMembers.Except(nullother);
+                var otherlivemembers = othermembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
+                var othernotlivemembers = othermembers.Except(otherlivemembers);
+                var otherwaslive = othernotlivemembers.Where(x => x.Roles.Contains(NowLive));
+
+                foreach (DiscordMember otherlivemember in otherlivemembers)
+                {
+                    if (otherlivemember.Roles.Contains(NowLive))
+                    {
+
+                    }
+
+                    else
+                    {
+                        await otherlivemember.GrantRoleAsync(NowLive);
+                    }
+
+                }
+
+                foreach (DiscordMember nullmember in otherwithNowLive)
+                {
+                    if (nullmember.Roles.Contains(NowLive))
+                    {
+                        await nullmember.RevokeRoleAsync(NowLive);
+                    }
+
+                    else
+                    {
+
+                    }
+
+                }
+
+                foreach (DiscordMember otherwaslivemember in otherwaslive)
+                {
+                    if (otherwaslivemember.Roles.Contains(NowLive))
+                    {
+                        await otherwaslivemember.RevokeRoleAsync(NowLive);
+                    }
+
+                    else
+                    {
+
+                    }
+
+                }
 
             }).Start();
 
@@ -730,7 +693,9 @@ namespace DiscordBot.Bots
                 }, UserStatus.Idle);
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
+            Console.ResetColor();
         }
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)

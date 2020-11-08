@@ -52,6 +52,8 @@ namespace DiscordBot.Core.Services.Profiles
                 Profile = profile,
                 LevelledUp = levelAfter > levelBefore
             };
+
+            
         }
     }
 }

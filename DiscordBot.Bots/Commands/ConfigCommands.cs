@@ -18,12 +18,14 @@ namespace DiscordBot.Bots.Commands
         private readonly INitroBoosterRoleConfigService _nitroBoosterRoleService;
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
         private readonly IGameChannelConfigService _gameChannelConfigService;
+        private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
 
-        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService, IGameChannelConfigService gameChannelConfigService)
+        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService, IGameChannelConfigService gameChannelConfigService, INowLiveRoleConfigService nowLiveRoleConfigService)
         {
             _nitroBoosterRoleService = nitroBoosterRoleService;
             _welcomeMessageConfigService = welcomeMessageConfigService;
             _gameChannelConfigService = gameChannelConfigService;
+            _nowLiveRoleConfigService = nowLiveRoleConfigService;
         }
 
         [Command("SetNitroRole")]
@@ -424,5 +426,113 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync($"Streamer Log Channel Created! {suggestionChannel.Mention}\n\nPlease do not rename this channel as the bot will not know where to post streamers for your admins to approve!\n\nYou may move the channel to another tab, just ensure {ctx.Client.CurrentUser.Mention} has permissions to access the channel and send messages to it!");
         }
 
+        [Command("SetNowLiveRole")]
+        public async Task CreateNowLiveRoleConfig(CommandContext ctx, DiscordRole role)
+        {
+            var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var nowLiveRoleConfig = new NowLiveRoleConfig()
+                {
+                    GuildId = ctx.Guild.Id,
+                    RoleId = role.Id,
+                };
+
+                await _nowLiveRoleConfigService.CreateNowLiveRoleConfig(nowLiveRoleConfig);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"New Game Channel Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{role.Mention} is the Now Live Role for the Server!"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                DiscordRole role2 = ctx.Guild.GetRole(config.RoleId);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is already a Game Channel Set!",
+                    Description = $"{role2.Mention} is the Game Channel for the Server!"
+                };
+
+                embed.AddField("To Clear the Config for the Game Channel", "Do `!config resetgamechannel`");
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+        }
+
+        [Command("GetNowLiveRole")]
+        public async Task GetNowLiveRoleConfig(CommandContext ctx)
+        {
+            var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is no Now Live Role Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Now Live Role Config, do `!config setnowliverole @role`"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+
+            else
+            {
+                DiscordRole role = ctx.Guild.GetRole(config.RoleId);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"The Now Live Role Configured\nfor {ctx.Guild.Name}",
+                    Description = $"{role.Mention} is the Now Live Role for the Server!"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+        }
+
+        [Command("ResetNowLiveRole")]
+        public async Task ResetNowLiveRoleConfig(CommandContext ctx)
+        {
+            var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is no Now Live Role Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Game Channel Config, do `!config setnowliverole @role`"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                await _nowLiveRoleConfigService.RemoveNowLiveRoleConfig(config);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"The Now Live Role Config has been reset!",
+                };
+
+                embed.AddField("To Add the Config for the Now Live Role", "Do `!config setnowliverole @role`");
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+        }
     }
 }

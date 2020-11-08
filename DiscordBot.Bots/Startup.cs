@@ -48,6 +48,7 @@ namespace DiscordBot.Bots
             services.AddScoped<IGameChannelConfigService, GameChannelConfigService>();
             services.AddScoped<ICommunityStreamerService, CommunityStreamerService>();
             services.AddScoped<ISuggestionService, SuggestionService>();
+            services.AddScoped<INowLiveRoleConfigService, NowLiveRoleConfigService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();
