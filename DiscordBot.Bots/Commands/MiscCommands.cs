@@ -14,6 +14,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using TwitchLib.Api;
@@ -286,6 +287,8 @@ namespace DiscordBot.Bots.Commands
 
             var nowLiveChannelCount = _guildStreamerConfigService.GetGuildStreamerList().Count();
 
+            var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
+
             embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
 
             embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
@@ -293,6 +296,7 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false);
             embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false);
             embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
+            embed.AddField("Bot Version:", botVersion);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
