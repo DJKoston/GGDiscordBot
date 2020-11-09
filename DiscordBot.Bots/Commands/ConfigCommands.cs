@@ -443,7 +443,7 @@ namespace DiscordBot.Bots.Commands
 
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"New Game Channel Config\nAdded for {ctx.Guild.Name}",
+                    Title = $"New Now Live Role Config\nAdded for {ctx.Guild.Name}",
                     Description = $"{role.Mention} is the Now Live Role for the Server!"
                 };
 
@@ -458,11 +458,11 @@ namespace DiscordBot.Bots.Commands
 
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"There is already a Game Channel Set!",
-                    Description = $"{role2.Mention} is the Game Channel for the Server!"
+                    Title = $"There is already a Now Live Role Set!",
+                    Description = $"{role2.Mention} is the Now Live Role for the Server!"
                 };
 
-                embed.AddField("To Clear the Config for the Game Channel", "Do `!config resetgamechannel`");
+                embed.AddField("To Clear the Config for the Now Live Role", "Do `!config resetnowliverole`");
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
 

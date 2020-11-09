@@ -243,8 +243,6 @@ namespace DiscordBot.Bots
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
 
-                    if (stream.Stream.Game != null) { embed.AddField("Game:", stream.Stream.Game); }
-
                     embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
                     embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
