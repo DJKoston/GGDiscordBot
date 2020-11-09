@@ -383,17 +383,17 @@ namespace DiscordBot.Bots
             {
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
-                if (guild == null) { return; }
+                if (guild == null) { continue; }
 
                 DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
 
-                if (member == null) { return; }
+                if (member == null) { continue; }
 
                 if (e.User.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                 {
-                    DiscordRole NowLive = guild.GetRole(745018328179015700);
+                    DiscordRole NowLive = guild.GetRole(config.RoleId);
 
-                    if (member.Roles.Contains(NowLive)) { return; }
+                    if (member.Roles.Contains(NowLive)) { continue; }
 
                     else
                     {
