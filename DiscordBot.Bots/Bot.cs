@@ -274,8 +274,6 @@ namespace DiscordBot.Bots
                         config.StreamerName = streamer.DisplayName;
 
                         _guildStreamerConfigService.EditUser(config);
-
-                        Console.WriteLine($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
                     }
                 }
 

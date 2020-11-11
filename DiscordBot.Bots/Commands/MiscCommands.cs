@@ -1,4 +1,5 @@
-﻿using DiscordBot.Core.Services.CommunityStreamers;
+﻿using DiscordBot.Bots.JsonConverts;
+using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.DAL;
@@ -10,13 +11,13 @@ using DSharpPlus.Entities;
 using GiphyDotNet.Manager;
 using GiphyDotNet.Model.Parameters;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Xml.Schema;
 using TwitchLib.Api;
 
 namespace DiscordBot.Bots.Commands
@@ -227,7 +228,7 @@ namespace DiscordBot.Bots.Commands
             {
                 var result = await giphy.RandomGif(new RandomParameter()
                 {
-                    Rating = Rating.R
+                    Rating = Rating.R,
                 });
 
                 await ctx.Channel.SendMessageAsync(result.Data.ImageUrl);
@@ -298,6 +299,73 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
             embed.AddField("Bot Version:", botVersion);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        [Command("simpsons")]
+        [Description("Get a Simpsons Quote!")]
+        public async Task SimpsonsQuote(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var request = new HttpClient();
+
+            request.BaseAddress = new Uri("http://thesimpsonsquoteapi.glitch.me");
+
+            request.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+            request.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+            request.DefaultRequestHeaders.Add("Accept-Language", "en-GB,en-US;q=0.9,en;q=0.8");
+            request.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
+            request.DefaultRequestHeaders.Add("Connection", "keep-alive");
+            request.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+            request.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36");
+
+            HttpResponseMessage response = await request.GetAsync("quotes");
+
+            var resp = await response.Content.ReadAsStringAsync();
+
+            var formatted = resp.Replace("[", string.Empty);
+            var formattedresp = formatted.Replace("]", string.Empty);
+
+            var simpsons = JsonConvert.DeserializeObject<TheSimpsons>(formattedresp);
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"{simpsons.Quote}",
+                Description = $"{simpsons.Character}",
+                Color = DiscordColor.Yellow,
+            };
+
+            embed.WithImageUrl(simpsons.ImageURL);
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        [Command("advice")]
+        public async Task Advice(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var request = new HttpClient();
+
+            request.BaseAddress = new Uri("https://api.adviceslip.com/");
+
+            HttpResponseMessage response = await request.GetAsync("advice");
+
+            var resp = await response.Content.ReadAsStringAsync();
+
+            var formatted1 = resp.Replace("{\"slip\":", string.Empty);
+            var formatted2 = formatted1.Replace("\"}}", "\"}");
+
+            var advice = JsonConvert.DeserializeObject<Advice>(formatted2);
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"Advice #{advice.Id}",
+                Description = advice.AdviceOutput,
+                Color = DiscordColor.Aquamarine
+            };
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
