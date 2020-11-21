@@ -113,7 +113,7 @@ namespace DiscordBot.Bots.Commands
                 if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
                 if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
 
-                var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
+                var toNextLevel = nextLevel - profile.XP;
 
                 profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}");
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
