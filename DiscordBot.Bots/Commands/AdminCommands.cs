@@ -1,15 +1,12 @@
 ﻿using DiscordBot.Core.Services.Configs;
-using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
-using DiscordBot.DAL.Models.ReactionRoles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
@@ -67,6 +64,8 @@ namespace DiscordBot.Bots.Commands
                 Name = "For my new update!",
             }, UserStatus.DoNotDisturb);
 
+            Bot.DebugLog("Bot Downtime Started");
+
             Environment.Exit(0);
         }
 
@@ -96,6 +95,8 @@ namespace DiscordBot.Bots.Commands
 
                 await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
             }
+
+            Bot.DebugLog("Bot Downtime Completed");
         }
     }
 }

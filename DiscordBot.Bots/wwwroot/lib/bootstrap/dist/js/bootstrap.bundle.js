@@ -4717,7 +4717,7 @@
 
       this._setScrollbar();
 
-      this._adjustDialog();
+      this._adjustDiaDebugLog();
 
       this._setEscapeEvent();
 
@@ -4807,7 +4807,7 @@
     };
 
     _proto.handleUpdate = function handleUpdate() {
-      this._adjustDialog();
+      this._adjustDiaDebugLog();
     } // Private
     ;
 
@@ -5013,7 +5013,7 @@
     // ----------------------------------------------------------------------
     ;
 
-    _proto._adjustDialog = function _adjustDialog() {
+    _proto._adjustDialog = function _adjustDiaDebugLog() {
       var isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
 
       if (!this._isBodyOverflowing && isModalOverflowing) {
