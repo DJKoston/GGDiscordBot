@@ -76,7 +76,7 @@ namespace DiscordBot.Bots
             Client.Ready += OnClientReady;
             Client.MessageCreated += OnMessageCreated;
             Client.ClientErrored += OnClientErrored;
-            Client.GuildMemberAdded += OnNewMember;
+            Client.GuildMemberAdded += OnMemberJoin;
             Client.GuildMemberRemoved += OnMemberLeave;
             Client.MessageReactionAdded += OnReactionAdded;
             Client.MessageReactionRemoved += OnReactionRemoved;
@@ -86,6 +86,7 @@ namespace DiscordBot.Bots
             Client.GuildDeleted += OnGuildLeave;
             Client.GuildUnavailable += OnGuildUnAvaliable;
 
+            DebugLog("-----------------------------");
             DebugLog($"Logging Started.");
 
             Client.UseInteractivity(new InteractivityConfiguration
@@ -901,7 +902,7 @@ namespace DiscordBot.Bots
             return;
         }
 
-        private async Task OnNewMember(DiscordClient c, GuildMemberAddEventArgs e)
+        private async Task OnMemberJoin(DiscordClient c, GuildMemberAddEventArgs e)
         {
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 

@@ -69,8 +69,10 @@ namespace DiscordBot.Bots.Commands
 
                 var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
 
-                profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}", true);
-                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"), true);
+                var toNextLevel = nextLevel - profile.XP;
+
+                profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}");
+                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
                 if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
                 if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
@@ -111,7 +113,9 @@ namespace DiscordBot.Bots.Commands
                 if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
                 if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
 
-                profileEmbed.AddField("XP", profile.XP.ToString("###,###,###,###,###"));
+                var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
+
+                profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}");
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
                 if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
