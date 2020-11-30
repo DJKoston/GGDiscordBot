@@ -13,6 +13,7 @@ using GiphyDotNet.Model.Parameters;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -290,6 +291,10 @@ namespace DiscordBot.Bots.Commands
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
 
+            var botStartTime = Process.GetCurrentProcess().StartTime;
+
+            var botUptime = DateTime.Now - botStartTime;
+
             embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
 
             embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
@@ -299,6 +304,25 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
             embed.AddField("Bot Version:", botVersion);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
+            embed.AddField("Uptime:", $"{botUptime.Hours}:{botUptime.Minutes}:{botUptime.Seconds}");
+            embed.WithFooter($"Bot came live at {botStartTime.Hour}:{botStartTime.Minute} GMT on {botStartTime.Month} {botStartTime.Day}, {botStartTime.Year}");
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        [Command("uptime")]
+        public async Task Uptime(CommandContext ctx)
+        {
+            var botStartTime = Process.GetCurrentProcess().StartTime;
+
+            var botUptime = DateTime.Now - botStartTime;
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"The Bot has been Live for: {botUptime.Hours}:{botUptime.Minutes}:{botUptime.Seconds}",
+                Description = $"The bot has been live since: {botStartTime.Hour}:{botStartTime.Minute}:{botStartTime.Second} on {botStartTime.Month} {botStartTime.Day}, {botStartTime.Year}",
+                Color = DiscordColor.Blurple
+            };
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }

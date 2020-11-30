@@ -72,6 +72,8 @@ namespace DiscordBot.Bots
 
             Client = new DiscordClient(config);
 
+            
+
             Client.Heartbeated += OnHeartbeat;
             Client.Ready += OnClientReady;
             Client.MessageCreated += OnMessageCreated;
@@ -86,8 +88,12 @@ namespace DiscordBot.Bots
             Client.GuildDeleted += OnGuildLeave;
             Client.GuildUnavailable += OnGuildUnAvaliable;
 
+            var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
+
             DebugLog("-----------------------------");
             DebugLog($"Logging Started.");
+            DebugLog($"Bot Version: {botVersion}");
+            Console.WriteLine($"Current Bot Version: {botVersion}");
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
@@ -157,17 +163,17 @@ namespace DiscordBot.Bots
 
         public static void DebugLog(string logMessage)
         {
-            if (!Directory.Exists($"\\Logs\\DebugLogs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
+            if (!Directory.Exists($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
             {
-                Directory.CreateDirectory($"\\Logs\\DebugLogs\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
+                Directory.CreateDirectory($"\\Logs\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
             }
 
-            if (!File.Exists($"\\Logs\\DebugLogs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt"))
+            if (!File.Exists($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt"))
             {
-                File.Create($"\\Logs\\DebugLogs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt").Close();
+                File.Create($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt").Close();
             }
 
-            using (StreamWriter w = File.AppendText($"\\Logs\\DebugLogs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt"))
+            using (StreamWriter w = File.AppendText($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt"))
             {
                 w.WriteLine($"{DateTime.Now}: {logMessage}");
 
@@ -223,15 +229,15 @@ namespace DiscordBot.Bots
                 var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
-                var toReplaceMessage = config.AnnouncementMessage;
-
-                var channelReplace = toReplaceMessage.Replace("%USER%", e.Stream.UserName);
-
                 if (e.Stream.UserName.Contains("_"))
                 {
-                    var userReplace = channelReplace.Replace("_", "\\_");
+                    var toReplaceMessage = config.AnnouncementMessage;
 
-                    var gameReplace = userReplace.Replace("%GAME%", stream.Stream.Game);
+                    var username = e.Stream.UserName.Replace("_", "\\_");
+
+                    var channelReplace = toReplaceMessage.Replace("%USER%", username);
+
+                    var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
                     var color = new DiscordColor("9146FF");
@@ -271,6 +277,12 @@ namespace DiscordBot.Bots
 
                 else
                 {
+                    var toReplaceMessage = config.AnnouncementMessage;
+
+                    var username = e.Stream.UserName;
+
+                    var channelReplace = toReplaceMessage.Replace("%USER%", username);
+
                     var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
@@ -503,6 +515,8 @@ namespace DiscordBot.Bots
                     await message.DeleteAsync();
 
                     await _messageStoreService.RemoveMessageStore(storedMessage);
+
+                    DebugLog($"Message Store for {user.Name} deleted successfully.");
                 }
 
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -981,6 +995,8 @@ namespace DiscordBot.Bots
 
                 else
                 {
+                    await _profileService.DeleteProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
+
                     var leaveEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",

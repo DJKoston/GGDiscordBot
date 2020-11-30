@@ -34,6 +34,7 @@ namespace DiscordBot.Bots
                 options.UseSqlServer(SqlServerConnectionString,
                    x => x.MigrationsAssembly("DiscordBot.DAL.Migrations"));
             });
+
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IExperienceService, ExperienceService>();
