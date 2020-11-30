@@ -304,8 +304,7 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
             embed.AddField("Bot Version:", botVersion);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
-            embed.AddField("Uptime:", $"{botUptime.Hours}:{botUptime.Minutes}:{botUptime.Seconds}");
-            embed.WithFooter($"Bot came live at {botStartTime.Hour}:{botStartTime.Minute} GMT on {botStartTime.Month} {botStartTime.Day}, {botStartTime.Year}");
+            embed.AddField("Uptime:", $"{botUptime.Hours.ToString("00")}:{botUptime.Minutes.ToString("00")}:{botUptime.Seconds.ToString("00")}");
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
@@ -319,8 +318,8 @@ namespace DiscordBot.Bots.Commands
 
             var embed = new DiscordEmbedBuilder
             {
-                Title = $"The Bot has been Live for: {botUptime.Hours}:{botUptime.Minutes}:{botUptime.Seconds}",
-                Description = $"The bot has been live since: {botStartTime.Hour}:{botStartTime.Minute}:{botStartTime.Second} on {botStartTime.Month} {botStartTime.Day}, {botStartTime.Year}",
+                Title = $"The Bot has been Live for: {botUptime.Hours.ToString("00")}:{botUptime.Minutes.ToString("00")}:{botUptime.Seconds.ToString("00")}",
+                Description = $"The bot has been live since: {botStartTime.Hour}:{botStartTime.Minute}:{botStartTime.Second} GMT on {botStartTime.Day}/{botStartTime.Month}/{botStartTime.Year}",
                 Color = DiscordColor.Blurple
             };
 
