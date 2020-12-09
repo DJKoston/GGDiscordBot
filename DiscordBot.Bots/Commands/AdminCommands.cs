@@ -64,8 +64,6 @@ namespace DiscordBot.Bots.Commands
                 Name = "For my new update!",
             }, UserStatus.DoNotDisturb);
 
-            Bot.DebugLog("Bot Downtime Started");
-
             Environment.Exit(0);
         }
 
@@ -95,8 +93,6 @@ namespace DiscordBot.Bots.Commands
 
                 await gamesChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);
             }
-
-            Bot.DebugLog("Bot Downtime Completed");
         }
     }
 }
