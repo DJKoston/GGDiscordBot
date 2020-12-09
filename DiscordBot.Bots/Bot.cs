@@ -20,6 +20,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -90,9 +91,6 @@ namespace DiscordBot.Bots
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
 
-            DebugLog("-----------------------------");
-            DebugLog($"Logging Started.");
-            DebugLog($"Bot Version: {botVersion}");
             Console.WriteLine($"Current Bot Version: {botVersion}");
 
             Client.UseInteractivity(new InteractivityConfiguration
@@ -113,7 +111,6 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<AdminCommands>();
             Commands.RegisterCommands<ConfigCommands>();
             Commands.RegisterCommands<GameCommands>();
-            Commands.RegisterCommands<LeaveRoleCommands>();
             Commands.RegisterCommands<ManageCommands>();
             Commands.RegisterCommands<MiscCommands>();
             Commands.RegisterCommands<ModCommands>();
@@ -121,7 +118,6 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<ProfileCommands>();
             Commands.RegisterCommands<QuoteCommands>();
             Commands.RegisterCommands<ReactionRoleCommands>();
-            Commands.RegisterCommands<RoleCommands>();
             Commands.RegisterCommands<StreamerCommands>();
             Commands.RegisterCommands<SuggestionCommands>();
 
@@ -137,48 +133,23 @@ namespace DiscordBot.Bots
             Console.ForegroundColor = ConsoleColor.Magenta;
             Monitor.SetChannelsById(lst);
             Console.WriteLine("Connecting to Twitch...");
-            DebugLog("Connection to Twitch.");
 
             Monitor.Start();
             if (Monitor.Enabled)
             {
                 Console.WriteLine("Connected to Twitch!");
                 Console.WriteLine($"Bot has started monitoring {lst.Count} Channels.");
-                DebugLog("Connected to Twitch successfully.");
-                DebugLog($"Bot has started monitoring {lst.Count} Channels.");
             }
 
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine("Connecting to Discord...");
-            DebugLog("Connecting to Discord.");
             Console.ResetColor();
             Client.ConnectAsync();
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine("Connected to Discord!");
-            DebugLog("Connected to Discord.");
             Console.ResetColor();
-        }
-
-        public static void DebugLog(string logMessage)
-        {
-            if (!Directory.Exists($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
-            {
-                Directory.CreateDirectory($"\\Logs\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
-            }
-
-            if (!File.Exists($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt"))
-            {
-                File.Create($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt").Close();
-            }
-
-            using (StreamWriter w = File.AppendText($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.Day}.txt"))
-            {
-                w.WriteLine($"{DateTime.Now}: {logMessage}");
-
-                w.Close();
-            }
         }
         
         private readonly IReactionRoleService _reactionRoleService;
@@ -203,13 +174,52 @@ namespace DiscordBot.Bots
 
             // Sets the channels the bot needs to monitor.
             Monitor.SetChannelsById(lst);
+
+            var guildCount = c.Guilds.Count();
+
+            var botStartTime = Process.GetCurrentProcess().StartTime;
+
+            var botUptime = DateTime.Now - botStartTime;
+
+            if (c.CurrentUser.Presence.Activity.ActivityType == ActivityType.Watching)
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Playing,
+                    Name = $"Online for: {botUptime.Days}d {botUptime.Hours:00}h {botUptime.Minutes:00}m",
+                }, UserStatus.Online);
+
+                return;
+            }
+
+            if (c.CurrentUser.Presence.Activity.ActivityType == ActivityType.Playing)
+            {
+                if (guildCount == 1)
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{guildCount} Server!",
+                    }, UserStatus.Online);
+                }
+
+                else
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{guildCount} Servers!",
+                    }, UserStatus.Online);
+                }
+
+                return;
+            }
         }
 
         private void GGOnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Live!");
-            DebugLog($"{e.Stream.UserName} just went Live.");
             Console.ResetColor();
             
             var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
@@ -271,8 +281,6 @@ namespace DiscordBot.Bots
                     };
 
                     _messageStoreService.CreateNewMessageStore(messageStore);
-
-                    DebugLog($"Message Store for {e.Stream.UserName} created successfully.");
                 }
 
                 else
@@ -318,8 +326,6 @@ namespace DiscordBot.Bots
 
                     _messageStoreService.CreateNewMessageStore(messageStore);
 
-                    DebugLog($"Message Store for {e.Stream.UserName} created successfully.");
-
                     if (streamer.DisplayName == config.StreamerName)
                     {
                         continue;
@@ -332,7 +338,6 @@ namespace DiscordBot.Bots
                         _guildStreamerConfigService.EditUser(config);
 
                         Console.WriteLine($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
-                        DebugLog($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
                     }
                 }
             }
@@ -343,7 +348,6 @@ namespace DiscordBot.Bots
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Offline!");
-            DebugLog($"{e.Stream.UserName} just went Offline.");
             Console.ResetColor();
 
             var streamUser = api.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
@@ -376,7 +380,6 @@ namespace DiscordBot.Bots
 
 
                 _messageStoreService.RemoveMessageStore(storedMessage);
-                DebugLog($"Message Store for {e.Stream.UserName} deleted successfully.");
             }
         }
 
@@ -425,9 +428,6 @@ namespace DiscordBot.Bots
 
         private async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
         {
-            DebugLog($"Bot added to: {e.Guild.Name}");
-           
-
             int guilds = c.Guilds.Count();
 
             if (guilds == 1)
@@ -451,9 +451,6 @@ namespace DiscordBot.Bots
 
         private async Task OnGuildLeave(DiscordClient c, GuildDeleteEventArgs e)
         {
-            DebugLog($"Bot removed from: {e.Guild.Name}");
-            
-
             int guilds = c.Guilds.Count();
 
             if (guilds == 1)
@@ -480,7 +477,6 @@ namespace DiscordBot.Bots
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"{e.Guild.Name} is now Unavaliable");
-            DebugLog($"{e.Guild.Name} is now Unavaliable");
             Console.ResetColor();
 
             return Task.CompletedTask;
@@ -515,13 +511,10 @@ namespace DiscordBot.Bots
                     await message.DeleteAsync();
 
                     await _messageStoreService.RemoveMessageStore(storedMessage);
-
-                    DebugLog($"Message Store for {user.Name} deleted successfully.");
                 }
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"{e.Guild.Name} is now Avaliable");
-                DebugLog($"{e.Guild.Name} is now Avaliable");
                 
                 Console.ResetColor();
 
@@ -654,18 +647,17 @@ namespace DiscordBot.Bots
                 }, UserStatus.Online);
             }
 
-            if(Environment.MachineName == "HAYDON-PC")
-            {
-                await Client.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Watching,
-                    Name = "the latest test build",
-                }, UserStatus.Idle);
-            }
+            //if(Environment.MachineName == "HAYDON-PC")
+            //{
+                //await Client.UpdateStatusAsync(new DiscordActivity
+                //{
+                    //ActivityType = ActivityType.Watching,
+                    //Name = "the latest test build",
+                //}, UserStatus.Idle);
+            //}
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
-            DebugLog("Bot is Ready");
             Console.ResetColor();
         }
 
@@ -794,9 +786,7 @@ namespace DiscordBot.Bots
             //var exceptionMessage = e.Exception.Message;
 
             Console.WriteLine(innerException);
-            DebugLog(innerException.ToString());
             //Console.WriteLine(exceptionMessage);
-            //Log(exceptionMessage.ToString());
 
             return Task.CompletedTask;
         }
