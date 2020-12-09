@@ -5,13 +5,14 @@
     <AssemblyName>DiscordBot</AssemblyName>
     <Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <UserSecretsId>34b56b5f-2361-41bd-96ec-2648e2719edc</UserSecretsId>
-    <Version>0.6.4.0</Version>
+    <Version>0.6.5.1</Version>
     <Authors>DJKoston</Authors>
     <Company>Generation Gamers</Company>
     <Product>GG Discord Bot</Product>
     <NeutralLanguage>en-GB</NeutralLanguage>
     <RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
     <Copyright>DJKoston 2020</Copyright>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Build|AnyCPU'">

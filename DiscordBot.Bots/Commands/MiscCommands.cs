@@ -62,22 +62,6 @@ namespace DiscordBot.Bots.Commands
             await ctx.RespondAsync($"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 12)}").ConfigureAwait(false);
         }
 
-        [Command("roles")]
-        [Description("See what role commands you can use!")]
-        public async Task Roles(CommandContext ctx)
-        {
-            var rolesEmbed = new DiscordEmbedBuilder
-            {
-                Title = "Role's You Can Self Assign!",
-                Description = "Check the list below to find out what commands you can use to get your roles!",
-                Color = DiscordColor.Blurple
-            };
-            rolesEmbed.AddField("`!role 18+`", "Gets the 18+ Role");
-            rolesEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
-
-            await ctx.Channel.SendMessageAsync(embed: rolesEmbed).ConfigureAwait(false);
-        }
-
         [Command("cmcs")]
         [Description("Alex only Command")]
         [RequireRoles(RoleCheckMode.Any, "Dotty <3")]
@@ -304,7 +288,7 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
             embed.AddField("Bot Version:", botVersion);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
-            embed.AddField("Uptime:", $"{botUptime.Hours.ToString("00")}:{botUptime.Minutes.ToString("00")}:{botUptime.Seconds.ToString("00")}");
+            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours:00}:{botUptime.Minutes:00}:{botUptime.Seconds:00}");
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
@@ -318,8 +302,8 @@ namespace DiscordBot.Bots.Commands
 
             var embed = new DiscordEmbedBuilder
             {
-                Title = $"The Bot has been Live for: {botUptime.Hours.ToString("00")}:{botUptime.Minutes.ToString("00")}:{botUptime.Seconds.ToString("00")}",
-                Description = $"The bot has been live since: {botStartTime.Hour}:{botStartTime.Minute}:{botStartTime.Second} GMT on {botStartTime.Day}/{botStartTime.Month}/{botStartTime.Year}",
+                Title = $"The Bot has been Live for: {botUptime.Days}d {botUptime.Hours:00}:{botUptime.Minutes:00}:{botUptime.Seconds:00}",
+                Description = $"The bot has been live since: {botStartTime.Hour:00}:{botStartTime.Minute:00} GMT on {botStartTime.Day:00}/{botStartTime.Month:00}/{botStartTime.Year:00}",
                 Color = DiscordColor.Blurple
             };
 
