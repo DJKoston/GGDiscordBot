@@ -288,7 +288,7 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
             embed.AddField("Bot Version:", botVersion);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
-            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours:00}:{botUptime.Minutes:00}:{botUptime.Seconds:00}");
+            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes:00}m");
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
@@ -302,7 +302,7 @@ namespace DiscordBot.Bots.Commands
 
             var embed = new DiscordEmbedBuilder
             {
-                Title = $"The Bot has been Live for: {botUptime.Days}d {botUptime.Hours:00}:{botUptime.Minutes:00}:{botUptime.Seconds:00}",
+                Title = $"The Bot has been Live for: {botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes}m",
                 Description = $"The bot has been live since: {botStartTime.Hour:00}:{botStartTime.Minute:00} GMT on {botStartTime.Day:00}/{botStartTime.Month:00}/{botStartTime.Year:00}",
                 Color = DiscordColor.Blurple
             };
