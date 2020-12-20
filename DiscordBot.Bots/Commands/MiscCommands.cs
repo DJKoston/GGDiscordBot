@@ -316,9 +316,10 @@ namespace DiscordBot.Bots.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            var request = new HttpClient();
-
-            request.BaseAddress = new Uri("http://thesimpsonsquoteapi.glitch.me");
+            var request = new HttpClient
+            {
+                BaseAddress = new Uri("http://thesimpsonsquoteapi.glitch.me")
+            };
 
             request.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
             request.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
@@ -354,9 +355,10 @@ namespace DiscordBot.Bots.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            var request = new HttpClient();
-
-            request.BaseAddress = new Uri("https://api.adviceslip.com/");
+            var request = new HttpClient
+            {
+                BaseAddress = new Uri("https://api.adviceslip.com/")
+            };
 
             HttpResponseMessage response = await request.GetAsync("advice");
 
@@ -373,6 +375,37 @@ namespace DiscordBot.Bots.Commands
                 Description = advice.AdviceOutput,
                 Color = DiscordColor.Aquamarine
             };
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        [Command("serverstats")]
+        public async Task ServerStats(CommandContext ctx)
+        {
+            var guild = ctx.Guild; 
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"{guild.Name} Stats",
+                Color = guild.CurrentMember.Color,
+            };
+
+            int channelCount = guild.Channels.Count();
+
+            int memberCount = guild.MemberCount;
+            
+            var nowLiveChannelCount = _context.GuildStreamerConfigs.Where(x => x.GuildId == ctx.Guild.Id).Count();
+
+            embed.WithThumbnail(guild.IconUrl);
+
+            embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
+            if (memberCount > 0) { embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false); }
+            if (memberCount == 0) { embed.AddField("Discord Members:", "0", false); }
+            if (channelCount > 0) { embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false); }
+            if (channelCount == 0) { embed.AddField("Discord Channels:", "0", false); }
+            if (nowLiveChannelCount > 0) { embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false); }
+            if (nowLiveChannelCount == 0) { embed.AddField("Twitch Channels:", "0", false); }
+            embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
