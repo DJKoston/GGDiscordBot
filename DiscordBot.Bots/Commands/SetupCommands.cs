@@ -38,7 +38,7 @@ namespace DiscordBot.Bots.Commands
             var setupStep4 = new SetupStep("What would you like your Welcome Image to be? (Post a link to the image, DO NOT UPLOAD)", setupStep5);
             var setupStep3 = new SetupStep("What would you like your Welcome Message to be? (Do not include Username etc here as the embed will already contain that information)", setupStep4);
             var setupStep2 = new SetupChannelStep("Which channel would you like your Welcome Channel to be? (This is used to announce when someone joins your server!)", setupStep3);
-            var setupStep1 = new SetupRoleStep("Which role would you like your Nitro Booster role to be? (This is used for 2x XP)", setupStep2);
+            var setupStep1 = new SetupRoleStep("Which role would you like your Double XP role to be? (This is used for 2x XP)", setupStep2);
 
             var nitroBoosterConfig = new NitroBoosterRoleConfig();
             nitroBoosterConfig.GuildId = ctx.Guild.Id;
@@ -81,7 +81,7 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Purple,
             };
 
-            embed.AddField("Nitro Booster Role:", "`!config getnitrorole`");
+            embed.AddField("Double XP:", "`!config get2xprole`");
             embed.AddField("Welcome Channel Config", "`!config getwelcomechannel`");
             embed.AddField("Game Channel:", "`!config getgamechannel`");
             embed.AddField("Now Live Role:", "`!config getnowliverole`");

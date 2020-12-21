@@ -28,7 +28,7 @@ namespace DiscordBot.Bots.Commands
             _nowLiveRoleConfigService = nowLiveRoleConfigService;
         }
 
-        [Command("SetNitroRole")]
+        [Command("Set2xpRole")]
         public async Task CreateNewNitroBoosterConfig(CommandContext ctx, DiscordRole role)
         {
             var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
@@ -45,8 +45,8 @@ namespace DiscordBot.Bots.Commands
 
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"New Discord Nitro Booster Role Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"{role.Mention} is the Nitro Booster Role for the Server!"
+                    Title = $"New Double XP Role Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{role.Mention} is the Double XP Role for the Server!"
                 };
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
@@ -60,11 +60,11 @@ namespace DiscordBot.Bots.Commands
 
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"There is already a Nitro Booster Role Set!",
-                    Description = $"{NitroRole.Mention} is the Nitro Booster Role for the Server!"
+                    Title = $"There is already a Double XP Role Set!",
+                    Description = $"{NitroRole.Mention} is the Double XP Role for the Server!"
                 };
 
-                embed.AddField("To Clear the Config for the Nitro Booster Role", "Do `!config resetnitrorole`");
+                embed.AddField("To Clear the Config for the Double XP Role", "Do `!config reset2xprole`");
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
 
@@ -74,7 +74,7 @@ namespace DiscordBot.Bots.Commands
 
         }
 
-        [Command("GetNitroRole")]
+        [Command("Get2xpRole")]
         public async Task ViewCurrentNitroBoosterRole(CommandContext ctx)
         {
             var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
@@ -83,8 +83,8 @@ namespace DiscordBot.Bots.Commands
             {
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"There is no Nitro Role Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Nitro Role Config, do `!config setnitrorole @Role`"
+                    Title = $"There is no Double XP Role Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Double XP Role Config, do `!config set2xprole @Role`"
                 };
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
@@ -96,15 +96,15 @@ namespace DiscordBot.Bots.Commands
 
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"The Nitro Booster Role Configured\nfor {ctx.Guild.Name}",
-                    Description = $"{NitroBooster.Mention} is the Nitro Booster Role for the Server!"
+                    Title = $"The Double XP Role Configured\nfor {ctx.Guild.Name}",
+                    Description = $"{NitroBooster.Mention} is the Double XP Role for the Server!"
                 };
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
             }
         }
 
-        [Command("ResetNitroRole")]
+        [Command("Reset2xpRole")]
         public async Task ResetNitroBoosterRole(CommandContext ctx)
         {
             var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
@@ -113,8 +113,8 @@ namespace DiscordBot.Bots.Commands
             {
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"There is no Nitro Role Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Nitro Role Config, do `!config setnitrorole @Role`"
+                    Title = $"There is no Double XP Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Double XP Role Config, do `!config set2xprole @Role`"
                 };
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
@@ -128,10 +128,10 @@ namespace DiscordBot.Bots.Commands
 
                 var embed = new DiscordEmbedBuilder
                 {
-                    Title = $"The Nitro Booster Role Config has been reset!",
+                    Title = $"The Double XP Role Config has been reset!",
                 };
 
-                embed.AddField("To Add the Config for the Nitro Booster Role", "Do `!config setnitrorole @Role`");
+                embed.AddField("To Add the Config for the Double XP Role", "Do `!config set2xprole @Role`");
 
                 await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
 
