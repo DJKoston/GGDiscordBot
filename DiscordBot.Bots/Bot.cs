@@ -73,8 +73,6 @@ namespace DiscordBot.Bots
 
             Client = new DiscordClient(config);
 
-            
-
             Client.Heartbeated += OnHeartbeat;
             Client.Ready += OnClientReady;
             Client.MessageCreated += OnMessageCreated;
@@ -429,6 +427,24 @@ namespace DiscordBot.Bots
 
         private async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
         {
+            var members = await e.Guild.GetAllMembersAsync().ConfigureAwait(false);
+            var profiles = members.Where(x => x.IsBot == false);
+
+            foreach (DiscordMember profile in profiles)
+            {
+                if (profile.IsBot)
+                {
+                    continue;
+                }
+
+                await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
+
+                Console.WriteLine($"Profile created for {profile.DisplayName} in {e.Guild.Name}");
+
+                Thread.Sleep(1000);
+            }
+
+
             int guilds = c.Guilds.Count();
 
             if (guilds == 1)
