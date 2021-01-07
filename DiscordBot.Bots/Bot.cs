@@ -84,7 +84,6 @@ namespace DiscordBot.Bots
             Client.GuildAvailable += OnGuildAvaliable;
             Client.PresenceUpdated += OnPresenceUpdated;
             Client.GuildCreated += OnGuildJoin;
-            Client.GuildDeleted += OnGuildLeave;
             Client.GuildUnavailable += OnGuildUnAvaliable;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
@@ -180,7 +179,35 @@ namespace DiscordBot.Bots
 
             var botUptime = DateTime.Now - botStartTime;
 
-            if (c.CurrentUser.Presence.Activity.ActivityType == ActivityType.Watching)
+            var currentStatus = c.CurrentUser.Presence.Activity;
+
+            var liveChannels = Monitor.LiveStreams.Count();
+
+            if (currentStatus.Name == null)
+            {
+                if (guildCount == 1)
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{guildCount} Server!",
+                    }, UserStatus.Online);
+                }
+
+                else
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{guildCount} Servers!",
+                    }, UserStatus.Online);
+                }
+
+                return;
+            }
+
+            //Servers to Uptime
+            if (currentStatus.Name.Contains("Server"))
             {
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
@@ -191,7 +218,87 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            if (c.CurrentUser.Presence.Activity.ActivityType == ActivityType.Playing)
+            if (currentStatus.Name.Contains("Servers!"))
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Playing,
+                    Name = $"Online for: {botUptime.Days}d {botUptime.Hours:00}h {botUptime.Minutes:00}m",
+                }, UserStatus.Online);
+
+                return;
+            }
+
+            //Uptme to Twitch Channels
+            if (currentStatus.Name.Contains("Online for:"))
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.ListeningTo,
+                    Name = $"{lst.Count()} Twitch Channels!",
+                }, UserStatus.Online);
+
+                return;
+            }
+
+            //Twitch Channels to Twitch Streamers
+            if (currentStatus.Name.Contains("Twitch Channels!"))
+            {
+                if (liveChannels == 0)
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{liveChannels} Twitch Streams!",
+                    }, UserStatus.Online);
+                }
+
+                if (liveChannels == 1)
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{liveChannels} Twitch Stream!",
+                    }, UserStatus.Online);
+                }
+
+                else
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{liveChannels} Twitch Streams!",
+                    }, UserStatus.Online);
+                }
+
+                return;
+            }
+
+            //Twitch Channels to Servers
+            if (currentStatus.Name.Contains("Twitch Stream!"))
+            {
+                if (guildCount == 1)
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{guildCount} Server!",
+                    }, UserStatus.Online);
+                }
+
+                else
+                {
+                    await Client.UpdateStatusAsync(new DiscordActivity
+                    {
+                        ActivityType = ActivityType.Watching,
+                        Name = $"{guildCount} Servers!",
+                    }, UserStatus.Online);
+                }
+
+                return;
+            }
+
+            if (currentStatus.Name.Contains("Twitch Streams!"))
             {
                 if (guildCount == 1)
                 {
@@ -427,69 +534,20 @@ namespace DiscordBot.Bots
 
         private async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
         {
-            int guilds = c.Guilds.Count();
+            var members = await e.Guild.GetAllMembersAsync().ConfigureAwait(false);
+            var profiles = members.Where(x => x.IsBot == false);
 
-            if (guilds == 1)
+            foreach (DiscordMember profile in profiles)
             {
-                await Client.UpdateStatusAsync(new DiscordActivity
+                if (profile.IsBot)
                 {
-                    ActivityType = ActivityType.Watching,
-                    Name = $"{guilds} Server!",
-                }, UserStatus.Online);
-            }
-
-            else
-            {
-                await Client.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Watching,
-                    Name = $"{guilds} Servers!",
-                }, UserStatus.Online);
-            }
-
-            new Thread(async () =>
-            {
-                var members = await e.Guild.GetAllMembersAsync().ConfigureAwait(false);
-                var profiles = members.Where(x => x.IsBot == false);
-
-                foreach (DiscordMember profile in profiles)
-                {
-                    if (profile.IsBot)
-                    {
-                        continue;
-                    }
-
-                    await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
-
-                    Console.WriteLine($"Profile created for {profile.DisplayName} in {e.Guild.Name}");
-
-                    Thread.Sleep(1000);
+                    continue;
                 }
-            }).Start();
-        }
 
-        private async Task OnGuildLeave(DiscordClient c, GuildDeleteEventArgs e)
-        {
-            int guilds = c.Guilds.Count();
+                await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
 
-            if (guilds == 1)
-            {
-                await Client.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Watching,
-                    Name = $"{guilds} Server!",
-                }, UserStatus.Online);
+                Console.WriteLine($"Profile created for {profile.DisplayName} in {e.Guild.Name}");
             }
-
-            else
-            {
-                await Client.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Watching,
-                    Name = $"{guilds} Servers!",
-                }, UserStatus.Online);
-            }
-
         }
 
         private Task OnGuildUnAvaliable(DiscordClient c, GuildDeleteEventArgs e)
@@ -646,34 +704,14 @@ namespace DiscordBot.Bots
 
         private async Task OnClientReady(DiscordClient c, ReadyEventArgs e)
         {
-            int guilds = c.Guilds.Count();
-
-            if (guilds == 1)
+            if(Environment.MachineName == "SERVER2011")
             {
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
                     ActivityType = ActivityType.Watching,
-                    Name = $"{guilds} Server!",
-                }, UserStatus.Online);
+                    Name = "the latest test build",
+                }, UserStatus.Idle);
             }
-
-            else
-            {
-                await Client.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Watching,
-                    Name = $"{guilds} Servers!",
-                }, UserStatus.Online);
-            }
-
-            //if(Environment.MachineName == "HAYDON-PC")
-            //{
-                //await Client.UpdateStatusAsync(new DiscordActivity
-                //{
-                    //ActivityType = ActivityType.Watching,
-                    //Name = "the latest test build",
-                //}, UserStatus.Idle);
-            //}
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
