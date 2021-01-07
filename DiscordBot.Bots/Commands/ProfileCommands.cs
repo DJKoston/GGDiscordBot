@@ -437,36 +437,36 @@ namespace DiscordBot.Bots.Commands
                 var tenth = xplist[9];
 
                 // Gets User Display Name in Discord
-                DiscordMember member1 = await ctx.Guild.GetMemberAsync(first.DiscordId);
-                DiscordMember member2 = await ctx.Guild.GetMemberAsync(second.DiscordId);
-                DiscordMember member3 = await ctx.Guild.GetMemberAsync(third.DiscordId);
-                DiscordMember member4 = await ctx.Guild.GetMemberAsync(fourth.DiscordId);
-                DiscordMember member5 = await ctx.Guild.GetMemberAsync(fifth.DiscordId);
-                DiscordMember member6 = await ctx.Guild.GetMemberAsync(sixth.DiscordId);
-                DiscordMember member7 = await ctx.Guild.GetMemberAsync(seventh.DiscordId);
-                DiscordMember member8 = await ctx.Guild.GetMemberAsync(eighth.DiscordId);
-                DiscordMember member9 = await ctx.Guild.GetMemberAsync(ninth.DiscordId);
-                DiscordMember member10 = await ctx.Guild.GetMemberAsync(tenth.DiscordId);
+                DiscordUser member1 = await ctx.Client.GetUserAsync(first.DiscordId);
+                DiscordUser member2 = await ctx.Client.GetUserAsync(second.DiscordId);
+                DiscordUser member3 = await ctx.Client.GetUserAsync(third.DiscordId);
+                DiscordUser member4 = await ctx.Client.GetUserAsync(fourth.DiscordId);
+                DiscordUser member5 = await ctx.Client.GetUserAsync(fifth.DiscordId);
+                DiscordUser member6 = await ctx.Client.GetUserAsync(sixth.DiscordId);
+                DiscordUser member7 = await ctx.Client.GetUserAsync(seventh.DiscordId);
+                DiscordUser member8 = await ctx.Client.GetUserAsync(eighth.DiscordId);
+                DiscordUser member9 = await ctx.Client.GetUserAsync(ninth.DiscordId);
+                DiscordUser member10 = await ctx.Client.GetUserAsync(tenth.DiscordId);
 
                 var leaderboardEmbed = new DiscordEmbedBuilder
                 {
-                    Title = $"XP Leaderboard\n{member1.DisplayName} is currently in 1st!",
+                    Title = $"XP Leaderboard\n{member1.Username} is currently in 1st!",
                     Description = "Here are the top 10 XP gainers in the Discord!",
-                    Color = member1.Color,
+                    Color = DiscordColor.Gold,
                 };
 
                 leaderboardEmbed.WithFooter($"Leaderboard correct as of {DateTime.Now}");
                 leaderboardEmbed.WithThumbnail(member1.AvatarUrl);
-                leaderboardEmbed.AddField("1st", $"{member1.DisplayName} - {first.XP:###,###,###,###,###} XP - Level {first.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("2nd", $"{member2.DisplayName} - {second.XP:###,###,###,###,###} XP - Level {second.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("3rd", $"{member3.DisplayName} - {third.XP:###,###,###,###,###} XP - Level {third.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("4th", $"{member4.DisplayName} - {fourth.XP:###,###,###,###,###} XP - Level {fourth.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("5th", $"{member5.DisplayName} - {fifth.XP:###,###,###,###,###} XP - Level {fifth.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("6th", $"{member6.DisplayName} - {sixth.XP:###,###,###,###,###} XP - Level {sixth.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("7th", $"{member7.DisplayName} - {seventh.XP:###,###,###,###,###} XP - Level {seventh.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("8th", $"{member8.DisplayName} - {eighth.XP:###,###,###,###,###} XP - Level {eighth.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("9th", $"{member9.DisplayName} - {ninth.XP:###,###,###,###,###} XP - Level {ninth.Level:###,###,###,###,###}");
-                leaderboardEmbed.AddField("10th", $"{member10.DisplayName} - {tenth.XP:###,###,###,###,###} XP - Level {tenth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("1st", $"{member1.Username} - {first.XP:###,###,###,###,###} XP - Level {first.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("2nd", $"{member2.Username} - {second.XP:###,###,###,###,###} XP - Level {second.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("3rd", $"{member3.Username} - {third.XP:###,###,###,###,###} XP - Level {third.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("4th", $"{member4.Username} - {fourth.XP:###,###,###,###,###} XP - Level {fourth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("5th", $"{member5.Username} - {fifth.XP:###,###,###,###,###} XP - Level {fifth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("6th", $"{member6.Username} - {sixth.XP:###,###,###,###,###} XP - Level {sixth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("7th", $"{member7.Username} - {seventh.XP:###,###,###,###,###} XP - Level {seventh.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("8th", $"{member8.Username} - {eighth.XP:###,###,###,###,###} XP - Level {eighth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("9th", $"{member9.Username} - {ninth.XP:###,###,###,###,###} XP - Level {ninth.Level:###,###,###,###,###}");
+                leaderboardEmbed.AddField("10th", $"{member10.Username} - {tenth.XP:###,###,###,###,###} XP - Level {tenth.Level:###,###,###,###,###}");
 
                 await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
 
@@ -490,36 +490,36 @@ namespace DiscordBot.Bots.Commands
                 var tenth = xplist[9];
 
                 // Gets User Display Name in Discord
-                DiscordMember member1 = await ctx.Guild.GetMemberAsync(first.DiscordId);
-                DiscordMember member2 = await ctx.Guild.GetMemberAsync(second.DiscordId);
-                DiscordMember member3 = await ctx.Guild.GetMemberAsync(third.DiscordId);
-                DiscordMember member4 = await ctx.Guild.GetMemberAsync(fourth.DiscordId);
-                DiscordMember member5 = await ctx.Guild.GetMemberAsync(fifth.DiscordId);
-                DiscordMember member6 = await ctx.Guild.GetMemberAsync(sixth.DiscordId);
-                DiscordMember member7 = await ctx.Guild.GetMemberAsync(seventh.DiscordId);
-                DiscordMember member8 = await ctx.Guild.GetMemberAsync(eighth.DiscordId);
-                DiscordMember member9 = await ctx.Guild.GetMemberAsync(ninth.DiscordId);
-                DiscordMember member10 = await ctx.Guild.GetMemberAsync(tenth.DiscordId);
+                DiscordUser member1 = await ctx.Client.GetUserAsync(first.DiscordId);
+                DiscordUser member2 = await ctx.Client.GetUserAsync(second.DiscordId);
+                DiscordUser member3 = await ctx.Client.GetUserAsync(third.DiscordId);
+                DiscordUser member4 = await ctx.Client.GetUserAsync(fourth.DiscordId);
+                DiscordUser member5 = await ctx.Client.GetUserAsync(fifth.DiscordId);
+                DiscordUser member6 = await ctx.Client.GetUserAsync(sixth.DiscordId);
+                DiscordUser member7 = await ctx.Client.GetUserAsync(seventh.DiscordId);
+                DiscordUser member8 = await ctx.Client.GetUserAsync(eighth.DiscordId);
+                DiscordUser member9 = await ctx.Client.GetUserAsync(ninth.DiscordId);
+                DiscordUser member10 = await ctx.Client.GetUserAsync(tenth.DiscordId);
 
                 var leaderboardEmbed = new DiscordEmbedBuilder
                 {
-                    Title = $"Gold Leaderboard\n{member1.DisplayName} is currently in 1st!",
+                    Title = $"Gold Leaderboard\n{member1.Username} is currently in 1st!",
                     Description = "Here are the top 10 Gold gainers in the Discord!",
-                    Color = member1.Color,
+                    Color = DiscordColor.Gold,
                 };
 
                 leaderboardEmbed.WithFooter($"Leaderboard correct as of {DateTime.Now}");
                 leaderboardEmbed.WithThumbnail(member1.AvatarUrl);
-                leaderboardEmbed.AddField("1st", $"{member1.DisplayName} - {first.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("2nd", $"{member2.DisplayName} - {second.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("3rd", $"{member3.DisplayName} - {third.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("4th", $"{member4.DisplayName} - {fourth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("5th", $"{member5.DisplayName} - {fifth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("6th", $"{member6.DisplayName} - {sixth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("7th", $"{member7.DisplayName} - {seventh.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("8th", $"{member8.DisplayName} - {eighth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("9th", $"{member9.DisplayName} - {ninth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("10th", $"{member10.DisplayName} - {tenth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("1st", $"{member1.Username} - {first.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("2nd", $"{member2.Username} - {second.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("3rd", $"{member3.Username} - {third.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("4th", $"{member4.Username} - {fourth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("5th", $"{member5.Username} - {fifth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("6th", $"{member6.Username} - {sixth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("7th", $"{member7.Username} - {seventh.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("8th", $"{member8.Username} - {eighth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("9th", $"{member9.Username} - {ninth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("10th", $"{member10.Username} - {tenth.Gold:###,###,###,###,###} Gold");
 
                 await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
 

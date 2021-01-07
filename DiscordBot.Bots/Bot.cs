@@ -1004,8 +1004,6 @@ namespace DiscordBot.Bots
 
                 else
                 {
-                    await _profileService.DeleteProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
-
                     var leaveEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
