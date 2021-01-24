@@ -50,6 +50,7 @@ namespace DiscordBot.Bots
             services.AddScoped<ICommunityStreamerService, CommunityStreamerService>();
             services.AddScoped<ISuggestionService, SuggestionService>();
             services.AddScoped<INowLiveRoleConfigService, NowLiveRoleConfigService>();
+            services.AddScoped<IGoodBotBadBotService, GoodBotBadBotService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();

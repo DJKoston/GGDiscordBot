@@ -50,6 +50,7 @@ namespace DiscordBot.Bots
             _messageStoreService = services.GetService<IMessageStoreService>();
             _gameChannelConfigService = services.GetService<IGameChannelConfigService>();
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
+            _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
 
             api = new TwitchAPI();
 
@@ -159,6 +160,7 @@ namespace DiscordBot.Bots
         private readonly ICustomCommandService _customCommandService;
         private readonly IGameChannelConfigService _gameChannelConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
+        private readonly IGoodBotBadBotService _goodBotBadBotService;
 
         private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
@@ -719,6 +721,13 @@ namespace DiscordBot.Bots
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)
         {
+            DiscordEmoji praisedEmote = DiscordEmoji.FromName(c, ":blush:");
+            DiscordEmoji scoldedEmote = DiscordEmoji.FromName(c, ":disappointed:");
+
+            if (e.Message.Content.ToLower().Contains("good bot")) { await _goodBotBadBotService.AddGoodBot(); await e.Message.CreateReactionAsync(praisedEmote); }
+
+            if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); }
+
             if (e.Channel.IsPrivate) { return; }
 
             if (e.Author.IsBot) { return; }

@@ -29,14 +29,16 @@ namespace DiscordBot.Bots.Commands
         private readonly ISuggestionService _suggestionService;
         private readonly ICommunityStreamerService _communityStreamerService;
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+        private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly IConfiguration _configuration;
 
-        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService, IConfiguration configuration)
+        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService,IGoodBotBadBotService goodBotBadBotService, IConfiguration configuration)
         {
             _context = context;
             _suggestionService = suggestionService;
             _communityStreamerService = communityStreamerService;
             _guildStreamerConfigService = guildStreamerConfigService;
+            _goodBotBadBotService = goodBotBadBotService;
             _configuration = configuration;
         }
 
@@ -424,6 +426,26 @@ namespace DiscordBot.Bots.Commands
             };
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        [Command("praised")]
+        public async Task BotPraised(CommandContext ctx)
+        {
+            var goodBot = await _goodBotBadBotService.GetGoodBot();
+
+            if (goodBot.GoodBot == 0) { await ctx.Channel.SendMessageAsync($"I have been praised {goodBot.GoodBot} times! 😊😊😊"); }
+            if (goodBot.GoodBot == 1) { await ctx.Channel.SendMessageAsync($"I have been praised {goodBot.GoodBot} time! 😊😊😊"); }
+            if (goodBot.GoodBot > 1) { await ctx.Channel.SendMessageAsync($"I have been praised {goodBot.GoodBot} times! 😊😊😊"); }
+        }
+
+        [Command("scolded")]
+        public async Task BotScolded(CommandContext ctx)
+        {
+            var goodBot = await _goodBotBadBotService.GetGoodBot();
+
+            if (goodBot.BadBot == 0) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!"); }
+            if (goodBot.BadBot == 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} time! 😞 I'll try to do better!"); }
+            if (goodBot.BadBot > 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!"); }
         }
     }
 }
