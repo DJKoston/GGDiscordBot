@@ -396,5 +396,34 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
 
+        [Command("starwars")]
+        public async Task StarWarsQuote(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            HttpClientHandler clientHandler = new HttpClientHandler();
+
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var request = new HttpClient(clientHandler)
+            {
+                BaseAddress = new Uri("http://swquotesapi.digitaljedi.dk/api/SWQuote/"),
+            };
+
+            HttpResponseMessage response = await request.GetAsync("RandomStarWarsQuote");
+
+            var resp = await response.Content.ReadAsStringAsync();
+
+            var quote = JsonConvert.DeserializeObject<StarWarsQuotes>(resp);
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"Star Wars Quote #{quote.Id}",
+                Description = quote.Content,
+                Color = DiscordColor.Orange
+            };
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
     }
 }
