@@ -1,6 +1,5 @@
 ﻿using DiscordBot.Bots.Handlers.Dialogue.Steps;
 using DiscordBot.Core.Services.Configs;
-using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
 using DiscordBot.Handlers.Dialogue;
 using DSharpPlus.CommandsNext;

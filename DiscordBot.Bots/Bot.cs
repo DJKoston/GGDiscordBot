@@ -21,7 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -725,6 +724,8 @@ namespace DiscordBot.Bots
             if (e.Author.IsBot) { return; }
 
             if (e.Message.Content.Contains("!")) { return; }
+
+            if (e.Guild.Id == 136613758045913088) { return; }
 
             DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);

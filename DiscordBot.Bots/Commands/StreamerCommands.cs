@@ -1,9 +1,7 @@
 ﻿using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configs;
-using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Configs;
-using DiscordBot.DAL.Models.ReactionRoles;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
