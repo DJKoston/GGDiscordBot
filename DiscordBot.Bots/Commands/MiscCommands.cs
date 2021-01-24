@@ -369,5 +369,32 @@ namespace DiscordBot.Bots.Commands
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
+
+        [Command("randomdog")]
+        public async Task RandomDog(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var request = new HttpClient
+            {
+                BaseAddress = new Uri("https://dog.ceo/api/breeds/image/")
+            };
+
+            HttpResponseMessage response = await request.GetAsync("random");
+
+            var resp = await response.Content.ReadAsStringAsync();
+
+            var advice = JsonConvert.DeserializeObject<RandomDog>(resp);
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"Here is your random dog {ctx.Member.DisplayName}",
+                ImageUrl = advice.Message,
+                Color = DiscordColor.Aquamarine
+            };
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
+
     }
 }
