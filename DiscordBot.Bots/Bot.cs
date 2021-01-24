@@ -726,7 +726,7 @@ namespace DiscordBot.Bots
 
             if (e.Message.Content.ToLower().Contains("good bot")) { await _goodBotBadBotService.AddGoodBot(); await e.Message.CreateReactionAsync(praisedEmote); }
 
-            if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); }
+            if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); await e.Channel.SendMessageAsync($"I'm sorry {e.Author.Mention}, I'll try to do better 😞😞"); }
 
             if (e.Channel.IsPrivate) { return; }
 
