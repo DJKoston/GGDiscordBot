@@ -21,14 +21,17 @@ namespace DiscordBot.Bots.Commands
         private readonly IExperienceService _experienceService;
         private readonly IGoldService _goldService;
         private readonly INitroBoosterRoleConfigService _nitroBoosterRoleConfigService;
+        private readonly ICurrencyNameConfigService _currencyNameConfig;
+        public string currencyName;
 
-        public ProfileCommands(RPGContext context, IProfileService profileService, IExperienceService experienceService, IGoldService goldService, INitroBoosterRoleConfigService nitroBoosterRoleConfigService)
+        public ProfileCommands(RPGContext context, IProfileService profileService, IExperienceService experienceService, IGoldService goldService, INitroBoosterRoleConfigService nitroBoosterRoleConfigService, ICurrencyNameConfigService currencyNameConfig)
         {
             _context = context;
             _profileService = profileService;
             _experienceService = experienceService;
             _goldService = goldService;
             _nitroBoosterRoleConfigService = nitroBoosterRoleConfigService;
+            _currencyNameConfig = currencyNameConfig;
         }
 
         [Command("myinfo")]
@@ -47,7 +50,12 @@ namespace DiscordBot.Bots.Commands
         {
             var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
 
-            if(NBConfig == null)
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
+            if (NBConfig == null)
             {
                 var memberUsername = ctx.Guild.Members[memberId].Username;
 
@@ -69,11 +77,11 @@ namespace DiscordBot.Bots.Commands
 
                 var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
 
-                profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}");
+                profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
-                if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
-                if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
+                if (profile.Gold == 0) { profileEmbed.AddField(currencyName, profile.Gold.ToString()); }
+                if (profile.Gold >= 1) { profileEmbed.AddField(currencyName, profile.Gold.ToString("###,###,###,###,###")); };
 
                 if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
                 if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
@@ -108,12 +116,12 @@ namespace DiscordBot.Bots.Commands
 
                 profileEmbed.WithThumbnail(member.AvatarUrl);
 
-                if (profile.Gold == 0) { profileEmbed.AddField("Gold", profile.Gold.ToString()); }
-                if (profile.Gold >= 1) { profileEmbed.AddField("Gold", profile.Gold.ToString("###,###,###,###,###")); };
+                if (profile.Gold == 0) { profileEmbed.AddField(currencyName, profile.Gold.ToString()); }
+                if (profile.Gold >= 1) { profileEmbed.AddField(currencyName, profile.Gold.ToString("###,###,###,###,###")); };
 
                 var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
 
-                profileEmbed.AddField("XP", $"{profile.XP.ToString("###,###,###,###,###")} / {nextLevel.ToString("###,###,###,###,###")}");
+                profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
                 if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
@@ -168,15 +176,20 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
         }
 
-        [Command("givegold")]
+        [Command("givecurrency")]
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
-        public async Task GiveGold(CommandContext ctx, DiscordMember member, int number)
+        public async Task GiveCurrency(CommandContext ctx, DiscordMember member, int number)
         {
-            await GiveGold(ctx, member.Id, number);
+            await GiveCurrency(ctx, member.Id, number);
         }
 
-        private async Task GiveGold(CommandContext ctx, ulong memberId, int goldGranted)
+        private async Task GiveCurrency(CommandContext ctx, ulong memberId, int goldGranted)
         {
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             var member = ctx.Guild.Members[memberId];
             var memberUsername = ctx.Guild.Members[memberId].Username;
 
@@ -186,24 +199,24 @@ namespace DiscordBot.Bots.Commands
 
             var GoldAddedEmbed = new DiscordEmbedBuilder
             {
-                Title = $"{goldGranted:###,###,###,###,###} Gold given to {member.DisplayName}!",
+                Title = $"{goldGranted:###,###,###,###,###} {currencyName} given to {member.DisplayName}!",
                 Color = DiscordColor.Blurple
             };
 
             Profile newProfile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
 
-            if (oldProfile.Gold == 0) { GoldAddedEmbed.AddField("Gold Before", oldProfile.Gold.ToString()); }
-            if (oldProfile.Gold >= 1) { GoldAddedEmbed.AddField("Gold Before", oldProfile.Gold.ToString("###,###,###,###,###")); }
+            if (oldProfile.Gold == 0) { GoldAddedEmbed.AddField($"{currencyName} Before", oldProfile.Gold.ToString()); }
+            if (oldProfile.Gold >= 1) { GoldAddedEmbed.AddField($"{currencyName} Before", oldProfile.Gold.ToString("###,###,###,###,###")); }
 
-            if (newProfile.Gold == 0) { GoldAddedEmbed.AddField("Gold Now", newProfile.Gold.ToString()); }
-            if (newProfile.Gold >= 1) { GoldAddedEmbed.AddField("Gold Now", newProfile.Gold.ToString("###,###,###,###,###")); }
+            if (newProfile.Gold == 0) { GoldAddedEmbed.AddField($"{currencyName} Now", newProfile.Gold.ToString()); }
+            if (newProfile.Gold >= 1) { GoldAddedEmbed.AddField($"{currencyName} Now", newProfile.Gold.ToString("###,###,###,###,###")); }
 
             if (oldProfile.Gold == newProfile.Gold)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
                     Title = "An Error has occurred!",
-                    Description = $"It appears an error has occurred while trying to add {goldGranted:###,###,###,###,###} gold to {member.DisplayName}",
+                    Description = $"It appears an error has occurred while trying to add {goldGranted:###,###,###,###,###} {currencyName} to {member.DisplayName}",
                     Color = DiscordColor.Red
                 };
 
@@ -221,6 +234,11 @@ namespace DiscordBot.Bots.Commands
         [Description("Usage: !pay {user} {amount}")]
         public async Task PayUser(CommandContext ctx, DiscordMember member, int payAmount)
         {
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             Profile userProfile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
             await _profileService.GetOrCreateProfileAsync(member.Id, ctx.Guild.Id, member.Username);
 
@@ -229,12 +247,12 @@ namespace DiscordBot.Bots.Commands
                 var userProfileCheckFailEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"You can't pay that much {ctx.Member.DisplayName}!",
-                    Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount:###,###,###,###,###} Gold! Try paying them a smaller amount... We have shown you how much Gold you have below!",
+                    Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount:###,###,###,###,###} {currencyName}! Try paying them a smaller amount... We have shown you how much {currencyName} you have below!",
                     Color = DiscordColor.IndianRed,
                 };
 
-                if (userProfile.Gold == 0) { userProfileCheckFailEmbed.AddField("Gold", userProfile.Gold.ToString()); }
-                if (userProfile.Gold >= 1) { userProfileCheckFailEmbed.AddField("Gold", userProfile.Gold.ToString("###,###,###,###,###")); }
+                if (userProfile.Gold == 0) { userProfileCheckFailEmbed.AddField(currencyName, userProfile.Gold.ToString()); }
+                if (userProfile.Gold >= 1) { userProfileCheckFailEmbed.AddField(currencyName, userProfile.Gold.ToString("###,###,###,###,###")); }
 
                 await ctx.Channel.SendMessageAsync(embed: userProfileCheckFailEmbed).ConfigureAwait(false);
 
@@ -246,7 +264,7 @@ namespace DiscordBot.Bots.Commands
 
                 var lessThanCheck = new DiscordEmbedBuilder
                 {
-                    Title = $"You cannot pay less than 0 {ctx.Member.DisplayName}!",
+                    Title = $"You cannot pay less than 0 {currencyName} {ctx.Member.DisplayName}!",
                     Description = "Nice try suckka!",
                     Color = DiscordColor.IndianRed,
                 };
@@ -261,7 +279,7 @@ namespace DiscordBot.Bots.Commands
 
             var paidEmbed = new DiscordEmbedBuilder
             {
-                Title = $"You have paid {member.DisplayName} {payAmount:###,###,###,###,###} Gold!",
+                Title = $"You have paid {member.DisplayName} {payAmount:###,###,###,###,###} {currencyName}!",
                 Description = $"Thank you for using the GG Bot Payment Network {ctx.Member.DisplayName}!",
                 Color = DiscordColor.SpringGreen,
             };
@@ -275,6 +293,11 @@ namespace DiscordBot.Bots.Commands
         public async Task HourlyCollect(CommandContext ctx)
         {
             var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
 
             var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
 
@@ -291,7 +314,7 @@ namespace DiscordBot.Bots.Commands
                 var hourlyEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{ctx.Member.DisplayName} has just collected their hourly 'Tax'!",
-                    Description = $"You just received {hourlyCollectNitro:###,###,###,###,###} Gold!",
+                    Description = $"You just received {hourlyCollectNitro:###,###,###,###,###} {currencyName}!",
                     Color = DiscordColor.Cyan,
                 };
 
@@ -314,7 +337,7 @@ namespace DiscordBot.Bots.Commands
                 var hourlyEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{ctx.Member.DisplayName} has just collected their hourly 'Tax'!",
-                    Description = $"You just received {hourlyCollect:###,###,###,###,###} Gold!",
+                    Description = $"You just received {hourlyCollect:###,###,###,###,###} {currencyName}!",
                     Color = DiscordColor.Cyan,
                 };
 
@@ -333,6 +356,11 @@ namespace DiscordBot.Bots.Commands
         {
             var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
 
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
 
             if (ctx.Member.Roles.Contains(NitroBoosterRole))
@@ -348,7 +376,7 @@ namespace DiscordBot.Bots.Commands
                 var dailyEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{ctx.Member.DisplayName} has collected their Daily 'Tax'!",
-                    Description = $"You just received {dailyCollectNitro:###,###,###,###,###} Gold!",
+                    Description = $"You just received {dailyCollectNitro:###,###,###,###,###} {currencyName}!",
                     Color = DiscordColor.Cyan,
                 };
 
@@ -371,7 +399,7 @@ namespace DiscordBot.Bots.Commands
                 var dailyEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{ctx.Member.DisplayName} has collected their Daily 'Tax'!",
-                    Description = $"You just received {dailyCollect:###,###,###,###,###} Gold!",
+                    Description = $"You just received {dailyCollect:###,###,###,###,###} {currencyName}!",
                     Color = DiscordColor.Cyan,
                 };
 
@@ -413,13 +441,23 @@ namespace DiscordBot.Bots.Commands
         [Description("Displays the Top 10 users")]
         public async Task Top10Blank(CommandContext ctx)
         {
-            await ctx.Channel.SendMessageAsync("You need to specify whether you want `!top10 Gold` or `!top10 XP` only!");
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
+            await ctx.Channel.SendMessageAsync($"You need to specify whether you want `!top10 {currencyName}` or `!top10 XP` only!");
         }
 
         [Command("top10")]
         [Description("Displays the Top 10 users!")]
-        public async Task Top10(CommandContext ctx, string XPorGold)
+        public async Task Top10(CommandContext ctx, [RemainingText]string XPorGold)
         {
+            var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             if (XPorGold.ToLower() == "xp")
             {
                 var xplist = _context.Profiles.Where(x => x.XP >= 0 && x.GuildId == ctx.Guild.Id).OrderByDescending(x => x.XP).Take(10).AsNoTracking().ToList();
@@ -473,7 +511,7 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            if (XPorGold.ToLower() == "gold")
+            if (XPorGold.ToLower() == currencyName.ToLower())
             {
                 var xplist = _context.Profiles.Where(x => x.XP >= 1 && x.GuildId == ctx.Guild.Id).OrderByDescending(x => x.Gold).Take(10).AsNoTracking().ToList();
 
@@ -504,28 +542,28 @@ namespace DiscordBot.Bots.Commands
                 var leaderboardEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"Gold Leaderboard\n{member1.Username} is currently in 1st!",
-                    Description = "Here are the top 10 Gold gainers in the Discord!",
+                    Description = $"Here are the top 10 {currencyName} gainers in the Discord!",
                     Color = DiscordColor.Gold,
                 };
 
                 leaderboardEmbed.WithFooter($"Leaderboard correct as of {DateTime.Now}");
                 leaderboardEmbed.WithThumbnail(member1.AvatarUrl);
-                leaderboardEmbed.AddField("1st", $"{member1.Username} - {first.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("2nd", $"{member2.Username} - {second.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("3rd", $"{member3.Username} - {third.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("4th", $"{member4.Username} - {fourth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("5th", $"{member5.Username} - {fifth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("6th", $"{member6.Username} - {sixth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("7th", $"{member7.Username} - {seventh.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("8th", $"{member8.Username} - {eighth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("9th", $"{member9.Username} - {ninth.Gold:###,###,###,###,###} Gold");
-                leaderboardEmbed.AddField("10th", $"{member10.Username} - {tenth.Gold:###,###,###,###,###} Gold");
+                leaderboardEmbed.AddField("1st", $"{member1.Username} - {first.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("2nd", $"{member2.Username} - {second.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("3rd", $"{member3.Username} - {third.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("4th", $"{member4.Username} - {fourth.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("5th", $"{member5.Username} - {fifth.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("6th", $"{member6.Username} - {sixth.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("7th", $"{member7.Username} - {seventh.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("8th", $"{member8.Username} - {eighth.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("9th", $"{member9.Username} - {ninth.Gold:###,###,###,###,###} {currencyName}");
+                leaderboardEmbed.AddField("10th", $"{member10.Username} - {tenth.Gold:###,###,###,###,###} {currencyName}");
 
                 await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
 
                 return;
             }
-            await ctx.Channel.SendMessageAsync("You need to specify whether you want `!top10 Gold` or `!top10 XP` only!");
+            await ctx.Channel.SendMessageAsync($"You need to specify whether you want `!top10 {currencyName}` or `!top10 XP` only!");
 
             return;
         }

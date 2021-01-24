@@ -18,13 +18,15 @@ namespace DiscordBot.Bots.Commands
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
         private readonly IGameChannelConfigService _gameChannelConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
+        private readonly ICurrencyNameConfigService _currencyNameConfigService;
 
-        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService, IGameChannelConfigService gameChannelConfigService, INowLiveRoleConfigService nowLiveRoleConfigService)
+        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService, IGameChannelConfigService gameChannelConfigService, INowLiveRoleConfigService nowLiveRoleConfigService, ICurrencyNameConfigService currencyNameConfigService)
         {
             _nitroBoosterRoleService = nitroBoosterRoleService;
             _welcomeMessageConfigService = welcomeMessageConfigService;
             _gameChannelConfigService = gameChannelConfigService;
             _nowLiveRoleConfigService = nowLiveRoleConfigService;
+            _currencyNameConfigService = currencyNameConfigService;
         }
 
         [Command("Set2xpRole")]
@@ -533,5 +535,113 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
         }
+
+        [Command("SetCurrencyName")]
+        public async Task SetCurrencyName(CommandContext ctx, [RemainingText]string currencyName)
+        {
+            var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var CurrencyNameConfig = new CurrencyNameConfig()
+                {
+                    GuildId = ctx.Guild.Id,
+                    CurrencyName = currencyName,
+                };
+
+                await _currencyNameConfigService.CreateCurrencyNameConfig(CurrencyNameConfig);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"New Custom Currency Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{currencyName} is the Currency Name for the Server!"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is already a Custom Currency Name Set!",
+                    Description = $"{config.CurrencyName} is the current Custom Currency Name for the Server!"
+                };
+
+                embed.AddField("To Clear the Config", "Do `!config resetcurrencyname`");
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+
+        }
+
+        [Command("GetCurrencyName")]
+        public async Task ViewCurrentCurrencyName(CommandContext ctx)
+        {
+            var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is no Custom Currency Name Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Custom Currency Name Config, do `!config setcurrencyname 'currencyname'`"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+
+            else
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"The Custom Currency Name Configured\nfor {ctx.Guild.Name}",
+                    Description = $"{config.CurrencyName} is the Custom Currency Name for the Server!"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+        }
+
+        [Command("ResetCurrencyName")]
+        public async Task ResetCustomCurrency(CommandContext ctx)
+        {
+            var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
+
+            if (config == null)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"There is no Custom Currency Name Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"To add a Custom Currency Name Config, do `!config setcurrencyname 'currencyname'`"
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+
+            else
+            {
+                await _currencyNameConfigService.RemoveCurrencyNameConfig(config);
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"The Custom Currency Name Config has been reset!",
+                };
+
+                embed.AddField("To Add the Config for the Custom Currency Name", "Do `!config setcurrencyname Currency Name`");
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                return;
+            }
+        }
+
     }
 }

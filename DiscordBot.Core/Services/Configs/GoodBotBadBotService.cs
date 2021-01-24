@@ -25,9 +25,9 @@ namespace DiscordBot.Core.Services.Configs
         {
             using var context = new RPGContext(_options);
 
-            var goodBotBadBot = await context.GoodBotBadBots.FirstOrDefaultAsync().ConfigureAwait(false);
+            var goodBotBadBot = await context.GoodBotBadBots.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
 
-            goodBotBadBot.GoodBot = goodBotBadBot.GoodBot + 1;
+            goodBotBadBot.GoodBot += 1;
 
             context.Update(goodBotBadBot);
 
@@ -38,9 +38,9 @@ namespace DiscordBot.Core.Services.Configs
         {
             using var context = new RPGContext(_options);
 
-            var goodBotBadBot = await context.GoodBotBadBots.FirstOrDefaultAsync().ConfigureAwait(false);
+            var goodBotBadBot = await context.GoodBotBadBots.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
 
-            goodBotBadBot.BadBot = goodBotBadBot.BadBot + 1;
+            goodBotBadBot.BadBot += 1;
 
             context.Update(goodBotBadBot);
 
@@ -51,14 +51,14 @@ namespace DiscordBot.Core.Services.Configs
         {
             using var context = new RPGContext(_options);
 
-            return await context.GoodBotBadBots.FirstOrDefaultAsync().ConfigureAwait(false);
+            return await context.GoodBotBadBots.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
         }
 
         public async Task<GoodBotBadBot> GetBadBot()
         {
             using var context = new RPGContext(_options);
 
-            return await context.GoodBotBadBots.FirstOrDefaultAsync().ConfigureAwait(false);
+            return await context.GoodBotBadBots.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
         }
     }
 }

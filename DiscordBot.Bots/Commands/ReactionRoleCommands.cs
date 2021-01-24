@@ -48,7 +48,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("delete")]
-        public async Task DeletedReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordRole Role, DiscordEmoji Emoji)
+        public async Task DeletedReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordEmoji Emoji)
         {
             DiscordChannel channel = ctx.Guild.GetChannel(Channel.Id);
             DiscordMessage message = await channel.GetMessageAsync(MessageId);

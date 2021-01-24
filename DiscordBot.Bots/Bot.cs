@@ -48,9 +48,9 @@ namespace DiscordBot.Bots
             _welcomeMessageConfigService = services.GetService<IWelcomeMessageConfigService>();
             _guildStreamerConfigService = services.GetService<IGuildStreamerConfigService>();
             _messageStoreService = services.GetService<IMessageStoreService>();
-            _gameChannelConfigService = services.GetService<IGameChannelConfigService>();
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
+            _currencyNameService = services.GetService<ICurrencyNameConfigService>();
 
             api = new TwitchAPI();
 
@@ -158,9 +158,9 @@ namespace DiscordBot.Bots
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
         private readonly IMessageStoreService _messageStoreService;
         private readonly ICustomCommandService _customCommandService;
-        private readonly IGameChannelConfigService _gameChannelConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
+        private readonly ICurrencyNameConfigService _currencyNameService;
 
         private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
@@ -705,7 +705,7 @@ namespace DiscordBot.Bots
 
         private async Task OnClientReady(DiscordClient c, ReadyEventArgs e)
         {
-            if(Environment.MachineName == "SERVER2011")
+            if(Environment.MachineName == "Haydon-PC")
             {
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
@@ -751,17 +751,23 @@ namespace DiscordBot.Bots
 
                 GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
                 
-
                 if (!viewModel.LevelledUp) { return; }
 
                 Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
 
                 int levelUpGold = (profile.Level * 100);
 
+                var CNConfig = await _currencyNameService.GetCurrencyNameConfig(e.Guild.Id);
+
+                var currencyName = "Gold";
+
+                if (CNConfig == null) { currencyName = "Gold"; }
+                else { currencyName = CNConfig.CurrencyName; }
+
                 var leveledUpEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
+                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
                     Color = DiscordColor.Gold,
                 };
 
@@ -794,10 +800,17 @@ namespace DiscordBot.Bots
 
                 int levelUpGold = profile.Level * 100;
 
+                var CNConfig = await _currencyNameService.GetCurrencyNameConfig(e.Guild.Id);
+
+                var currencyName = "Gold";
+
+                if (CNConfig == null) { currencyName = "Gold"; }
+                else { currencyName = CNConfig.CurrencyName; }
+
                 var leveledUpEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
+                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
                     Color = DiscordColor.Gold,
                 };
 
@@ -820,26 +833,29 @@ namespace DiscordBot.Bots
 
                 GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
 
-       
-
                 if (!viewModel.LevelledUp) { return; }
 
                 Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
 
                 int levelUpGold = (profile.Level * 100);
 
+                var CNConfig = await _currencyNameService.GetCurrencyNameConfig(e.Guild.Id);
+
+                var currencyName = "Gold";
+
+                if (CNConfig == null) { currencyName = "Gold"; }
+                else { currencyName = CNConfig.CurrencyName; }
+
                 var leveledUpEmbed = new DiscordEmbedBuilder
                 {
                     Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} Gold for Levelling Up!",
+                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
                     Color = DiscordColor.Gold,
                 };
 
                 leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
                 await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
-
-                
 
                 return;
             }

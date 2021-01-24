@@ -14,12 +14,15 @@ namespace DiscordBot.Bots.Commands
         private readonly IProfileService _profileService;
         private readonly IGoldService _goldService;
         private readonly IGameChannelConfigService _gameChannelConfigService;
+        private readonly ICurrencyNameConfigService _currencyNameService;
+        public string currencyName;
 
-        public GameCommands(IProfileService profileService, IGoldService goldService, IGameChannelConfigService gameChannelConfigService)
+        public GameCommands(IProfileService profileService, IGoldService goldService, IGameChannelConfigService gameChannelConfigService, ICurrencyNameConfigService currencyNameService)
         {
             _profileService = profileService;
             _goldService = goldService;
             _gameChannelConfigService = gameChannelConfigService;
+            _currencyNameService = currencyNameService;
         }
 
         [Command("spin")]
@@ -28,7 +31,7 @@ namespace DiscordBot.Bots.Commands
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
 
-            if(ctx.Channel.Id == configChannel.ChannelId)
+            if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var errorEmbed = new DiscordEmbedBuilder
                 {
@@ -54,6 +57,11 @@ namespace DiscordBot.Bots.Commands
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
 
+            var CNConfig = await _currencyNameService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var rnd = new Random();
@@ -65,7 +73,7 @@ namespace DiscordBot.Bots.Commands
                 {
                     var maxLimitCheck = new DiscordEmbedBuilder
                     {
-                        Title = "You can't bet more than 1,000,000 Gold!",
+                        Title = $"You can't bet more than 1,000,000 {currencyName}!",
                         Description = "Please try again in 1 min",
                         Color = DiscordColor.HotPink,
                     };
@@ -101,11 +109,11 @@ namespace DiscordBot.Bots.Commands
                     var profileCheckFail = new DiscordEmbedBuilder
                     {
                         Title = "You can't bet that much!",
-                        Description = $"Seems like you're too poor to afford to bet {bet:###,###,###,###,###} Gold! Try betting a smaller amount... We have shown you how much Gold you have below!"
+                        Description = $"Seems like you're too poor to afford to bet {bet:###,###,###,###,###} {currencyName}! Try betting a smaller amount... We have shown you how much {currencyName} you have below!"
                     };
 
-                    if (profileCheck.Gold == 0) { profileCheckFail.AddField("Gold", profileCheck.Gold.ToString()); }
-                    if (profileCheck.Gold >= 1) { profileCheckFail.AddField("Gold", profileCheck.Gold.ToString("###,###,###,###,###")); }
+                    if (profileCheck.Gold == 0) { profileCheckFail.AddField(currencyName, profileCheck.Gold.ToString()); }
+                    if (profileCheck.Gold >= 1) { profileCheckFail.AddField(currencyName, profileCheck.Gold.ToString("###,###,###,###,###")); }
 
                     profileCheckFail.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
                     profileCheckFail.WithFooter($"Command run by {ctx.Member.DisplayName}");
@@ -128,7 +136,7 @@ namespace DiscordBot.Bots.Commands
                     var winEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"You won the spin!",
-                        Description = $"You just won {winAmount:###,###,###,###,###} Gold!",
+                        Description = $"You just won {winAmount:###,###,###,###,###} {currencyName}!",
                         Color = DiscordColor.SpringGreen
                     };
 
@@ -148,7 +156,7 @@ namespace DiscordBot.Bots.Commands
                     var loseEmbed = new DiscordEmbedBuilder
                     {
                         Title = "You lost the spin!",
-                        Description = $"You just lost {bet:###,###,###,###,###} Gold!",
+                        Description = $"You just lost {bet:###,###,###,###,###} {currencyName}!",
                         Color = DiscordColor.IndianRed
                     };
 
@@ -172,6 +180,11 @@ namespace DiscordBot.Bots.Commands
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
 
+            var CNConfig = await _currencyNameService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 if (commandString == "all")
@@ -185,7 +198,7 @@ namespace DiscordBot.Bots.Commands
                     {
                         var maxLimitCheck = new DiscordEmbedBuilder
                         {
-                            Title = "You can't bet more than 1,000,000 Gold!",
+                            Title = $"You can't bet more than 1,000,000 {currencyName}!",
                             Description = "Please try again in 1 min",
                             Color = DiscordColor.HotPink,
                         };
@@ -203,7 +216,7 @@ namespace DiscordBot.Bots.Commands
                     {
                         var lessThanCheck = new DiscordEmbedBuilder
                         {
-                            Title = "You cannot bet 0 Gold or less!",
+                            Title = $"You cannot bet 0 {currencyName} or less!",
                             Description = "Nice try suckka!",
                             Color = DiscordColor.HotPink,
                         };
@@ -231,7 +244,7 @@ namespace DiscordBot.Bots.Commands
                         var winEmbed = new DiscordEmbedBuilder
                         {
                             Title = $"You won the spin!",
-                            Description = $"You just won {winAmount:###,###,###,###,###} Gold!",
+                            Description = $"You just won {winAmount:###,###,###,###,###} {currencyName}!",
                             Color = DiscordColor.SpringGreen
                         };
 
@@ -251,7 +264,7 @@ namespace DiscordBot.Bots.Commands
                         var loseEmbed = new DiscordEmbedBuilder
                         {
                             Title = "You lost the spin!",
-                            Description = $"You just lost {bet:###,###,###,###,###} Gold!",
+                            Description = $"You just lost {bet:###,###,###,###,###} {currencyName}!",
                             Color = DiscordColor.IndianRed
                         };
 
@@ -298,6 +311,11 @@ namespace DiscordBot.Bots.Commands
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
 
+            var CNConfig = await _currencyNameService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 var rnd = new Random();
@@ -328,7 +346,7 @@ namespace DiscordBot.Bots.Commands
                     var errorEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"You cannot steal from {member.DisplayName}",
-                        Description = "They don't have any gold! Talk about trying to kick a man while he's down!",
+                        Description = $"They don't have any {currencyName}! Talk about trying to kick a man while he's down!",
                         Color = DiscordColor.IndianRed,
                     };
 
@@ -351,18 +369,18 @@ namespace DiscordBot.Bots.Commands
 
                         var winEmbed = new DiscordEmbedBuilder
                         {
-                            Title = $"You successfully stole {rndSteal:###,###,###,###,###} Gold from {member.DisplayName}!",
+                            Title = $"You successfully stole {rndSteal:###,###,###,###,###} {currencyName} from {member.DisplayName}!",
                             Color = DiscordColor.SpringGreen
                         };
 
                         Profile thiefWinProfile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
                         Profile victimLoseProfile = await _profileService.GetOrCreateProfileAsync(member.Id, ctx.Guild.Id, member.Username);
 
-                        if (thiefProfile.Gold == 0) { winEmbed.AddField("Gold", thiefWinProfile.Gold.ToString()); }
-                        if (thiefProfile.Gold >= 1) { winEmbed.AddField("Gold", thiefWinProfile.Gold.ToString("###,###,###,###,###")); }
+                        if (thiefProfile.Gold == 0) { winEmbed.AddField(currencyName, thiefWinProfile.Gold.ToString()); }
+                        if (thiefProfile.Gold >= 1) { winEmbed.AddField(currencyName, thiefWinProfile.Gold.ToString("###,###,###,###,###")); }
 
-                        if (victimLoseProfile.Gold == 0) { winEmbed.AddField("Their Gold", victimLoseProfile.Gold.ToString()); }
-                        if (victimLoseProfile.Gold >= 1) { winEmbed.AddField("Their Gold", victimLoseProfile.Gold.ToString("###,###,###,###,###")); }
+                        if (victimLoseProfile.Gold == 0) { winEmbed.AddField($"Their {currencyName}", victimLoseProfile.Gold.ToString()); }
+                        if (victimLoseProfile.Gold >= 1) { winEmbed.AddField($"Their {currencyName}", victimLoseProfile.Gold.ToString("###,###,###,###,###")); }
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
                         winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
@@ -383,11 +401,11 @@ namespace DiscordBot.Bots.Commands
                         Profile thiefLoseProfile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
                         Profile victimWinProfile = await _profileService.GetOrCreateProfileAsync(member.Id, ctx.Guild.Id, member.Username);
 
-                        if (thiefProfile.Gold == 0) { loseEmbed.AddField("Gold", thiefLoseProfile.Gold.ToString()); }
-                        if (thiefProfile.Gold >= 1) { loseEmbed.AddField("Gold", thiefLoseProfile.Gold.ToString("###,###,###,###,###")); }
+                        if (thiefProfile.Gold == 0) { loseEmbed.AddField(currencyName, thiefLoseProfile.Gold.ToString()); }
+                        if (thiefProfile.Gold >= 1) { loseEmbed.AddField(currencyName, thiefLoseProfile.Gold.ToString("###,###,###,###,###")); }
 
-                        if (victimWinProfile.Gold == 0) { loseEmbed.AddField("Their Gold", victimWinProfile.Gold.ToString()); }
-                        if (victimWinProfile.Gold >= 1) { loseEmbed.AddField("Their Gold", victimWinProfile.Gold.ToString("###,###,###,###,###")); }
+                        if (victimWinProfile.Gold == 0) { loseEmbed.AddField($"Their {currencyName}", victimWinProfile.Gold.ToString()); }
+                        if (victimWinProfile.Gold >= 1) { loseEmbed.AddField($"Their {currencyName}", victimWinProfile.Gold.ToString("###,###,###,###,###")); }
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
                         loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
@@ -401,7 +419,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("guess")]
-        [Description("Guess a number between 1 and 5, if you're right - Win 2500 Gold if you are right!!")]
+        [Description("Guess a number between 1 and 5, if you're right - Win 2500 Currency if you are right!!")]
         public async Task GuessTheNumber(CommandContext ctx)
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
@@ -423,11 +441,16 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("guess")]
-        [Description("Guess a number between 1 and 10, if you're right - Win 2,500 Gold if you are right!!")]
+        [Description("Guess a number between 1 and 10, if you're right - Win 2,500 Currency if you are right!!")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task GuessTheNumber(CommandContext ctx, int guess)
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            var CNConfig = await _currencyNameService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
 
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
@@ -462,11 +485,11 @@ namespace DiscordBot.Bots.Commands
                     var winEmbed = new DiscordEmbedBuilder
                     {
                         Title = $"You correctly guessed the number {Number}",
-                        Description = "You just won 2,500 Gold!",
+                        Description = $"You just won 2,500 {currencyName}!",
                         Color = DiscordColor.SpringGreen,
                     };
 
-                    winEmbed.AddField("Your Gold:", profile.Gold.ToString());
+                    winEmbed.AddField($"Your {currencyName}:", profile.Gold.ToString());
                     winEmbed.AddField("The number has now changed!", "Can you guess it now?");
                     winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
                     winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
@@ -491,10 +514,12 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("guess")]
-        [Description("Guess a number between 1 and 10, if you're right - Win 2500 Gold if you are right!!")]
+        [Description("Guess a number between 1 and 10, if you're right - Win 2500 Currency if you are right!!")]
         public async Task GuessTheNumber(CommandContext ctx, string text)
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
+
+            text.Remove(0);
 
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
@@ -512,7 +537,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("coinflip")]
-        [Description("Flip a coin, auto bet 50 gold! If you guess it, you get 100 back!")]
+        [Description("")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task FlipACoin(CommandContext ctx)
         {
@@ -534,16 +559,20 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("coinflip")]
-        [Description("Flip a coin, auto bet 50 gold! If you guess it, you get 100 back!")]
+        [Description("Flip a coin! If you guess it, you get 500 Currency back!")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task FlipACoin(CommandContext ctx, string guess)
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
 
+            var CNConfig = await _currencyNameService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            if (CNConfig == null) { currencyName = "Gold"; }
+            else { currencyName = CNConfig.CurrencyName; }
+
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
                 await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
-                await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -50, ctx.Member.Username);
 
                 var rnd = new Random();
                 var outcome = rnd.Next(1, 3).ToString();
@@ -555,12 +584,12 @@ namespace DiscordBot.Bots.Commands
                 {
                     if (outcome == heads)
                     {
-                        await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, 100, ctx.Member.Username);
+                        await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, 500, ctx.Member.Username);
 
                         var winEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Heads!",
-                            Description = "You just won 50 Gold!",
+                            Description = $"You just won 500 {currencyName}!",
                             Color = DiscordColor.SpringGreen,
                         };
 
@@ -578,7 +607,7 @@ namespace DiscordBot.Bots.Commands
                         var loseEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Tails!",
-                            Description = "You just lost 50 Gold!",
+                            Description = $"You just lost the toss!",
                             Color = DiscordColor.IndianRed,
                         };
 
@@ -595,12 +624,12 @@ namespace DiscordBot.Bots.Commands
                 {
                     if (outcome == tails)
                     {
-                        await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, 100, ctx.Member.Username);
+                        await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, 500, ctx.Member.Username);
 
                         var winEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Tails!",
-                            Description = "You just won 50 Gold!",
+                            Description = $"You just won 500 {currencyName}!",
                             Color = DiscordColor.SpringGreen,
                         };
 
@@ -617,7 +646,7 @@ namespace DiscordBot.Bots.Commands
                         var loseEmbed = new DiscordEmbedBuilder
                         {
                             Title = "The coin landed on Heads!",
-                            Description = "You just lost 50 Gold!",
+                            Description = "You just lost the toss!",
                             Color = DiscordColor.IndianRed,
                         };
 

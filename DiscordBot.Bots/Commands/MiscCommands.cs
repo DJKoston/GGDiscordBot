@@ -403,9 +403,10 @@ namespace DiscordBot.Bots.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            HttpClientHandler clientHandler = new HttpClientHandler();
-
-            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            HttpClientHandler clientHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
+            };
 
             var request = new HttpClient(clientHandler)
             {
@@ -447,5 +448,7 @@ namespace DiscordBot.Bots.Commands
             if (goodBot.BadBot == 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} time! 😞 I'll try to do better!"); }
             if (goodBot.BadBot > 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!"); }
         }
+
+        
     }
 }
