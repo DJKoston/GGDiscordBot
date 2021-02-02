@@ -377,7 +377,8 @@ namespace DiscordBot.Bots
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
-                    
+
+                    if (guild.Id == 136613758045913088) { return; }
 
                     var messageStore = new NowLiveMessages
                     {
@@ -424,6 +425,7 @@ namespace DiscordBot.Bots
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
+                    if (guild.Id == 136613758045913088) { return; }
 
                     var messageStore = new NowLiveMessages
                     {
