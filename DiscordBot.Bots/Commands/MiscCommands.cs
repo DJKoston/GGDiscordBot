@@ -459,7 +459,8 @@ namespace DiscordBot.Bots.Commands
 
             var embed = new DiscordEmbedBuilder
             {
-                Title = $"{quote.Quote} - {quote.Character}",
+                Title = $"{quote.Quote}",
+                Description = $"{quote.Character}",
                 ImageUrl = quote.ImageURL,
                 Color = DiscordColor.Yellow,
             };
