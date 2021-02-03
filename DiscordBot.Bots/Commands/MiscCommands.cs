@@ -467,5 +467,27 @@ namespace DiscordBot.Bots.Commands
 
             await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
+
+        [Command("bestgirl")]
+        [Description("DudeBDR only Command!")]
+        public async Task RemIsBestGirl(CommandContext ctx)
+        {
+            if (ctx.Member.Id == 498613660118155264)
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "REM IS BEST GIRL. NO EXCEPTION",
+                    ImageUrl = "https://i.pinimg.com/originals/14/02/9c/14029cb13f98ddd6edd0f5fddf401f87.jpg",
+                    Color = DiscordColor.Azure,
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+
+            else
+            {
+                await ctx.Channel.SendMessageAsync("Wait... You're not DudeBDR, but still, REM IS BEST GIRL!").ConfigureAwait(false);
+            }
+        }
     }
 }
