@@ -30,5 +30,6 @@ namespace DiscordBot.DAL
         public DbSet <NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }
         public DbSet <GoodBotBadBot> GoodBotBadBots { get; set; }
         public DbSet <CurrencyNameConfig> CurrencyNameConfigs { get; set; }
+        public DbSet <SimpsonsQuotes> SimpsonsQuotes { get; set; }
     }
 }

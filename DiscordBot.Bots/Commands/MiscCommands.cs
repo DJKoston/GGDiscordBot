@@ -1,6 +1,7 @@
 ﻿using DiscordBot.Bots.JsonConverts;
 using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configs;
+using DiscordBot.Core.Services.Quotes;
 using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.CommunityStreamers;
@@ -31,8 +32,9 @@ namespace DiscordBot.Bots.Commands
         private readonly IGuildStreamerConfigService _guildStreamerConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly IConfiguration _configuration;
+        private readonly ISimpsonsQuoteService _simpsonsQuoteService;
 
-        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService,IGoodBotBadBotService goodBotBadBotService, IConfiguration configuration)
+        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService,IGoodBotBadBotService goodBotBadBotService, IConfiguration configuration, ISimpsonsQuoteService simpsonsQuoteService)
         {
             _context = context;
             _suggestionService = suggestionService;
@@ -40,6 +42,7 @@ namespace DiscordBot.Bots.Commands
             _guildStreamerConfigService = guildStreamerConfigService;
             _goodBotBadBotService = goodBotBadBotService;
             _configuration = configuration;
+            _simpsonsQuoteService = simpsonsQuoteService;
         }
 
         [Command("ping")]
@@ -449,6 +452,19 @@ namespace DiscordBot.Bots.Commands
             if (goodBot.BadBot > 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!"); }
         }
 
-        
+        [Command("simpsons")]
+        public async Task SimpsonsQuote(CommandContext ctx)
+        {
+            var quote = await _simpsonsQuoteService.GetSimpsonsQuote();
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"{quote.Quote} - {quote.Character}",
+                ImageUrl = quote.ImageURL,
+                Color = DiscordColor.Yellow,
+            };
+
+            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+        }
     }
 }
