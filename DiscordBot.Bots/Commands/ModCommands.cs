@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,6 +47,23 @@ namespace DiscordBot.Bots.Commands
             Thread.Sleep(1000);
 
             await deletedConfirm.DeleteAsync();
+        }
+
+        [Command("getlog")]
+        public async Task GetLog(CommandContext ctx, string date)
+        {
+            if(date.ToLower() == "today")
+            {
+                var parsedTimeDate = DateTime.Now;
+
+                await ctx.Channel.SendFileAsync($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt", $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}").ConfigureAwait(false);
+            }
+            else
+            {
+                var parsedTimeDate = DateTime.Parse(date);
+
+                await ctx.Channel.SendFileAsync($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt", $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}").ConfigureAwait(false);
+            }
         }
     }
 }

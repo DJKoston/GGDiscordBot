@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,6 +89,10 @@ namespace DiscordBot.Bots
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
 
+            Log("-----------------------------");
+            Log($"Logging Started.");
+            Log($"Bot Version: {botVersion}");
+
             Console.WriteLine($"Current Bot Version: {botVersion}");
 
             Client.UseInteractivity(new InteractivityConfiguration
@@ -118,38 +123,56 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<SetupCommands>();
             Commands.RegisterCommands<StreamerCommands>();
             Commands.RegisterCommands<SuggestionCommands>();
+            Log("Command Registered.");
 
             Commands.CommandErrored += OnCommandErrored;
+            Commands.CommandExecuted += OnCommandExecuted;
+            Log("Command Events Subscribed.");
 
             Monitor = new LiveStreamMonitorService(api, 60);
-
+            Log("Twitch Monitor Created.");
+            
             Monitor.OnStreamOnline += GGOnStreamOnline;
             Monitor.OnStreamOffline += GGOnStreamOffline;
+            Log("Twitch Monitor Events Subscribed.");
 
             var lst = _guildStreamerConfigService.GetGuildStreamerList();
+            Log("Retrieved Streamers to Monitor.");
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Monitor.SetChannelsById(lst);
-            Console.WriteLine("Connecting to Twitch...");
+            Console.WriteLine("Connecting to Twitch Service...");
+            Log("Connecting to Twitch Service.");
 
             Monitor.Start();
             if (Monitor.Enabled)
             {
-                Console.WriteLine("Connected to Twitch!");
+                Console.WriteLine("Connected to Twitch Service!");
+                Log("Connected to Twitch Service.");
                 Console.WriteLine($"Bot has started monitoring {lst.Count} Channels.");
+                Log($"Bot has started monitoring {lst.Count} Channels.");
             }
 
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine("Connecting to Discord...");
+            Console.WriteLine("Connecting to Discord Service...");
+            Log("Connecting to Discord Service.");
             Console.ResetColor();
             Client.ConnectAsync();
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine("Connected to Discord!");
+            Log("Connected to Discord Service.");
             Console.ResetColor();
         }
-        
+
+        private Task OnCommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
+        {
+            Log($"{e.Context.Member.DisplayName} ran command !{e.Command.Name} in the #{e.Context.Channel.Name} Channel in {e.Context.Guild.Name}");
+
+            return Task.CompletedTask;
+        }
+
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IProfileService _profileService;
         private readonly IExperienceService _experienceService;
@@ -327,6 +350,7 @@ namespace DiscordBot.Bots
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Live!");
+            Log($"{e.Stream.UserName} just went Live.");
             Console.ResetColor();
             
             var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
@@ -378,7 +402,7 @@ namespace DiscordBot.Bots
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
-                    if (guild.Id == 136613758045913088) { return; }
+                    if (guild.Id == 136613758045913088) { Log("Skipped saving Message Store for ProjectExie Server"); return; }
 
                     var messageStore = new NowLiveMessages
                     {
@@ -391,6 +415,7 @@ namespace DiscordBot.Bots
                     };
 
                     _messageStoreService.CreateNewMessageStore(messageStore);
+                    Log($"Created Message Store for {e.Stream.UserName}");
                 }
 
                 else
@@ -425,7 +450,7 @@ namespace DiscordBot.Bots
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
-                    if (guild.Id == 136613758045913088) { return; }
+                    if (guild.Id == 136613758045913088) { Log("Skipped saving Message Store for ProjectExie Server"); return; }
 
                     var messageStore = new NowLiveMessages
                     {
@@ -438,20 +463,7 @@ namespace DiscordBot.Bots
                     };
 
                     _messageStoreService.CreateNewMessageStore(messageStore);
-
-                    if (streamer.DisplayName == config.StreamerName)
-                    {
-                        continue;
-                    }
-
-                    else
-                    {
-                        config.StreamerName = streamer.DisplayName;
-
-                        _guildStreamerConfigService.EditUser(config);
-
-                        Console.WriteLine($"{config.StreamerId}'s name has been set to {streamer.DisplayName}");
-                    }
+                    Log($"Created Message Store for {e.Stream.UserName}");
                 }
             }
 
@@ -461,6 +473,7 @@ namespace DiscordBot.Bots
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Offline!");
+            Log($"{e.Stream.UserName} just went Offline.");
             Console.ResetColor();
 
             var streamUser = api.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
@@ -491,8 +504,8 @@ namespace DiscordBot.Bots
 
                 message.DeleteAsync();
 
-
                 _messageStoreService.RemoveMessageStore(storedMessage);
+                Log("Deleted Stored Message in Message Store");
             }
         }
 
@@ -521,6 +534,7 @@ namespace DiscordBot.Bots
                     else
                     {
                         await member.GrantRoleAsync(NowLive);
+                        Log($"Granted {NowLive.Name} Role to {member.Username} in {guild.Name}.");
                     }
 
                 }
@@ -532,6 +546,7 @@ namespace DiscordBot.Bots
                     if (member.Roles.Contains(NowLive))
                     {
                         await member.RevokeRoleAsync(NowLive);
+                        Log($"Revoked {NowLive.Name} Role from {member.Username} in {guild.Name}.");
                     }
                 }
             }
@@ -541,6 +556,8 @@ namespace DiscordBot.Bots
 
         private async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
         {
+            Log($"GG-Bot has been added to the {e.Guild.Name} Discord Server.");
+
             var members = await e.Guild.GetAllMembersAsync().ConfigureAwait(false);
             var profiles = members.Where(x => x.IsBot == false);
 
@@ -554,6 +571,7 @@ namespace DiscordBot.Bots
                 await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
 
                 Console.WriteLine($"Profile created for {profile.DisplayName} in {e.Guild.Name}");
+                Log($"Profile created for {profile.DisplayName} in {e.Guild.Name}");
             }
         }
 
@@ -561,6 +579,7 @@ namespace DiscordBot.Bots
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"{e.Guild.Name} is now Unavaliable");
+            Log($"{e.Guild.Name} is now Unavaliable");
             Console.ResetColor();
 
             return Task.CompletedTask;
@@ -585,6 +604,8 @@ namespace DiscordBot.Bots
                     var isStreaming = await api.V5.Streams.BroadcasterOnlineAsync(user.Id);
 
                     if (isStreaming == true) { continue; }
+                    Console.WriteLine($"{user.DisplayName} is Offline. Deleting Message and Message Store Data.");
+                    Log($"{user.DisplayName} is Offline. Deleting Message and Message Store Data.");
 
                     var messageId = storedMessage.AnnouncementMessageId;
 
@@ -595,10 +616,12 @@ namespace DiscordBot.Bots
                     await message.DeleteAsync();
 
                     await _messageStoreService.RemoveMessageStore(storedMessage);
+                    Log("Deleted Stored Message in Message Store");
                 }
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"{e.Guild.Name} is now Avaliable");
+                Log($"{e.Guild.Name} is now Avaliable.");
                 
                 Console.ResetColor();
 
@@ -629,6 +652,7 @@ namespace DiscordBot.Bots
                     else
                     {
                         await otherlivemember.GrantRoleAsync(NowLive);
+                        Log($"Granted {NowLive.Name} Role to {otherlivemember.Username} in {guild.Name}.");
                     }
 
                 }
@@ -638,6 +662,7 @@ namespace DiscordBot.Bots
                     if (nullmember.Roles.Contains(NowLive))
                     {
                         await nullmember.RevokeRoleAsync(NowLive);
+                        Log($"Revoked {NowLive.Name} Role from {nullmember.Username} in {guild.Name}.");
                     }
 
                     else
@@ -652,6 +677,7 @@ namespace DiscordBot.Bots
                     if (otherwaslivemember.Roles.Contains(NowLive))
                     {
                         await otherwaslivemember.RevokeRoleAsync(NowLive);
+                        Log($"Revoked {NowLive.Name} Role from {otherwaslivemember.Username} in {guild.Name}.");
                     }
 
                     else
@@ -682,8 +708,7 @@ namespace DiscordBot.Bots
             DiscordRole role = guild.GetRole(reactionRole.RoleId);
 
             await member.RevokeRoleAsync(role);
-
-            
+            Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name}.");
 
             return;
         }
@@ -704,7 +729,7 @@ namespace DiscordBot.Bots
             DiscordRole role = guild.GetRole(reactionRole.RoleId);
 
             await member.GrantRoleAsync(role);
-            
+            Log($"Granted {role.Name} Role to {member.Username} in {guild.Name}.");
 
             return;
         }
@@ -722,6 +747,7 @@ namespace DiscordBot.Bots
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
+            Log($"{c.CurrentUser.Username} is Ready.");
             Console.ResetColor();
         }
 
@@ -730,9 +756,9 @@ namespace DiscordBot.Bots
             DiscordEmoji praisedEmote = DiscordEmoji.FromName(c, ":blush:");
             DiscordEmoji scoldedEmote = DiscordEmoji.FromName(c, ":disappointed:");
 
-            if (e.Message.Content.ToLower().Contains("good bot")) { await _goodBotBadBotService.AddGoodBot(); await e.Message.CreateReactionAsync(praisedEmote); }
+            if (e.Message.Content.ToLower().Contains("good bot")) { await _goodBotBadBotService.AddGoodBot(); await e.Message.CreateReactionAsync(praisedEmote); Log($"The bot was praised by {e.Author.Username}."); }
 
-            if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); await e.Channel.SendMessageAsync($"I'm sorry {e.Author.Mention}, I'll try to do better 😞😞"); }
+            if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); await e.Channel.SendMessageAsync($"I'm sorry {e.Author.Mention}, I'll try to do better 😞😞"); Log($"The bot was scolded by {e.Author.Username}."); }
 
             if (e.Channel.IsPrivate) { return; }
 
@@ -780,8 +806,6 @@ namespace DiscordBot.Bots
                 leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
                 await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
-
-                
 
                 return;
             }
@@ -872,10 +896,10 @@ namespace DiscordBot.Bots
         private Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
             var innerException = e.Exception.InnerException;
-            //var exceptionMessage = e.Exception.Message;
+            var exceptionMessage = e.Exception.Message;
 
             Console.WriteLine(innerException);
-            //Console.WriteLine(exceptionMessage);
+            Log(exceptionMessage);
 
             return Task.CompletedTask;
         }
@@ -997,6 +1021,8 @@ namespace DiscordBot.Bots
 
         private async Task OnMemberJoin(DiscordClient c, GuildMemberAddEventArgs e)
         {
+            Log($"{e.Member.DisplayName} just joined {e.Guild.Name}.");
+
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 
             if (WMConfig == null) { return; }
@@ -1049,6 +1075,9 @@ namespace DiscordBot.Bots
 
         private async Task OnMemberLeave(DiscordClient c, GuildMemberRemoveEventArgs e)
         {
+            Log($"{e.Member.DisplayName} just left {e.Guild.Name}.");
+
+
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
 
             if (WMConfig == null) { return; }
@@ -1090,6 +1119,21 @@ namespace DiscordBot.Bots
 
 
 
+        }
+
+        public static void Log(string logItem)
+        {
+            if (!Directory.Exists($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
+            {
+                Directory.CreateDirectory($"\\Logs\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
+            }
+
+            using (StreamWriter w = File.AppendText($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt"))
+            {
+                w.WriteLine($"{DateTime.Now}: {logItem}");
+
+                w.Dispose();
+            }
         }
     }
 }

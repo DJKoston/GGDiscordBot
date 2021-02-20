@@ -14,11 +14,7 @@ namespace DiscordBot.Handlers.Dialogue
         private IDialogueStep _currentStep;
 
 
-        public DialogueHandler(
-            DiscordClient client,
-            DiscordChannel channel,
-            DiscordUser user,
-            IDialogueStep startingStep)
+        public DialogueHandler(DiscordClient client, DiscordChannel channel, DiscordUser user, IDialogueStep startingStep)
         {
             _client = client;
             _channel = channel;

@@ -15,11 +15,7 @@ namespace DiscordBot.Bots.Handlers.Dialogue.Steps
 
         private IDialogueStep _nextStep;
 
-        public TextStep(
-            string content,
-            IDialogueStep nextStep,
-            int? minLength = null,
-            int? maxLength = null) : base(content)
+        public TextStep(string content, IDialogueStep nextStep, int? minLength = null, int? maxLength = null) : base(content)
         {
             _nextStep = nextStep;
             _minLength = minLength;
