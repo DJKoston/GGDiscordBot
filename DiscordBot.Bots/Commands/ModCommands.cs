@@ -62,7 +62,7 @@ namespace DiscordBot.Bots.Commands
             {
                 var parsedTimeDate = DateTime.Parse(date);
 
-                await ctx.Channel.SendFileAsync($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt", $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}").ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{parsedTimeDate.ToLongDateString()}.txt", $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}").ConfigureAwait(false);
             }
         }
     }
