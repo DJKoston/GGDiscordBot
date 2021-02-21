@@ -505,7 +505,7 @@ namespace DiscordBot.Bots
                 message.DeleteAsync();
 
                 _messageStoreService.RemoveMessageStore(storedMessage);
-                Log("Deleted Stored Message in Message Store");
+                Log($"Deleted Message Store for {e.Stream.UserName}");
             }
         }
 
@@ -585,7 +585,7 @@ namespace DiscordBot.Bots
             return Task.CompletedTask;
         }
 
-        private Task OnGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
+        private async Task OnGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
         {
             new Thread(async () =>
             {
@@ -593,9 +593,7 @@ namespace DiscordBot.Bots
 
                 foreach (string streamerList in lst)
                 {
-                    var configs = _guildStreamerConfigService.GetGuildStreamerConfig(streamerList);
-
-                    var storedMessage = _messageStoreService.GetMessageStore(e.Guild.Id, streamerList).Result;
+                    var storedMessage = await _messageStoreService.GetMessageStore(e.Guild.Id, streamerList);
 
                     if (storedMessage == null) { continue; }
 
@@ -611,7 +609,7 @@ namespace DiscordBot.Bots
 
                     var channel = e.Guild.GetChannel(storedMessage.AnnouncementChannelId);
 
-                    var message = await channel.GetMessageAsync(messageId);
+                    var message = channel.GetMessageAsync(messageId).Result;
 
                     await message.DeleteAsync();
 
@@ -621,15 +619,13 @@ namespace DiscordBot.Bots
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"{e.Guild.Name} is now Avaliable");
-                Log($"{e.Guild.Name} is now Avaliable.");
-                
                 Console.ResetColor();
 
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
                 var config = await _nowLiveRoleConfigService.GetNowLiveRoleConfig(e.Guild.Id);
 
-                if(config == null) { return; }
+                if (config == null) { return; }
 
                 var allMembers = await guild.GetAllMembersAsync();
 
@@ -686,10 +682,8 @@ namespace DiscordBot.Bots
                     }
 
                 }
-
             }).Start();
-
-            return Task.CompletedTask;
+            return;
         }
 
         private async Task OnReactionRemoved(DiscordClient c, MessageReactionRemoveEventArgs e)
@@ -1128,12 +1122,12 @@ namespace DiscordBot.Bots
                 Directory.CreateDirectory($"\\Logs\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
             }
 
-            using (StreamWriter w = File.AppendText($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt"))
-            {
-                w.WriteLine($"{DateTime.Now}: {logItem}");
+            using StreamWriter w = File.AppendText($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt");
 
-                w.Dispose();
-            }
+            w.WriteLine($"{DateTime.Now}: {logItem}");
+
+            w.Close();
+            w.Dispose();
         }
     }
 }
