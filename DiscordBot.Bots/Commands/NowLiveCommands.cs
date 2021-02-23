@@ -63,7 +63,6 @@ namespace DiscordBot.Bots.Commands
 
             public async Task AddStreamerAsync(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
             {
-
                 var api = new TwitchAPI();
 
                 var clientid = _configuration["twitch-clientid"];
@@ -124,7 +123,7 @@ namespace DiscordBot.Bots.Commands
                 {
                     var embed1 = new DiscordEmbedBuilder
                     {
-                        Title = $"{streamers.Count()} Streamers to announce in {ctx.Guild.Name}",
+                        Title = $"{streamers.Count()} Twitch Streamers being announced in {ctx.Guild.Name}",
                         Color = DiscordColor.Purple
                     };
 
@@ -144,7 +143,7 @@ namespace DiscordBot.Bots.Commands
                 {
                     var embed2 = new DiscordEmbedBuilder
                     {
-                        Title = $"Streamers to announce in {ctx.Guild.Name}",
+                        Title = $"Twitch Streamers being announced in {ctx.Guild.Name}",
                         Color = DiscordColor.Purple
                     };
 
@@ -164,7 +163,7 @@ namespace DiscordBot.Bots.Commands
                 {
                     var embed3 = new DiscordEmbedBuilder
                     {
-                        Title = $"Streamers to announce in {ctx.Guild.Name}",
+                        Title = $"Twitch Streamers being announced in {ctx.Guild.Name}",
                         Color = DiscordColor.Purple
                     };
 
@@ -184,7 +183,7 @@ namespace DiscordBot.Bots.Commands
                 {
                     var embed4 = new DiscordEmbedBuilder
                     {
-                        Title = $"Streamers to announce in {ctx.Guild.Name}",
+                        Title = $"Twitch Streamers being announced in {ctx.Guild.Name}",
                         Color = DiscordColor.Purple
                     };
 
@@ -199,8 +198,6 @@ namespace DiscordBot.Bots.Commands
 
                     if (embed4.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed4).ConfigureAwait(false); }
                 }
-
-
             }
 
             [Command("remove")]
@@ -246,6 +243,57 @@ namespace DiscordBot.Bots.Commands
                     await message.DeleteAsync();
                     await _messageStoreService.RemoveMessageStore(messages);
                 }
+            }
+        }
+
+        [Group("youtubelive")]
+        public class YouTubeLiveCommands : BaseCommandModule
+        {
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
+
+            public YouTubeLiveCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
+            {
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
+            }
+        }
+
+        [Group("glimesh")]
+        public class GlimeshCommands : BaseCommandModule
+        {
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
+
+            public GlimeshCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
+            {
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
+            }
+        }
+
+        [Group("youtube")]
+        public class YouTubeCommands : BaseCommandModule
+        {
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
+
+            public YouTubeCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
+            {
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
             }
         }
     }
