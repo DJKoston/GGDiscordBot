@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,21 +29,27 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            var messagesToDelete = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, deleteString);
+            var beforeTwoWeek = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, deleteString);
+
+            var twoWeekMarker = beforeTwoWeek.Where(x => x.CreationTimestamp < DateTime.Now.AddDays(-13));
+
+            var messagesToDelete = beforeTwoWeek.Except(twoWeekMarker);
+
+            if (messagesToDelete.Count() == 0) { await ctx.Channel.SendMessageAsync("I'm sorry, I can only purge messages that are within 2 weeks of today's date."); return; }
 
             await ctx.Channel.DeleteMessagesAsync(messagesToDelete).ConfigureAwait(false);
 
             await ctx.Message.DeleteAsync();
 
-            var deletedConfirm = await ctx.Channel.SendMessageAsync($"{deleteString} messages deleted!, This message will self distruct in 3 seconds.");
+            var deletedConfirm = await ctx.Channel.SendMessageAsync($"{messagesToDelete.Count()} messages deleted!, This message will self distruct in 3 seconds.");
 
             Thread.Sleep(1000);
 
-            await deletedConfirm.ModifyAsync($"{deleteString} messages deleted!, This message will self distruct in 2 seconds.");
+            await deletedConfirm.ModifyAsync($"{messagesToDelete.Count()} messages deleted!, This message will self distruct in 2 seconds.");
 
             Thread.Sleep(1000);
 
-            await deletedConfirm.ModifyAsync($"{deleteString} messages deleted!, This message will self distruct in 1 second.");
+            await deletedConfirm.ModifyAsync($"{messagesToDelete.Count()} messages deleted!, This message will self distruct in 1 second.");
 
             Thread.Sleep(1000);
 
@@ -56,13 +63,27 @@ namespace DiscordBot.Bots.Commands
             {
                 var parsedTimeDate = DateTime.Now;
 
-                await ctx.Channel.SendFileAsync($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt", $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}",
+                };
+
+                messageBuilder.WithFile($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt");
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
             else
             {
                 var parsedTimeDate = DateTime.Parse(date);
 
-                await ctx.Channel.SendFileAsync($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{parsedTimeDate.ToLongDateString()}.txt", $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}",
+                };
+
+                messageBuilder.WithFile($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{parsedTimeDate.ToLongDateString()}.txt");
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
     }
