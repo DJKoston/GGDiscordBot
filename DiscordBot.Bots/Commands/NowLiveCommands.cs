@@ -31,226 +31,269 @@ namespace DiscordBot.Bots.Commands
             _configuration = configuration;
         }
 
-        [Command("addstreamer")]
-        public async Task AddStreamer(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel)
+        [Group("twitch")]
+        public class TwitchCommands : BaseCommandModule
         {
-            var announcementMessage = "%USER% has gone live streaming %GAME%! You should check them out over at: %URL%";
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
 
-            await AddStreamerAsync(ctx, twitchStreamer, announceChannel, announcementMessage);
-        }
-
-        [Command("addstreamer")]
-        public async Task AddStreamer(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
-        {
-            await AddStreamerAsync(ctx, twitchStreamer, announceChannel, announcementMessage);
-        }
-
-        public async Task AddStreamerAsync(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
-        {
-
-            var api = new TwitchAPI();
-
-            var clientid = _configuration["twitch-clientid"];
-            var accesstoken = _configuration["twitch-accesstoken"];
-
-            api.Settings.ClientId = clientid;
-            api.Settings.AccessToken = accesstoken;
-
-            var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
-
-            if(searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
-
-            var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
-
-            if (stream.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
-
-            var streamResults = stream.Matches.FirstOrDefault();
-
-            if (streamResults.DisplayName.ToLower() != twitchStreamer.ToLower()) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
-
-            var streamerId = streamResults.Id;
-
-            var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
-
-            var config = new GuildStreamerConfig
+            public TwitchCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
             {
-                AnnounceChannelId = announceChannel.Id,
-                GuildId = ctx.Guild.Id,
-                StreamerId = getStreamId.Id,
-                AnnouncementMessage = announcementMessage,
-                StreamerName = getStreamId.DisplayName
-            };
-
-            await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
-
-            await ctx.Channel.SendMessageAsync($"{getStreamId.DisplayName} will now be announced in {announceChannel.Mention}");
-        }
-
-        [Command("liststreamers")]
-        public async Task ListStreamers(CommandContext ctx)
-        {
-            var streamers = _context.GuildStreamerConfigs.Where(x => x.GuildId == ctx.Guild.Id).OrderBy(x => x.StreamerName);
-
-            var streamerspage1 = streamers.Take(24);
-            var streamerspage2 = streamers.Skip(24).Take(24);
-            var streamerspage3 = streamers.Skip(48).Take(24);
-            var streamerspage4 = streamers.Skip(72).Take(24);
-
-            var api = new TwitchAPI();
-
-            var clientid = _configuration["twitch-clientid"];
-            var accesstoken = _configuration["twitch-accesstoken"];
-
-            api.Settings.ClientId = clientid;
-            api.Settings.AccessToken = accesstoken;
-
-            if(streamerspage1 != null) 
-            {
-                var embed1 = new DiscordEmbedBuilder
-                {
-                    Title = $"{streamers.Count()} Streamers to announce in {ctx.Guild.Name}",
-                    Color = DiscordColor.Purple
-                };
-
-                foreach (GuildStreamerConfig streamer in streamerspage1)
-                {
-                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
-
-                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
-
-                    embed1.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
-                }
-
-                if (embed1.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed1).ConfigureAwait(false); }
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
             }
 
-            if (streamerspage2 != null)
+            [Command("add")]
+            public async Task AddStreamer(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel)
             {
-                var embed2 = new DiscordEmbedBuilder
-                {
-                    Title = $"Streamers to announce in {ctx.Guild.Name}",
-                    Color = DiscordColor.Purple
-                };
+                var announcementMessage = "%USER% has gone live streaming %GAME%! You should check them out over at: %URL%";
 
-                foreach (GuildStreamerConfig streamer in streamerspage2)
-                {
-                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
-
-                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
-
-                    embed2.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
-                }
-
-                if (embed2.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed2).ConfigureAwait(false); }
+                await AddStreamerAsync(ctx, twitchStreamer, announceChannel, announcementMessage);
             }
 
-            if (streamerspage3 != null)
+            [Command("add")]
+            public async Task AddStreamer(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
             {
-                var embed3 = new DiscordEmbedBuilder
-                {
-                    Title = $"Streamers to announce in {ctx.Guild.Name}",
-                    Color = DiscordColor.Purple
-                };
-
-                foreach (GuildStreamerConfig streamer in streamerspage3)
-                {
-                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
-
-                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
-
-                    embed3.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
-                }
-
-                if(embed3.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed3).ConfigureAwait(false); }
+                await AddStreamerAsync(ctx, twitchStreamer, announceChannel, announcementMessage);
             }
 
-            if (streamerspage4 != null)
+            public async Task AddStreamerAsync(CommandContext ctx, string twitchStreamer, DiscordChannel announceChannel, string announcementMessage)
             {
-                var embed4 = new DiscordEmbedBuilder
+                var api = new TwitchAPI();
+
+                var clientid = _configuration["twitch-clientid"];
+                var accesstoken = _configuration["twitch-accesstoken"];
+
+                api.Settings.ClientId = clientid;
+                api.Settings.AccessToken = accesstoken;
+
+                var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
+
+                if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+
+                var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
+
+                if (stream.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+
+                var streamResults = stream.Matches.FirstOrDefault();
+
+                if (streamResults.DisplayName.ToLower() != twitchStreamer.ToLower()) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+
+                var streamerId = streamResults.Id;
+
+                var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
+
+                var config = new GuildStreamerConfig
                 {
-                    Title = $"Streamers to announce in {ctx.Guild.Name}",
-                    Color = DiscordColor.Purple
+                    AnnounceChannelId = announceChannel.Id,
+                    GuildId = ctx.Guild.Id,
+                    StreamerId = getStreamId.Id,
+                    AnnouncementMessage = announcementMessage,
+                    StreamerName = getStreamId.DisplayName
                 };
 
-                foreach (GuildStreamerConfig streamer in streamerspage4)
+                await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
+
+                await ctx.Channel.SendMessageAsync($"{getStreamId.DisplayName} will now be announced in {announceChannel.Mention}");
+            }
+
+            [Command("list")]
+            public async Task ListStreamers(CommandContext ctx)
+            {
+                var streamers = _context.GuildStreamerConfigs.Where(x => x.GuildId == ctx.Guild.Id).OrderBy(x => x.StreamerName);
+
+                var streamerspage1 = streamers.Take(24);
+                var streamerspage2 = streamers.Skip(24).Take(24);
+                var streamerspage3 = streamers.Skip(48).Take(24);
+                var streamerspage4 = streamers.Skip(72).Take(24);
+
+                var api = new TwitchAPI();
+
+                var clientid = _configuration["twitch-clientid"];
+                var accesstoken = _configuration["twitch-accesstoken"];
+
+                api.Settings.ClientId = clientid;
+                api.Settings.AccessToken = accesstoken;
+
+                if (streamerspage1 != null)
                 {
-                    DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+                    var embed1 = new DiscordEmbedBuilder
+                    {
+                        Title = $"{streamers.Count()} Twitch Streamers being announced in {ctx.Guild.Name}",
+                        Color = DiscordColor.Purple
+                    };
 
-                    var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+                    foreach (GuildStreamerConfig streamer in streamerspage1)
+                    {
+                        DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                    embed4.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                        embed1.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                    }
+
+                    if (embed1.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed1).ConfigureAwait(false); }
                 }
 
-                if (embed4.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed4).ConfigureAwait(false); }
-            }
-            
+                if (streamerspage2 != null)
+                {
+                    var embed2 = new DiscordEmbedBuilder
+                    {
+                        Title = $"Twitch Streamers being announced in {ctx.Guild.Name}",
+                        Color = DiscordColor.Purple
+                    };
 
+                    foreach (GuildStreamerConfig streamer in streamerspage2)
+                    {
+                        DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                        embed2.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                    }
+
+                    if (embed2.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed2).ConfigureAwait(false); }
+                }
+
+                if (streamerspage3 != null)
+                {
+                    var embed3 = new DiscordEmbedBuilder
+                    {
+                        Title = $"Twitch Streamers being announced in {ctx.Guild.Name}",
+                        Color = DiscordColor.Purple
+                    };
+
+                    foreach (GuildStreamerConfig streamer in streamerspage3)
+                    {
+                        DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                        embed3.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                    }
+
+                    if (embed3.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed3).ConfigureAwait(false); }
+                }
+
+                if (streamerspage4 != null)
+                {
+                    var embed4 = new DiscordEmbedBuilder
+                    {
+                        Title = $"Twitch Streamers being announced in {ctx.Guild.Name}",
+                        Color = DiscordColor.Purple
+                    };
+
+                    foreach (GuildStreamerConfig streamer in streamerspage4)
+                    {
+                        DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
+
+                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+
+                        embed4.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
+                    }
+
+                    if (embed4.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed4).ConfigureAwait(false); }
+                }
+            }
+
+            [Command("remove")]
+            public async Task RemoveStreamer(CommandContext ctx, string twitchStreamer)
+            {
+                var api = new TwitchAPI();
+
+                var clientid = _configuration["twitch-clientid"];
+                var accesstoken = _configuration["twitch-accesstoken"];
+
+                api.Settings.ClientId = clientid;
+                api.Settings.AccessToken = accesstoken;
+
+                var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
+
+                if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+
+                var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
+
+                var streamResults = stream.Matches.FirstOrDefault();
+
+                var streamerId = streamResults.Id;
+
+                var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
+
+                var config = await _guildStreamerConfigService.GetConfigToDelete(ctx.Guild.Id, getStreamId.Id);
+                if (config == null) { await ctx.Channel.SendMessageAsync($"No configuration found for {twitchStreamer}, do `!nl liststreamers` to see the list of streamers you can remove."); return; }
+
+                var messages = await _messageStoreService.GetMessageStore(ctx.Guild.Id, getStreamId.Id);
+
+                DiscordChannel channel = ctx.Guild.GetChannel(config.AnnounceChannelId);
+
+                await ctx.Channel.SendMessageAsync($"{getStreamId.DisplayName} will no longer be announced in {channel.Mention}");
+
+                await _guildStreamerConfigService.RemoveGuildStreamerConfig(config);
+
+                if (messages == null) { return; }
+
+                else
+                {
+                    DiscordMessage message = await channel.GetMessageAsync(messages.AnnouncementMessageId);
+
+                    await message.DeleteAsync();
+                    await _messageStoreService.RemoveMessageStore(messages);
+                }
+            }
         }
 
-        [Command("monitor")]
-        public async Task ViewMonitorLoads(CommandContext ctx)
+        [Group("youtubelive")]
+        public class YouTubeLiveCommands : BaseCommandModule
         {
-            var firstlst = _guildStreamerConfigService.GetGuildStreamerList();
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
 
-            var lst = firstlst.Distinct();
-
-            var embed = new DiscordEmbedBuilder
+            public YouTubeLiveCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
             {
-                Title = "GG-Bot Twitch Monitor Loadbalancing",
-                Color = DiscordColor.Orange,
-            };
-
-            if(lst.Count() == 0) { embed.AddField("Monitor 1:", "Offline"); }
-            else { embed.AddField("Monitor 1:", $"Monitoring {lst.Count()} Channels"); }
-
-
-            embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
-
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
+            }
         }
 
-        [Command("removestreamer")]
-        public async Task RemoveStreamer(CommandContext ctx, string twitchStreamer)
+        [Group("glimesh")]
+        public class GlimeshCommands : BaseCommandModule
         {
-            var api = new TwitchAPI();
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
 
-            var clientid = _configuration["twitch-clientid"];
-            var accesstoken = _configuration["twitch-accesstoken"];
-
-            api.Settings.ClientId = clientid;
-            api.Settings.AccessToken = accesstoken;
-
-            var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
-
-            if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
-
-            var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
-
-            var streamResults = stream.Matches.FirstOrDefault();
-
-            var streamerId = streamResults.Id;
-
-            var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
-
-            var config = await _guildStreamerConfigService.GetConfigToDelete(ctx.Guild.Id, getStreamId.Id);
-            if(config == null) { await ctx.Channel.SendMessageAsync($"No configuration found for {twitchStreamer}, do `!nl liststreamers` to see the list of streamers you can remove."); return; }
-
-            var messages = await _messageStoreService.GetMessageStore(ctx.Guild.Id, getStreamId.Id);
-
-            DiscordChannel channel = ctx.Guild.GetChannel(config.AnnounceChannelId);
-
-            await ctx.Channel.SendMessageAsync($"{getStreamId.DisplayName} will no longer be announced in {channel.Mention}");
-
-            await _guildStreamerConfigService.RemoveGuildStreamerConfig(config);
-
-            if(messages == null) { return; }
-
-            else
+            public GlimeshCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
             {
-                DiscordMessage message = await channel.GetMessageAsync(messages.AnnouncementMessageId);
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
+            }
+        }
 
-                await message.DeleteAsync();
-                await _messageStoreService.RemoveMessageStore(messages);
+        [Group("youtube")]
+        public class YouTubeCommands : BaseCommandModule
+        {
+            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+            private readonly RPGContext _context;
+            private readonly IMessageStoreService _messageStoreService;
+            private readonly IConfiguration _configuration;
+
+            public YouTubeCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
+            {
+                _guildStreamerConfigService = guildStreamerConfigService;
+                _context = context;
+                _messageStoreService = messageStoreService;
+                _configuration = configuration;
             }
         }
     }

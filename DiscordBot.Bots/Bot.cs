@@ -585,7 +585,7 @@ namespace DiscordBot.Bots
             return Task.CompletedTask;
         }
 
-        private async Task OnGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
+        private Task OnGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
         {
             new Thread(async () =>
             {
@@ -683,7 +683,7 @@ namespace DiscordBot.Bots
 
                 }
             }).Start();
-            return;
+            return Task.CompletedTask;
         }
 
         private async Task OnReactionRemoved(DiscordClient c, MessageReactionRemoveEventArgs e)
