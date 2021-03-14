@@ -623,6 +623,8 @@ namespace DiscordBot.Bots
 
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
+                if(guild.Name == "Base Camp") { return; }
+
                 var config = await _nowLiveRoleConfigService.GetNowLiveRoleConfig(e.Guild.Id);
 
                 if (config == null) { return; }
@@ -631,57 +633,32 @@ namespace DiscordBot.Bots
 
                 DiscordRole NowLive = guild.GetRole(config.RoleId);
 
-                var nullother = allMembers.Where(x => x.Presence == null);
-                var otherwithNowLive = nullother.Where(x => x.Roles.Contains(NowLive));
-                var othermembers = allMembers.Except(nullother);
-                var otherlivemembers = othermembers.Where(x => x.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)));
-                var othernotlivemembers = othermembers.Except(otherlivemembers);
-                var otherwaslive = othernotlivemembers.Where(x => x.Roles.Contains(NowLive));
+                var withNowLive = allMembers.Where(x => x.Roles.Contains(NowLive));
+                var withoutNowLive = allMembers.Except(withNowLive);
 
-                foreach (DiscordMember otherlivemember in otherlivemembers)
+                foreach (DiscordMember withRole in withNowLive)
                 {
-                    if (otherlivemember.Roles.Contains(NowLive))
+                    if (withRole.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                     {
 
                     }
 
                     else
                     {
-                        await otherlivemember.GrantRoleAsync(NowLive);
-                        Log($"Granted {NowLive.Name} Role to {otherlivemember.Username} in {guild.Name}.");
+                        await withRole.RevokeRoleAsync(NowLive);
                     }
-
                 }
 
-                foreach (DiscordMember nullmember in otherwithNowLive)
+                foreach (DiscordMember withoutRole in withoutNowLive)
                 {
-                    if (nullmember.Roles.Contains(NowLive))
+                    if (withoutRole.Presence == null) { continue; }
+
+                    if (withoutRole.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                     {
-                        await nullmember.RevokeRoleAsync(NowLive);
-                        Log($"Revoked {NowLive.Name} Role from {nullmember.Username} in {guild.Name}.");
+                        await withoutRole.GrantRoleAsync(NowLive);
                     }
-
-                    else
-                    {
-
-                    }
-
                 }
 
-                foreach (DiscordMember otherwaslivemember in otherwaslive)
-                {
-                    if (otherwaslivemember.Roles.Contains(NowLive))
-                    {
-                        await otherwaslivemember.RevokeRoleAsync(NowLive);
-                        Log($"Revoked {NowLive.Name} Role from {otherwaslivemember.Username} in {guild.Name}.");
-                    }
-
-                    else
-                    {
-
-                    }
-
-                }
             }).Start();
             return Task.CompletedTask;
         }
@@ -1117,12 +1094,19 @@ namespace DiscordBot.Bots
 
         public static void Log(string logItem)
         {
-            if (!Directory.Exists($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
+            var applicationName = "";
+
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            if (environment.ToLower() == "development") { applicationName = "GGBotTest"; }
+            else if (environment.ToLower() == "live") { applicationName = "GGBot"; }
+          
+            if (!Directory.Exists($"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
             {
-                Directory.CreateDirectory($"\\Logs\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
+                Directory.CreateDirectory($"\\Logs\\{applicationName}\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
             }
 
-            using StreamWriter w = File.AppendText($"\\Logs\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt");
+            using StreamWriter w = File.AppendText($"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt");
 
             w.WriteLine($"{DateTime.Now}: {logItem}");
 

@@ -59,31 +59,30 @@ namespace DiscordBot.Bots.Commands
         [Command("getlog")]
         public async Task GetLog(CommandContext ctx, string date)
         {
-            if(date.ToLower() == "today")
+            var applicationName = "";
+
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            if (environment.ToLower() == "development") { applicationName = "GGBotTest"; }
+            else if (environment.ToLower() == "live") { applicationName = "GGBot"; }
+
+            if (date.ToLower() == "today")
             {
                 var parsedTimeDate = DateTime.Now;
 
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Content = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}",
-                };
+                var fileLocation = $"\\Logs\\{applicationName}\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt";
+                var messageContent = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}";
 
-                messageBuilder.WithFile($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt");
-
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync(fileLocation, messageContent).ConfigureAwait(false);
             }
             else
             {
                 var parsedTimeDate = DateTime.Parse(date);
 
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Content = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}",
-                };
+                var fileLocation = $"\\Logs\\{applicationName}\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt";
+                var messageContent = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}";
 
-                messageBuilder.WithFile($"\\Logs\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{parsedTimeDate.ToLongDateString()}.txt");
-
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync(fileLocation, messageContent).ConfigureAwait(false);
             }
         }
     }
