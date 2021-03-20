@@ -245,56 +245,5 @@ namespace DiscordBot.Bots.Commands
                 }
             }
         }
-
-        [Group("youtubelive")]
-        public class YouTubeLiveCommands : BaseCommandModule
-        {
-            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
-            private readonly RPGContext _context;
-            private readonly IMessageStoreService _messageStoreService;
-            private readonly IConfiguration _configuration;
-
-            public YouTubeLiveCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
-            {
-                _guildStreamerConfigService = guildStreamerConfigService;
-                _context = context;
-                _messageStoreService = messageStoreService;
-                _configuration = configuration;
-            }
-        }
-
-        [Group("glimesh")]
-        public class GlimeshCommands : BaseCommandModule
-        {
-            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
-            private readonly RPGContext _context;
-            private readonly IMessageStoreService _messageStoreService;
-            private readonly IConfiguration _configuration;
-
-            public GlimeshCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
-            {
-                _guildStreamerConfigService = guildStreamerConfigService;
-                _context = context;
-                _messageStoreService = messageStoreService;
-                _configuration = configuration;
-            }
-        }
-
-        [Group("youtube")]
-        public class YouTubeCommands : BaseCommandModule
-        {
-            private readonly IGuildStreamerConfigService _guildStreamerConfigService;
-            private readonly RPGContext _context;
-            private readonly IMessageStoreService _messageStoreService;
-            private readonly IConfiguration _configuration;
-
-            public YouTubeCommands(IGuildStreamerConfigService guildStreamerConfigService, RPGContext context, IMessageStoreService messageStoreService, IConfiguration configuration)
-            {
-                _guildStreamerConfigService = guildStreamerConfigService;
-                _context = context;
-                _messageStoreService = messageStoreService;
-                _configuration = configuration;
-            }
-        }
     }
 }
