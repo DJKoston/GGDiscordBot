@@ -5,7 +5,7 @@
     <AssemblyName>DiscordBot</AssemblyName>
     <Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <UserSecretsId>34b56b5f-2361-41bd-96ec-2648e2719edc</UserSecretsId>
-    <Version>0.10.2</Version>
+    <Version>0.11.0</Version>
     <Authors>DJKoston</Authors>
     <Company>Generation Gamers</Company>
     <Product>GG Discord Bot</Product>
@@ -40,9 +40,9 @@
   </ItemGroup>
 
   <ItemGroup>
-	 <PackageReference Include="DSharpPlus" Version="4.0.0-rc1" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-rc1" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc1" />
+	 <PackageReference Include="DSharpPlus" Version="4.0.0-rc2" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-rc2" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc2" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
