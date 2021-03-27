@@ -624,8 +624,6 @@ namespace DiscordBot.Bots
 
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
-                if(guild.Name == "Base Camp") { return; }
-
                 var config = await _nowLiveRoleConfigService.GetNowLiveRoleConfig(e.Guild.Id);
 
                 if (config == null) { return; }
@@ -639,14 +637,23 @@ namespace DiscordBot.Bots
 
                 foreach (DiscordMember withRole in withNowLive)
                 {
+                    if (withRole.Presence == null)
+                    {
+                        await withRole.RevokeRoleAsync(NowLive);
+
+                        continue;
+                    }
+
                     if (withRole.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                     {
-
+                        continue;
                     }
 
                     else
                     {
                         await withRole.RevokeRoleAsync(NowLive);
+
+                        continue;
                     }
                 }
 
@@ -657,6 +664,8 @@ namespace DiscordBot.Bots
                     if (withoutRole.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                     {
                         await withoutRole.GrantRoleAsync(NowLive);
+
+                        continue;
                     }
                 }
 
