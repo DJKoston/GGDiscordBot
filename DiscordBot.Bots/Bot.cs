@@ -67,6 +67,7 @@ namespace DiscordBot.Bots
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
+                Intents = DiscordIntents.All
             };
 
             api.Settings.ClientId = clientid;
