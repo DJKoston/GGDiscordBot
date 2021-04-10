@@ -111,7 +111,6 @@ namespace DiscordBot.Bots
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
-            Commands.RegisterCommands<AdminCommands>();
             Commands.RegisterCommands<ConfigCommands>();
             Commands.RegisterCommands<GameCommands>();
             Commands.RegisterCommands<ManageCommands>();

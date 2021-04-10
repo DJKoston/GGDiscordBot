@@ -31,6 +31,54 @@ namespace DiscordBot.Bots.Commands
             _configuration = configuration;
         }
 
+        [Group("addstreamer")]
+        public class AddStreamerCommand : BaseCommandModule
+        {
+            [GroupCommand]
+            public async Task AddStreamerOld(CommandContext ctx)
+            {
+                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch add` command.").ConfigureAwait(false);
+            }
+
+            [GroupCommand]
+            public async Task AddStreamerOld(CommandContext ctx, [RemainingText] string anything)
+            {
+                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch add` command.").ConfigureAwait(false);
+            }
+        }
+
+        [Group("removestreamer")]
+        public class RemoveStreamerCommand : BaseCommandModule
+        {
+            [GroupCommand]
+            public async Task RemoveStreamerOld(CommandContext ctx)
+            {
+                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch remove` command.").ConfigureAwait(false);
+            }
+
+            [GroupCommand]
+            public async Task RemoveStreamerOld(CommandContext ctx, [RemainingText] string anything)
+            {
+                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch remove` command.").ConfigureAwait(false);
+            }
+        }
+
+        [Group("liststreamers")]
+        public class ListStreamerCommand : BaseCommandModule
+        {
+            [GroupCommand]
+            public async Task ListStreamerOld(CommandContext ctx)
+            {
+                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch list` command.").ConfigureAwait(false);
+            }
+
+            [GroupCommand]
+            public async Task ListStreamerOld(CommandContext ctx, [RemainingText] string anything)
+            {
+                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch list` command.").ConfigureAwait(false);
+            }
+        }
+
         [Group("twitch")]
         public class TwitchCommands : BaseCommandModule
         {
