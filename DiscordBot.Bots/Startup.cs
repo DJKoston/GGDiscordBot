@@ -1,6 +1,7 @@
 using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
+using DiscordBot.Core.Services.Egg;
 using DiscordBot.Core.Services.Items;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.Quotes;
@@ -53,6 +54,7 @@ namespace DiscordBot.Bots
             services.AddScoped<IGoodBotBadBotService, GoodBotBadBotService>();
             services.AddScoped<ICurrencyNameConfigService, CurrencyNameConfigService>();
             services.AddScoped<ISimpsonsQuoteService, SimpsonsQuoteService>();
+            services.AddScoped<IEggService, EggService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();

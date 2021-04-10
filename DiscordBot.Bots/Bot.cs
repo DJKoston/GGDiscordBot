@@ -741,6 +741,24 @@ namespace DiscordBot.Bots
 
             if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); await e.Channel.SendMessageAsync($"I'm sorry {e.Author.Mention}, I'll try to do better 😞😞"); Log($"The bot was scolded by {e.Author.Username}."); }
 
+            var rnd = new Random();
+            var rndGif = rnd.Next(1, 3);
+
+            if (e.Message.Content.ToLower().Contains("covid") && !e.Message.Author.Username.Contains("GG-Bot"))
+            {
+                if (rndGif == 1)
+                {
+
+
+                    await e.Message.RespondAsync("https://media.giphy.com/media/STfLOU6iRBRunMciZv/giphy.gif").ConfigureAwait(false);
+                }
+
+                else if (rndGif == 2)
+                {
+                    await e.Message.RespondAsync("No... No COVID!\n\nhttps://tenor.com/view/no-consuela-familyguy-gif-7535890").ConfigureAwait(false);
+                }
+            }
+
             if (e.Channel.IsPrivate) { return; }
 
             if (e.Author.IsBot) { return; }
@@ -1056,7 +1074,7 @@ namespace DiscordBot.Bots
 
         private async Task OnMemberLeave(DiscordClient c, GuildMemberRemoveEventArgs e)
         {
-            Log($"{e.Member.DisplayName} just left {e.Guild.Name}.");
+            //Log($"{e.Member.DisplayName} just left {e.Guild.Name}.");
 
 
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
