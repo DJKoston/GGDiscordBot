@@ -1,6 +1,7 @@
 ﻿using DiscordBot.DAL.Models.CommunityStreamers;
 using DiscordBot.DAL.Models.Configs;
 using DiscordBot.DAL.Models.CustomCommands;
+using DiscordBot.DAL.Models.Egg;
 using DiscordBot.DAL.Models.Items;
 using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
@@ -31,5 +32,8 @@ namespace DiscordBot.DAL
         public DbSet <GoodBotBadBot> GoodBotBadBots { get; set; }
         public DbSet <CurrencyNameConfig> CurrencyNameConfigs { get; set; }
         public DbSet <SimpsonsQuotes> SimpsonsQuotes { get; set; }
+        public DbSet <EggChannel> EggChannels { get; set; }
+        public DbSet <EggNickname> EggNicknames { get; set; }
+        public DbSet <EggRole> EggRoles { get; set; }
     }
 }

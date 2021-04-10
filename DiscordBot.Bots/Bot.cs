@@ -623,8 +623,6 @@ namespace DiscordBot.Bots
 
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
-                if(guild.Name == "Base Camp") { return; }
-
                 var config = await _nowLiveRoleConfigService.GetNowLiveRoleConfig(e.Guild.Id);
 
                 if (config == null) { return; }
@@ -638,14 +636,23 @@ namespace DiscordBot.Bots
 
                 foreach (DiscordMember withRole in withNowLive)
                 {
+                    if (withRole.Presence == null)
+                    {
+                        await withRole.RevokeRoleAsync(NowLive);
+
+                        continue;
+                    }
+
                     if (withRole.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                     {
-
+                        continue;
                     }
 
                     else
                     {
                         await withRole.RevokeRoleAsync(NowLive);
+
+                        continue;
                     }
                 }
 
@@ -656,6 +663,8 @@ namespace DiscordBot.Bots
                     if (withoutRole.Presence.Activities.Any(x => x.ActivityType.Equals(ActivityType.Streaming)))
                     {
                         await withoutRole.GrantRoleAsync(NowLive);
+
+                        continue;
                     }
                 }
 
@@ -730,6 +739,24 @@ namespace DiscordBot.Bots
             if (e.Message.Content.ToLower().Contains("good bot")) { await _goodBotBadBotService.AddGoodBot(); await e.Message.CreateReactionAsync(praisedEmote); Log($"The bot was praised by {e.Author.Username}."); }
 
             if (e.Message.Content.ToLower().Contains("bad bot")) { await _goodBotBadBotService.AddBadBot(); await e.Message.CreateReactionAsync(scoldedEmote); await e.Channel.SendMessageAsync($"I'm sorry {e.Author.Mention}, I'll try to do better 😞😞"); Log($"The bot was scolded by {e.Author.Username}."); }
+
+            var rnd = new Random();
+            var rndGif = rnd.Next(1, 3);
+
+            if (e.Message.Content.ToLower().Contains("covid") && !e.Message.Author.Username.Contains("GG-Bot"))
+            {
+                if (rndGif == 1)
+                {
+
+
+                    await e.Message.RespondAsync("https://media.giphy.com/media/STfLOU6iRBRunMciZv/giphy.gif").ConfigureAwait(false);
+                }
+
+                else if (rndGif == 2)
+                {
+                    await e.Message.RespondAsync("No... No COVID!\n\nhttps://tenor.com/view/no-consuela-familyguy-gif-7535890").ConfigureAwait(false);
+                }
+            }
 
             if (e.Channel.IsPrivate) { return; }
 
@@ -1046,7 +1073,7 @@ namespace DiscordBot.Bots
 
         private async Task OnMemberLeave(DiscordClient c, GuildMemberRemoveEventArgs e)
         {
-            Log($"{e.Member.DisplayName} just left {e.Guild.Name}.");
+            //Log($"{e.Member.DisplayName} just left {e.Guild.Name}.");
 
 
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
