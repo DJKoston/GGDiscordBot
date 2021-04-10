@@ -23,6 +23,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("addquote")]
+        [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task AddQuote(CommandContext ctx)
         {
             await ctx.Channel.SendMessageAsync("Please add a quote as such: `!addquote @username {Remainder of Quote}` - DO NOT add the curly braces!").ConfigureAwait(false);
