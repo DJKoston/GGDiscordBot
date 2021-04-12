@@ -2,6 +2,7 @@
 using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
+using DiscordBot.Core.Services.Radios;
 using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.ViewModels;
 using DiscordBot.DAL.Models.Configs;
@@ -56,6 +57,7 @@ namespace DiscordBot.Bots
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
             _currencyNameService = services.GetService<ICurrencyNameConfigService>();
+            _radioService = services.GetService<IRadioService>();
 
             api = new TwitchAPI();
 
@@ -93,6 +95,9 @@ namespace DiscordBot.Bots
             Client.PresenceUpdated += OnPresenceUpdated;
             Client.GuildCreated += OnGuildJoin;
             Client.GuildUnavailable += OnGuildUnAvaliable;
+            Client.VoiceStateUpdated += OnVoiceStateUpdate;
+            Client.GuildDownloadCompleted += OnDownloadComplete;
+            Client.Resumed += OnClientResumed;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
 
@@ -204,6 +209,97 @@ namespace DiscordBot.Bots
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly ICurrencyNameConfigService _currencyNameService;
+        private readonly IRadioService _radioService;
+
+        private Task OnClientResumed(DiscordClient c, ReadyEventArgs e)
+        {
+            new Thread(async () =>
+            {
+                var guilds = c.Guilds.Values;
+
+                foreach (DiscordGuild guild in guilds)
+                {
+                    var storedRadio = await _radioService.GetRadioAsync(guild.Id);
+
+                    if (storedRadio == null) { continue; }
+
+                    var channel = guild.GetChannel(storedRadio.ChannelId);
+                    var radioURL = new Uri(storedRadio.RadioURL);
+
+                    var lava = c.GetLavalink();
+                    var node = lava.ConnectedNodes.Values.First();
+                    await node.ConnectAsync(channel);
+                    var conn = node.GetGuildConnection(guild);
+
+                    var loadResult = await node.Rest.GetTracksAsync(radioURL);
+
+                    if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
+                        || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+                    {
+                        Console.WriteLine($"Unable to auto load Radio Station for {guild.Name}");
+                        return;
+                    }
+
+                    var track = loadResult.Tracks.First();
+
+                    await conn.PlayAsync(track);
+
+                    Console.WriteLine($"Radio Restarted in: {guild.Name}");
+                }
+            }).Start();
+            return Task.CompletedTask;
+        }
+
+        private Task OnDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
+        {
+            new Thread(async () =>
+            {
+                var guilds = c.Guilds.Values;
+
+                foreach (DiscordGuild guild in guilds)
+                {
+                    var storedRadio = await _radioService.GetRadioAsync(guild.Id);
+
+                    if (storedRadio == null) { continue; }
+
+                    var channel = guild.GetChannel(storedRadio.ChannelId);
+                    var radioURL = new Uri(storedRadio.RadioURL);
+
+                    var lava = c.GetLavalink();
+                    var node = lava.ConnectedNodes.Values.First();
+                    await node.ConnectAsync(channel);
+                    var conn = node.GetGuildConnection(guild);
+
+                    var loadResult = await node.Rest.GetTracksAsync(radioURL);
+
+                    if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
+                        || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+                    {
+                        Console.WriteLine($"Unable to auto load Radio Station for {guild.Name}");
+                        return;
+                    }
+
+                    var track = loadResult.Tracks.First();
+
+                    await conn.PlayAsync(track);
+
+                    Console.WriteLine($"Radio Restarted in: {guild.Name}");
+                }
+            }).Start();
+            return Task.CompletedTask;
+        }
+
+        private async Task OnVoiceStateUpdate(DiscordClient c, VoiceStateUpdateEventArgs e)
+        {
+            if (e.User.Id == c.CurrentUser.Id && e.After.Channel == null)
+            {
+                var serverRadio = await _radioService.GetRadioAsync(e.Guild.Id);
+
+                if (serverRadio != null) { await _radioService.DeleteRadioAsync(serverRadio); }
+
+                return;
+            }
+        }
 
         private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
