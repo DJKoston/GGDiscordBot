@@ -242,6 +242,7 @@ namespace DiscordBot.Bots
 
                     var track = loadResult.Tracks.First();
 
+                    await conn.SetVolumeAsync(25);
                     await conn.PlayAsync(track);
 
                     Console.WriteLine($"Radio Restarted in: {guild.Name}");
@@ -281,6 +282,7 @@ namespace DiscordBot.Bots
 
                     var track = loadResult.Tracks.First();
 
+                    await conn.SetVolumeAsync(25);
                     await conn.PlayAsync(track);
 
                     Console.WriteLine($"Radio Restarted in: {guild.Name}");

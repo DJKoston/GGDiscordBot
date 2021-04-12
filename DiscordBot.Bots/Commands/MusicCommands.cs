@@ -131,6 +131,7 @@ namespace DiscordBot.Bots.Commands
 
                 var track = loadResult.Tracks.First();
 
+                await conn.SetVolumeAsync(25);
                 await conn.PlayAsync(track);
 
                 await ctx.Message.DeleteAsync().ConfigureAwait(false);
