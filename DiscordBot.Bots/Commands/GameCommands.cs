@@ -41,9 +41,15 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             return;
@@ -52,7 +58,6 @@ namespace DiscordBot.Bots.Commands
         [Command("spin")]
         [Description("Spins a wheel and gets a random bonus!")]
         [Cooldown(1, 60, CooldownBucketType.User)]
-        
         public async Task SpinTheWheel(CommandContext ctx, int bet)
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
@@ -61,6 +66,35 @@ namespace DiscordBot.Bots.Commands
 
             if (CNConfig == null) { currencyName = "Gold"; }
             else { currencyName = CNConfig.CurrencyName; }
+
+            if (ctx.Channel.Id != configChannel.ChannelId)
+            {
+                if (configChannel == null)
+                {
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Content = "There isn't a game channel setup for this server. The Admin should specify one using the config command."
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                }
+
+                else
+                {
+                    var channel = ctx.Guild.GetChannel(configChannel.ChannelId);
+
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Content = $"You cannot run this command in this channel. Please run this command in the {channel.Mention} channel!"
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                }
+            }
 
             if (ctx.Channel.Id == configChannel.ChannelId)
             {
@@ -79,13 +113,18 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     maxLimitCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    maxLimitCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: maxLimitCheck).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = maxLimitCheck,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
                 }
-
 
                 if(bet < 0)
                 {
@@ -97,9 +136,15 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     lessThanCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    lessThanCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: lessThanCheck).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = lessThanCheck,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
                 }
@@ -116,9 +161,15 @@ namespace DiscordBot.Bots.Commands
                     if (profileCheck.Gold >= 1) { profileCheckFail.AddField(currencyName, profileCheck.Gold.ToString("###,###,###,###,###")); }
 
                     profileCheckFail.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    profileCheckFail.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: profileCheckFail).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = profileCheckFail,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
                 }
@@ -141,16 +192,21 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = winEmbed,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
                 }
 
                 if (winOrLose == 1)
                 {
-
                     await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -bet, ctx.Member.Username);
 
                     var loseEmbed = new DiscordEmbedBuilder
@@ -161,13 +217,17 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = loseEmbed,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
-
-                
                 }
             }
         }
@@ -175,7 +235,6 @@ namespace DiscordBot.Bots.Commands
         [Command("spin")]
         [Description("Spins a wheel and gets a random bonus!")]
         [Cooldown(1, 60, CooldownBucketType.User)]
-
         public async Task SpinAllGold(CommandContext ctx, string commandString)
         {
             var configChannel = await _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id);
@@ -204,13 +263,18 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         maxLimitCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        maxLimitCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: maxLimitCheck).ConfigureAwait(false);
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = maxLimitCheck,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                         return;
                     }
-
 
                     if (profileCheck.Gold <= 0)
                     {
@@ -222,9 +286,15 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         lessThanCheck.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        lessThanCheck.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: lessThanCheck).ConfigureAwait(false);
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = lessThanCheck,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                         return;
                     }
@@ -249,16 +319,21 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = winEmbed,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                         return;
                     }
 
                     if (winOrLose == 1)
                     {
-
                         await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -bet, ctx.Member.Username);
 
                         var loseEmbed = new DiscordEmbedBuilder
@@ -269,12 +344,17 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = loseEmbed,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                         return;
-
                     }
 
                     return;
@@ -298,9 +378,15 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }           
         }
 
@@ -334,9 +420,15 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = errorEmbed,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
                 }
@@ -351,9 +443,15 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = errorEmbed,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                     return;
                 }
@@ -383,9 +481,15 @@ namespace DiscordBot.Bots.Commands
                         if (victimLoseProfile.Gold >= 1) { winEmbed.AddField($"Their {currencyName}", victimLoseProfile.Gold.ToString("###,###,###,###,###")); }
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = winEmbed,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                         return;
                     }
@@ -408,9 +512,15 @@ namespace DiscordBot.Bots.Commands
                         if (victimWinProfile.Gold >= 1) { loseEmbed.AddField($"Their {currencyName}", victimWinProfile.Gold.ToString("###,###,###,###,###")); }
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = loseEmbed,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                         return;
                     }
@@ -434,9 +544,15 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 errorEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -468,9 +584,15 @@ namespace DiscordBot.Bots.Commands
                     };
 
                     maxEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    maxEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: maxEmbed).ConfigureAwait(false);
+                    var messageBuilder1 = new DiscordMessageBuilder
+                    {
+                        Embed = maxEmbed,
+                    };
+
+                    messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
 
                     return;
                 }
@@ -492,9 +614,15 @@ namespace DiscordBot.Bots.Commands
                     winEmbed.AddField($"Your {currencyName}:", profile.Gold.ToString());
                     winEmbed.AddField("The number has now changed!", "Can you guess it now?");
                     winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                    winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                    await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
+                    var messageBuilder2 = new DiscordMessageBuilder
+                    {
+                        Embed = winEmbed,
+                    };
+
+                    messageBuilder2.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
 
                     return;
                 }
@@ -507,9 +635,15 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = loseEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -530,9 +664,14 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.CornflowerBlue,
                 };
 
-                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -551,11 +690,16 @@ namespace DiscordBot.Bots.Commands
                     Description = "For example `!coinflip heads`",
                     Color = DiscordColor.CornflowerBlue,
                 };
-                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
-
         }
 
         [Command("coinflip")]
@@ -594,9 +738,15 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
+                        var messageBuilder1 = new DiscordMessageBuilder
+                        {
+                            Embed = winEmbed,
+                        };
+
+                        messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
 
                         return;
                     }
@@ -612,9 +762,15 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
+                        var messageBuilder2 = new DiscordMessageBuilder
+                        {
+                            Embed = loseEmbed,
+                        };
+
+                        messageBuilder2.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
 
                         return;
                     }
@@ -634,9 +790,15 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         winEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        winEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: winEmbed).ConfigureAwait(false);
+                        var messageBuilder3 = new DiscordMessageBuilder
+                        {
+                            Embed = winEmbed,
+                        };
+
+                        messageBuilder3.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
 
                         return;
                     }
@@ -651,13 +813,18 @@ namespace DiscordBot.Bots.Commands
                         };
 
                         loseEmbed.AddField("There is a cooldown for this command!", "You can run it again in 1 min.");
-                        loseEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
 
-                        await ctx.Channel.SendMessageAsync(embed: loseEmbed).ConfigureAwait(false);
+                        var messageBuilder4 = new DiscordMessageBuilder
+                        {
+                            Embed = loseEmbed,
+                        };
+
+                        messageBuilder4.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder4).ConfigureAwait(false);
 
                         return;
                     }
-
                 }
 
                 var errorEmbed = new DiscordEmbedBuilder
@@ -667,11 +834,15 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.CornflowerBlue,
                 };
 
-                errorEmbed.WithFooter($"Command run by {ctx.Member.DisplayName}");
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
-            
     }
 }

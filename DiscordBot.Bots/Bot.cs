@@ -2,7 +2,6 @@
 using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
-using DiscordBot.Core.Services.Radios;
 using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.ViewModels;
 using DiscordBot.DAL.Models.Configs;
@@ -16,8 +15,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.Lavalink;
-using DSharpPlus.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,8 +36,6 @@ namespace DiscordBot.Bots
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
-        public LavalinkExtension Lavalink { get; private set; }
-        public LavalinkConfiguration LavaConfig { get; private set; }
         public LiveStreamMonitorService Monitor;
         public TwitchAPI api;
 
@@ -57,7 +52,6 @@ namespace DiscordBot.Bots
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
             _currencyNameService = services.GetService<ICurrencyNameConfigService>();
-            _radioService = services.GetService<IRadioService>();
 
             api = new TwitchAPI();
 
@@ -66,8 +60,6 @@ namespace DiscordBot.Bots
             var clientid = configuration["twitch-clientid"];
             var accesstoken = configuration["twitch-accesstoken"];
             var refreshtoken = configuration["twitch-refreshtoken"];
-            var lavalinkHost = configuration["lavalink-host"];
-            var lavalinkPassword = configuration["lavalink-password"];
 
             var config = new DiscordConfiguration
             {
@@ -95,9 +87,6 @@ namespace DiscordBot.Bots
             Client.PresenceUpdated += OnPresenceUpdated;
             Client.GuildCreated += OnGuildJoin;
             Client.GuildUnavailable += OnGuildUnAvaliable;
-            Client.VoiceStateUpdated += OnVoiceStateUpdate;
-            Client.GuildDownloadCompleted += OnDownloadComplete;
-            Client.Resumed += OnClientResumed;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
 
@@ -126,7 +115,6 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<GameCommands>();
             Commands.RegisterCommands<ManageCommands>();
             Commands.RegisterCommands<MiscCommands>();
-            Commands.RegisterCommands<MusicCommands>();
             Commands.RegisterCommands<ModCommands>();
             Commands.RegisterCommands<NowLiveCommands>();
             Commands.RegisterCommands<ProfileCommands>();
@@ -176,22 +164,9 @@ namespace DiscordBot.Bots
             Console.WriteLine("Connected to Discord!");
             Log("Connected to Discord Service.");
             Console.ResetColor();
-
-            var endpoint = new ConnectionEndpoint
-            {
-                Hostname = lavalinkHost,
-                Port = 2333
-            };
-
-            LavaConfig = new LavalinkConfiguration
-            {
-                Password = lavalinkPassword,
-                RestEndpoint = endpoint,
-                SocketEndpoint = endpoint
-            };
         }
 
-        private Task OnCommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
+        private Task OnCommandExecuted(CommandsNextExtension c, CommandExecutionEventArgs e)
         {
             Log($"{e.Context.Member.DisplayName} ran command !{e.Command.Name} in the #{e.Context.Channel.Name} Channel in {e.Context.Guild.Name}");
 
@@ -209,99 +184,6 @@ namespace DiscordBot.Bots
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly ICurrencyNameConfigService _currencyNameService;
-        private readonly IRadioService _radioService;
-
-        private Task OnClientResumed(DiscordClient c, ReadyEventArgs e)
-        {
-            new Thread(async () =>
-            {
-                var guilds = c.Guilds.Values;
-
-                foreach (DiscordGuild guild in guilds)
-                {
-                    var storedRadio = await _radioService.GetRadioAsync(guild.Id);
-
-                    if (storedRadio == null) { continue; }
-
-                    var channel = guild.GetChannel(storedRadio.ChannelId);
-                    var radioURL = new Uri(storedRadio.RadioURL);
-
-                    var lava = c.GetLavalink();
-                    var node = lava.ConnectedNodes.Values.First();
-                    await node.ConnectAsync(channel);
-                    var conn = node.GetGuildConnection(guild);
-
-                    var loadResult = await node.Rest.GetTracksAsync(radioURL);
-
-                    if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
-                        || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
-                    {
-                        Console.WriteLine($"Unable to auto load Radio Station for {guild.Name}");
-                        return;
-                    }
-
-                    var track = loadResult.Tracks.First();
-
-                    await conn.SetVolumeAsync(25);
-                    await conn.PlayAsync(track);
-
-                    Console.WriteLine($"Radio Restarted in: {guild.Name}");
-                }
-            }).Start();
-            return Task.CompletedTask;
-        }
-
-        private Task OnDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
-        {
-            new Thread(async () =>
-            {
-                var guilds = c.Guilds.Values;
-
-                foreach (DiscordGuild guild in guilds)
-                {
-                    var storedRadio = await _radioService.GetRadioAsync(guild.Id);
-
-                    if (storedRadio == null) { continue; }
-
-                    var channel = guild.GetChannel(storedRadio.ChannelId);
-                    var radioURL = new Uri(storedRadio.RadioURL);
-
-                    var lava = c.GetLavalink();
-                    var node = lava.ConnectedNodes.Values.First();
-                    await node.ConnectAsync(channel);
-                    var conn = node.GetGuildConnection(guild);
-
-                    var loadResult = await node.Rest.GetTracksAsync(radioURL);
-
-                    if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
-                        || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
-                    {
-                        Console.WriteLine($"Unable to auto load Radio Station for {guild.Name}");
-                        return;
-                    }
-
-                    var track = loadResult.Tracks.First();
-
-                    await conn.SetVolumeAsync(25);
-                    await conn.PlayAsync(track);
-
-                    Console.WriteLine($"Radio Restarted in: {guild.Name}");
-                }
-            }).Start();
-            return Task.CompletedTask;
-        }
-
-        private async Task OnVoiceStateUpdate(DiscordClient c, VoiceStateUpdateEventArgs e)
-        {
-            if (e.User.Id == c.CurrentUser.Id && e.After.Channel == null)
-            {
-                var serverRadio = await _radioService.GetRadioAsync(e.Guild.Id);
-
-                if (serverRadio != null) { await _radioService.DeleteRadioAsync(serverRadio); }
-
-                return;
-            }
-        }
 
         private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
@@ -494,9 +376,13 @@ namespace DiscordBot.Bots
 
                     var username = e.Stream.UserName.Replace("_", "\\_");
 
+                    Log($"Username _ replaced to resolve to: {username}");
                     var channelReplace = toReplaceMessage.Replace("%USER%", username);
 
+                    Log($"Game is: {stream.Stream.Game}");
                     var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
+
+                    Log($"URL is: https://twitch.tv/{e.Stream.UserName}");
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
                     var color = new DiscordColor("9146FF");
@@ -509,18 +395,21 @@ namespace DiscordBot.Bots
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
 
+                    Log($"Follower Count is: {stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###")}");
                     embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+
+                    Log($"Total Viewers are: {stream.Stream.Channel.Views.ToString("###,###,###,###,###,###")}");
                     embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
                     var twitchImageURL = $"{stream.Stream.Preview.Large}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}"; 
 
                     embed.WithThumbnail(streamer.Logo);
                     embed.WithImageUrl(twitchImageURL);
+
+                    Log($"Stream went live at: {e.Stream.StartedAt}");
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
-
-                    if (guild.Id == 136613758045913088) { Log("Skipped saving Message Store for ProjectExie Server"); return; }
 
                     var messageStore = new NowLiveMessages
                     {
@@ -544,7 +433,10 @@ namespace DiscordBot.Bots
 
                     var channelReplace = toReplaceMessage.Replace("%USER%", username);
 
+                    Log($"Game is: {stream.Stream.Game}");
                     var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
+
+                    Log($"URL is: https://twitch.tv/{e.Stream.UserName}");
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
                     var color = new DiscordColor("9146FF");
@@ -557,7 +449,10 @@ namespace DiscordBot.Bots
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
 
+                    Log($"Follower Count is: {stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###")}");
                     embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+
+                    Log($"Total Viewers are: {stream.Stream.Channel.Views.ToString("###,###,###,###,###,###")}");
                     embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
                     var twitchImageURL = $"{stream.Stream.Preview.Large}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
@@ -847,10 +742,6 @@ namespace DiscordBot.Bots
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
             Log($"{c.CurrentUser.Username} is Ready.");
             Console.ResetColor();
-
-            Lavalink = Client.UseLavalink();
-
-            await Lavalink.ConnectAsync(LavaConfig);
         }
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)

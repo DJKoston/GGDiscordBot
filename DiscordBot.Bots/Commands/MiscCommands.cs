@@ -49,14 +49,14 @@ namespace DiscordBot.Bots.Commands
         [Description("Play Ping-Pong with the Bot")]
         public async Task Ping(CommandContext ctx)
         {
-            await ctx.Channel.SendMessageAsync("Pong").ConfigureAwait(false);
-        }
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = "Pong",
+            };
 
-        [Command("mathadd")]
-        [Description("Add two numbers together")]
-        public async Task MathAdd(CommandContext ctx, [Description("First Number")] int numberOne, [Description("Second Number")] int numberTwo)
-        {
-            await ctx.Channel.SendMessageAsync((numberOne + numberTwo).ToString()).ConfigureAwait(false);
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("d12")]
@@ -64,7 +64,15 @@ namespace DiscordBot.Bots.Commands
         public async Task RollTwelveDie(CommandContext ctx)
         {
             var rnd = new Random();
-            await ctx.RespondAsync($"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 12)}").ConfigureAwait(false);
+
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = $"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 12)}",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("cmcs")]
@@ -93,7 +101,14 @@ namespace DiscordBot.Bots.Commands
 
                 string responseFromServer = reader.ReadToEnd();
 
-                await ctx.Channel.SendMessageAsync(responseFromServer).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = responseFromServer,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             response.Close();
@@ -105,7 +120,19 @@ namespace DiscordBot.Bots.Commands
         {
             var suggestionChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "suggestions-log");
 
-            if(suggestionChannel == null) { await ctx.Channel.SendMessageAsync("An Error has occured while trying to log your suggestion. Please contact an Admin and ask them to ensure the Suggestion-Log channel is set up.").ConfigureAwait(false); return; }
+            if(suggestionChannel == null)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = "An Error has occured while trying to log your suggestion. Please contact an Admin and ask them to ensure the Suggestion-Log channel is set up.",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                
+                return;
+            }
 
             var newSuggestion = new Suggestion
             {
@@ -135,14 +162,28 @@ namespace DiscordBot.Bots.Commands
 
             await _suggestionService.EditSuggestion(newSuggestion);
 
-            await ctx.Channel.SendMessageAsync("Your suggestion has been logged!").ConfigureAwait(false);
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = "Your suggestion has been logged!",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("ImAStreamer")]
         [Description("Let us Know Your Streamer Tag!")]
         public async Task StreamerTag(CommandContext ctx)
         {
-            await ctx.Channel.SendMessageAsync("To let us know your're a streamer, please do the following command `!twitchchannel YourTwitchUserName`");
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = "To let us know your're a streamer, please do the following command `!twitchchannel YourTwitchUserName`",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("TwitchChannel")]
@@ -159,11 +200,35 @@ namespace DiscordBot.Bots.Commands
 
             var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchUserName);
 
-            if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchUserName}."); return; }
+            if (searchStreamer.Total == 0)
+            {
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"There was no channel with the username {twitchUserName}.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                
+                return;
+            }
 
             var streamerChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "streamers-to-approve");
 
-            if (streamerChannel == null) { await ctx.Channel.SendMessageAsync("An Error has occured while trying to log your request. Please contact an Admin and ask them to ensure the streamers-to-approve channel is set up.").ConfigureAwait(false); return; }
+            if (streamerChannel == null)
+            {
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "An Error has occured while trying to log your request. Please contact an Admin and ask them to ensure the streamers-to-approve channel is set up.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                
+                return;
+            }
 
             var newStreamer = new CommunityStreamer
             {
@@ -193,7 +258,14 @@ namespace DiscordBot.Bots.Commands
 
             await _communityStreamerService.EditStreamer(newStreamer);
 
-            await ctx.Channel.SendMessageAsync("Your request has been logged!").ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Content = "Your request has been logged!",
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("gifme")]
@@ -221,8 +293,16 @@ namespace DiscordBot.Bots.Commands
                     Rating = Rating.R,
                 });
 
-                await ctx.Channel.SendMessageAsync(result.Data.ImageUrl);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = result.Data.ImageUrl,
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
             }
+
             else
             {
                 var searchParams = new SearchParameter()
@@ -240,9 +320,15 @@ namespace DiscordBot.Bots.Commands
 
                 var result = searchResult.Data.ElementAt(randomElement);
 
-                await ctx.Channel.SendMessageAsync(result.Images.Original.Url);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = result.Images.Original.Url,
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
             }
-            
         }
 
         [Command("stats")]
@@ -295,7 +381,14 @@ namespace DiscordBot.Bots.Commands
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
             embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes:00}m");
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("uptime")]
@@ -312,7 +405,14 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Blurple
             };
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("advice")]
@@ -341,7 +441,14 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Aquamarine
             };
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("serverstats")]
@@ -372,7 +479,14 @@ namespace DiscordBot.Bots.Commands
             if (nowLiveChannelCount == 0) { embed.AddField("Twitch Channels:", "0", false); }
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("randomdog")]
@@ -398,7 +512,14 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Aquamarine
             };
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("starwars")]
@@ -429,7 +550,14 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Orange
             };
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("praised")]
@@ -437,9 +565,41 @@ namespace DiscordBot.Bots.Commands
         {
             var goodBot = await _goodBotBadBotService.GetGoodBot();
 
-            if (goodBot.GoodBot == 0) { await ctx.Channel.SendMessageAsync($"I have been praised {goodBot.GoodBot} times! 😊😊😊"); }
-            if (goodBot.GoodBot == 1) { await ctx.Channel.SendMessageAsync($"I have been praised {goodBot.GoodBot} time! 😊😊😊"); }
-            if (goodBot.GoodBot > 1) { await ctx.Channel.SendMessageAsync($"I have been praised {goodBot.GoodBot} times! 😊😊😊"); }
+            if (goodBot.GoodBot == 0)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been praised {goodBot.GoodBot} times! 😊😊😊",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.GoodBot == 1)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been praised {goodBot.GoodBot} time! 😊😊😊",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.GoodBot > 1)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been praised {goodBot.GoodBot} times! 😊😊😊",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
         }
 
         [Command("scolded")]
@@ -447,9 +607,41 @@ namespace DiscordBot.Bots.Commands
         {
             var goodBot = await _goodBotBadBotService.GetGoodBot();
 
-            if (goodBot.BadBot == 0) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!"); }
-            if (goodBot.BadBot == 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} time! 😞 I'll try to do better!"); }
-            if (goodBot.BadBot > 1) { await ctx.Channel.SendMessageAsync($"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!"); }
+            if (goodBot.BadBot == 0)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false); 
+            }
+
+            if (goodBot.BadBot == 1) 
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been scolded {goodBot.BadBot} time! 😞 I'll try to do better!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.BadBot > 1) 
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
         }
 
         [Command("simpsons")]
@@ -465,7 +657,14 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.Yellow,
             };
 
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("bestgirl")]
@@ -481,12 +680,26 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.Azure,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Embed = embed,
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
             }
 
             else
             {
-                await ctx.Channel.SendMessageAsync("Wait... You're not DudeBDR, but still, REM IS BEST GIRL!").ConfigureAwait(false);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = "Wait... You're not DudeBDR, but still, REM IS BEST GIRL!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
             }
         }
     }

@@ -91,7 +91,14 @@ namespace DiscordBot.Bots.Commands
                 if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
                 if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
 
-                await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = profileEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             else
@@ -134,7 +141,14 @@ namespace DiscordBot.Bots.Commands
 
                 if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You have the Double XP Role!", "You currently get 2x XP and 2x Tax!"); }
 
-                await ctx.Channel.SendMessageAsync(embed: profileEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = profileEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -173,7 +187,14 @@ namespace DiscordBot.Bots.Commands
 
             leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
-            await ctx.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Embed = leveledUpEmbed,
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("givecurrency")]
@@ -222,12 +243,26 @@ namespace DiscordBot.Bots.Commands
 
                 errorEmbed.AddField("🤔", "Please try again or if it persists, please contact DJKoston");
 
-                await ctx.Channel.SendMessageAsync(embed: errorEmbed);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Embed = errorEmbed,
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
 
                 return;
             }
 
-            await ctx.Channel.SendMessageAsync(embed: GoldAddedEmbed).ConfigureAwait(false);
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Embed = GoldAddedEmbed,
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("pay")]
@@ -254,7 +289,14 @@ namespace DiscordBot.Bots.Commands
                 if (userProfile.Gold == 0) { userProfileCheckFailEmbed.AddField(currencyName, userProfile.Gold.ToString()); }
                 if (userProfile.Gold >= 1) { userProfileCheckFailEmbed.AddField(currencyName, userProfile.Gold.ToString("###,###,###,###,###")); }
 
-                await ctx.Channel.SendMessageAsync(embed: userProfileCheckFailEmbed).ConfigureAwait(false);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Embed = userProfileCheckFailEmbed,
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
 
                 return;
             }
@@ -269,7 +311,14 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.IndianRed,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: lessThanCheck).ConfigureAwait(false);
+                var messageBuilder2 = new DiscordMessageBuilder
+                {
+                    Embed = lessThanCheck,
+                };
+
+                messageBuilder2.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
 
                 return;
             }
@@ -284,7 +333,14 @@ namespace DiscordBot.Bots.Commands
                 Color = DiscordColor.SpringGreen,
             };
 
-            await ctx.Channel.SendMessageAsync(embed: paidEmbed).ConfigureAwait(false);
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Embed = paidEmbed,
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("hourly")]
@@ -320,7 +376,14 @@ namespace DiscordBot.Bots.Commands
 
                 hourlyEmbed.AddField("You collected 2x Normal Tax", "Because you have the Double XP Role!");
 
-                await ctx.Channel.SendMessageAsync(embed: hourlyEmbed);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = hourlyEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -341,12 +404,17 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.Cyan,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: hourlyEmbed);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = hourlyEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
-
-            
         }
 
         [Command("daily")]
@@ -382,7 +450,14 @@ namespace DiscordBot.Bots.Commands
 
                 dailyEmbed.AddField("You collected 2x Normal Tax", "Because you have the Double XP Role");
 
-                await ctx.Channel.SendMessageAsync(embed: dailyEmbed);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = dailyEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -403,38 +478,17 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.Cyan,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: dailyEmbed);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = dailyEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
-
-            
-        }
-
-        [Command("buildprofiletable")]
-        [Description("Bring all users in the server to the Profile Table")]
-        [RequirePermissions(DSharpPlus.Permissions.Administrator)]
-        public async Task BuildProfileTable(CommandContext ctx)
-        {
-            var members = await ctx.Guild.GetAllMembersAsync().ConfigureAwait(false);
-            var profiles = members.Where(x => x.IsBot == false);
-
-            foreach (DiscordMember profile in profiles)
-            {
-                if (profile.IsBot)
-                {
-                    return;
-                }
-
-                await _profileService.GetOrCreateProfileAsync(profile.Id, ctx.Guild.Id, profile.Username);
-
-                await ctx.Channel.SendMessageAsync($"Profile created for {profile.Mention}").ConfigureAwait(false);
-
-                Thread.Sleep(1000);
-            }
-
-            return;
-            
         }
 
         [Command("top10")]
@@ -446,7 +500,14 @@ namespace DiscordBot.Bots.Commands
             if (CNConfig == null) { currencyName = "Gold"; }
             else { currencyName = CNConfig.CurrencyName; }
 
-            await ctx.Channel.SendMessageAsync($"You need to specify whether you want `!top10 {currencyName}` or `!top10 XP` only!");
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = $"You need to specify whether you want `!top10 {currencyName}` or `!top10 XP` only!",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("top10")]
@@ -506,7 +567,14 @@ namespace DiscordBot.Bots.Commands
                 leaderboardEmbed.AddField("9th", $"{member9.Username} - {ninth.XP:###,###,###,###,###} XP - Level {ninth.Level:###,###,###,###,###}");
                 leaderboardEmbed.AddField("10th", $"{member10.Username} - {tenth.XP:###,###,###,###,###} XP - Level {tenth.Level:###,###,###,###,###}");
 
-                await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
+                var messageBuilder3 = new DiscordMessageBuilder
+                {
+                    Embed = leaderboardEmbed,
+                };
+
+                messageBuilder3.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
 
                 return;
             }
@@ -559,11 +627,26 @@ namespace DiscordBot.Bots.Commands
                 leaderboardEmbed.AddField("9th", $"{member9.Username} - {ninth.Gold:###,###,###,###,###} {currencyName}");
                 leaderboardEmbed.AddField("10th", $"{member10.Username} - {tenth.Gold:###,###,###,###,###} {currencyName}");
 
-                await ctx.Channel.SendMessageAsync(embed: leaderboardEmbed).ConfigureAwait(false);
+                var messageBuilder4 = new DiscordMessageBuilder
+                {
+                    Embed = leaderboardEmbed,
+                };
+
+                messageBuilder4.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder4).ConfigureAwait(false);
 
                 return;
             }
-            await ctx.Channel.SendMessageAsync($"You need to specify whether you want `!top10 {currencyName}` or `!top10 XP` only!");
+
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = $"You need to specify whether you want `!top10 {currencyName}` or `!top10 XP` only!",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
             return;
         }

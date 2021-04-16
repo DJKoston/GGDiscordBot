@@ -13,7 +13,7 @@ namespace DiscordBot.Bots.Commands
     {
         [Command("purge")]
         [Description("Deletes a certain amount of messages from the server. Warning, Max 100.")]
-        public async Task Test(CommandContext ctx, int deleteString)
+        public async Task Purge(CommandContext ctx, int deleteString)
         {
            if(deleteString > 100)
             {
@@ -54,45 +54,6 @@ namespace DiscordBot.Bots.Commands
             Thread.Sleep(1000);
 
             await deletedConfirm.DeleteAsync();
-        }
-
-        [Command("getlog")]
-        public async Task GetLog(CommandContext ctx, string date)
-        {
-            var applicationName = "";
-
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-            if (environment.ToLower() == "development") { applicationName = "GGBotTest"; }
-            else if (environment.ToLower() == "live") { applicationName = "GGBot"; }
-
-            if (date.ToLower() == "today")
-            {
-                var parsedTimeDate = DateTime.Now;
-
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Content = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}",
-                };
-
-                messageBuilder.WithFile($"\\Logs\\{applicationName}\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt");
-
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
-            }
-
-            else
-            {
-                var parsedTimeDate = DateTime.Parse(date);
-
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Content = $"Here is the log file for {parsedTimeDate.ToLongDateString()} {ctx.Member.Mention}",
-                };
-
-                messageBuilder.WithFile($"\\Logs\\{applicationName}\\{parsedTimeDate.Year}\\{parsedTimeDate.Month}\\{DateTime.Today.ToLongDateString()}.txt");
-
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
-            }
         }
     }
 }

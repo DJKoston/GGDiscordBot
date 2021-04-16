@@ -63,7 +63,14 @@ namespace DiscordBot.Bots.Commands
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task Profile(CommandContext ctx)
         {
-            await ctx.Channel.SendMessageAsync("You have not specified what command is to be deleted! **USAGE: `!deletecommand <!command>`**");
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = "You have not specified what command is to be deleted! **USAGE: `!deletecommand <!command>`**",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("deletecommand")]
@@ -86,13 +93,28 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.Red,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: noCommandEmbed);
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Embed = noCommandEmbed,
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+
                 return;
             }
 
             await _customCommandService.DeleteCommandAsync(command);
 
-            await ctx.Channel.SendMessageAsync($"Command: `{command.Trigger}` deleted.");
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = $"Command: `{command.Trigger}` deleted.",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("commands")]
@@ -107,12 +129,18 @@ namespace DiscordBot.Bots.Commands
             {
                 Title = "Custom Commands",
                 Color = DiscordColor.Lilac,
-                Description = $"Please find below the custom commands that have been added to the bot!"
             };
 
             customCommandEmbed.AddField("Custom Commands:", listedCommands);
 
-            await ctx.Channel.SendMessageAsync(embed: customCommandEmbed).ConfigureAwait(false);
+            var messageBuilder2 = new DiscordMessageBuilder
+            {
+                Embed = customCommandEmbed,
+            };
+
+            messageBuilder2.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
 
             return;
         }

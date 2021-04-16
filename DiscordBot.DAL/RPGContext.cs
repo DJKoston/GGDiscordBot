@@ -6,7 +6,6 @@ using DiscordBot.DAL.Models.Items;
 using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
-using DiscordBot.DAL.Models.Radios;
 using DiscordBot.DAL.Models.ReactionRoles;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,6 +35,5 @@ namespace DiscordBot.DAL
         public DbSet <EggChannel> EggChannels { get; set; }
         public DbSet <EggNickname> EggNicknames { get; set; }
         public DbSet <EggRole> EggRoles { get; set; }
-        public DbSet <Radio> Radios { get; set; }
     }
 }

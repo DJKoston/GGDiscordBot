@@ -26,7 +26,14 @@ namespace DiscordBot.Bots.Commands
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task AddQuote(CommandContext ctx)
         {
-            await ctx.Channel.SendMessageAsync("Please add a quote as such: `!addquote @username {Remainder of Quote}` - DO NOT add the curly braces!").ConfigureAwait(false);
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = "Please add a quote as such: `!addquote @username {Remainder of Quote}` - DO NOT add the curly braces!",
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("addquote")]
@@ -66,7 +73,14 @@ namespace DiscordBot.Bots.Commands
                 quoteAddEmbed.AddField("Quoted By:", ctx.Member.DisplayName);
                 quoteAddEmbed.WithFooter(quoteDb.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
 
-                await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = quoteAddEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -100,12 +114,17 @@ namespace DiscordBot.Bots.Commands
                 quoteAddEmbed.AddField("Quoted By:", ctx.Member.DisplayName);
                 quoteAddEmbed.WithFooter(quoteDb.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
 
-                await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = quoteAddEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
-
-            
         }
 
         [Command("totalquotes")]
@@ -122,8 +141,15 @@ namespace DiscordBot.Bots.Commands
                     Title = "There are currently 0 quotes in the bot!",
                     Color = DiscordColor.IndianRed,
                 };
-                
-                await ctx.Channel.SendMessageAsync(embed: zeroQuoteEmbed).ConfigureAwait(false);
+
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = zeroQuoteEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -136,7 +162,14 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.Orange,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: zeroQuoteEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = zeroQuoteEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -149,7 +182,14 @@ namespace DiscordBot.Bots.Commands
                     Color = DiscordColor.Orange,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: zeroQuoteEmbed).ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = zeroQuoteEmbed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -170,9 +210,15 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 embed.AddField("Try searching for another quote!", "For example `!deletequote 154`");
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
 
-               
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = embed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -195,7 +241,14 @@ namespace DiscordBot.Bots.Commands
             quoteAddEmbed.AddField("Deleted By:", ctx.Member.DisplayName);
             quoteAddEmbed.WithFooter(quote.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
 
-            await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = quoteAddEmbed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("quote")]
@@ -207,7 +260,14 @@ namespace DiscordBot.Bots.Commands
 
             if(lastQuoteId == null)
             {
-                await ctx.Channel.SendMessageAsync("No Quote's exist. Please add one before searching for a quote.").ConfigureAwait(false);
+                var messageBuilder3 = new DiscordMessageBuilder
+                {
+                    Content = "No Quote's exist. Please add one before searching for a quote.",
+                };
+
+                messageBuilder3.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
 
                 return;
             }
@@ -232,8 +292,14 @@ namespace DiscordBot.Bots.Commands
             quoteAddEmbed.AddField("Channel Quoted in:", quote.ChannelQuotedIn);
             quoteAddEmbed.WithFooter(quote.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
 
-            await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Embed = quoteAddEmbed,
+            };
 
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
         [Command("quote")]
@@ -256,7 +322,15 @@ namespace DiscordBot.Bots.Commands
                 };
 
                 embed.AddField("Try searching for another quote!", "For example `!quote 154`");
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Embed = embed,
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 return;
             }
@@ -273,7 +347,14 @@ namespace DiscordBot.Bots.Commands
             quoteAddEmbed.AddField("Channel Quoted in:", quote.ChannelQuotedIn);
             quoteAddEmbed.WithFooter(quote.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
 
-            await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = quoteAddEmbed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
         [Command("quote")]
@@ -286,7 +367,19 @@ namespace DiscordBot.Bots.Commands
 
             var quote = userQuotes.Skip(rndQuote).Take(1).FirstOrDefault();
             
-            if(quote == null) { await ctx.Channel.SendMessageAsync("We cannot find any quotes! Please try again or try another user."); return; }
+            if(quote == null) 
+            {
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "We cannot find any quotes! Please try again or try another user.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                
+                return; 
+            }
 
             var quotedUser = await ctx.Client.GetUserAsync(quote.DiscordUserQuotedId);
             var quoterUser = await ctx.Client.GetUserAsync(quote.AddedById);
@@ -303,7 +396,14 @@ namespace DiscordBot.Bots.Commands
             quoteAddEmbed.AddField("Channel Quoted in:", quote.ChannelQuotedIn);
             quoteAddEmbed.WithFooter(quote.DateAdded, "https://www.kindpng.com/picc/b/10-101445_white-clock-icon-png.png");
 
-            await ctx.Channel.SendMessageAsync(embed: quoteAddEmbed).ConfigureAwait(false);
+            var messageBuilder2 = new DiscordMessageBuilder
+            {
+                Embed = quoteAddEmbed,
+            };
+
+            messageBuilder2.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
         }
     }
 }

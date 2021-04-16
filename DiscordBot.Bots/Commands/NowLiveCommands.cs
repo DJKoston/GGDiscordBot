@@ -37,13 +37,28 @@ namespace DiscordBot.Bots.Commands
             [GroupCommand]
             public async Task AddStreamerOld(CommandContext ctx)
             {
-                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch add` command.").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "This command is now depricated. Please use the `!nl twitch add` command.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             [GroupCommand]
             public async Task AddStreamerOld(CommandContext ctx, [RemainingText] string anything)
             {
-                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch add` command.").ConfigureAwait(false);
+
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "This command is now depricated. Please use the `!nl twitch add` command.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -53,13 +68,27 @@ namespace DiscordBot.Bots.Commands
             [GroupCommand]
             public async Task RemoveStreamerOld(CommandContext ctx)
             {
-                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch remove` command.").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "This command is now depricated. Please use the `!nl twitch remove` command.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             [GroupCommand]
             public async Task RemoveStreamerOld(CommandContext ctx, [RemainingText] string anything)
             {
-                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch remove` command.").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "This command is now depricated. Please use the `!nl twitch remove` command.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -69,13 +98,27 @@ namespace DiscordBot.Bots.Commands
             [GroupCommand]
             public async Task ListStreamerOld(CommandContext ctx)
             {
-                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch list` command.").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "This command is now depricated. Please use the `!nl twitch list` command.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             [GroupCommand]
             public async Task ListStreamerOld(CommandContext ctx, [RemainingText] string anything)
             {
-                await ctx.Channel.SendMessageAsync("This command is now depricated. Please use the `!nl twitch list` command.").ConfigureAwait(false);
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "This command is now depricated. Please use the `!nl twitch list` command.",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
         }
 
@@ -121,15 +164,51 @@ namespace DiscordBot.Bots.Commands
 
                 var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
 
-                if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+                if (searchStreamer.Total == 0)
+                {
+                    var messageBuilder1 = new DiscordMessageBuilder
+                    {
+                        Content = $"There was no channel with the username {twitchStreamer}.",
+                    };
+
+                    messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                    
+                    return;
+                }
 
                 var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
 
-                if (stream.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+                if (stream.Total == 0) 
+                {
+                    var messageBuilder2 = new DiscordMessageBuilder
+                    {
+                        Content = $"There was no channel with the username {twitchStreamer}.",
+                    };
+
+                    messageBuilder2.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
+
+                    return;
+                }
 
                 var streamResults = stream.Matches.FirstOrDefault();
 
-                if (streamResults.DisplayName.ToLower() != twitchStreamer.ToLower()) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+                if (streamResults.DisplayName.ToLower() != twitchStreamer.ToLower()) 
+                {
+                    var messageBuilder3 = new DiscordMessageBuilder
+                    {
+                        Content = $"There was no channel with the username {twitchStreamer}.",
+                    };
+
+                    messageBuilder3.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
+
+                    return; 
+                }
 
                 var streamerId = streamResults.Id;
 
@@ -146,7 +225,14 @@ namespace DiscordBot.Bots.Commands
 
                 await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
 
-                await ctx.Channel.SendMessageAsync($"{getStreamId.DisplayName} will now be announced in {announceChannel.Mention}");
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"{getStreamId.DisplayName} will now be announced in {announceChannel.Mention}",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
             }
 
             [Command("list")]
@@ -184,7 +270,17 @@ namespace DiscordBot.Bots.Commands
                         embed1.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
 
-                    if (embed1.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed1).ConfigureAwait(false); }
+                    if (embed1.Fields.Count != 0) 
+                    {
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = embed1,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                    }
                 }
 
                 if (streamerspage2 != null)
@@ -204,7 +300,17 @@ namespace DiscordBot.Bots.Commands
                         embed2.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
 
-                    if (embed2.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed2).ConfigureAwait(false); }
+                    if (embed2.Fields.Count != 0) 
+                    {
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = embed2,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                    }
                 }
 
                 if (streamerspage3 != null)
@@ -224,7 +330,17 @@ namespace DiscordBot.Bots.Commands
                         embed3.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
 
-                    if (embed3.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed3).ConfigureAwait(false); }
+                    if (embed3.Fields.Count != 0) 
+                    {
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = embed3,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                    }
                 }
 
                 if (streamerspage4 != null)
@@ -244,7 +360,17 @@ namespace DiscordBot.Bots.Commands
                         embed4.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
 
-                    if (embed4.Fields.Count != 0) { await ctx.Channel.SendMessageAsync(embed: embed4).ConfigureAwait(false); }
+                    if (embed4.Fields.Count != 0) 
+                    {
+                        var messageBuilder = new DiscordMessageBuilder
+                        {
+                            Embed = embed4,
+                        };
+
+                        messageBuilder.WithReply(ctx.Message.Id, true);
+
+                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                    }
                 }
             }
 
@@ -261,7 +387,19 @@ namespace DiscordBot.Bots.Commands
 
                 var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
 
-                if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {twitchStreamer}."); return; }
+                if (searchStreamer.Total == 0) 
+                {
+                    var messageBuilder1 = new DiscordMessageBuilder
+                    {
+                        Content = $"There was no channel with the username {twitchStreamer}.",
+                    };
+
+                    messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                    
+                    return;
+                }
 
                 var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
 
@@ -272,13 +410,33 @@ namespace DiscordBot.Bots.Commands
                 var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
 
                 var config = await _guildStreamerConfigService.GetConfigToDelete(ctx.Guild.Id, getStreamId.Id);
-                if (config == null) { await ctx.Channel.SendMessageAsync($"No configuration found for {twitchStreamer}, do `!nl liststreamers` to see the list of streamers you can remove."); return; }
+
+                if (config == null) 
+                {
+                    var messageBuilder2 = new DiscordMessageBuilder
+                    {
+                        Content = $"No configuration found for {twitchStreamer}, do `!nl liststreamers` to see the list of streamers you can remove.",
+                    };
+
+                    messageBuilder2.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
+                    
+                    return; 
+                }
 
                 var messages = await _messageStoreService.GetMessageStore(ctx.Guild.Id, getStreamId.Id);
 
                 DiscordChannel channel = ctx.Guild.GetChannel(config.AnnounceChannelId);
 
-                await ctx.Channel.SendMessageAsync($"{getStreamId.DisplayName} will no longer be announced in {channel.Mention}");
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"{getStreamId.DisplayName} will no longer be announced in {channel.Mention}",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
 
                 await _guildStreamerConfigService.RemoveGuildStreamerConfig(config);
 

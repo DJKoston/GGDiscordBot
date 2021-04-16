@@ -5,7 +5,6 @@ using DiscordBot.Core.Services.Egg;
 using DiscordBot.Core.Services.Items;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.Quotes;
-using DiscordBot.Core.Services.Radios;
 using DiscordBot.Core.Services.ReactionRoles;
 using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.DAL;
@@ -56,7 +55,6 @@ namespace DiscordBot.Bots
             services.AddScoped<ICurrencyNameConfigService, CurrencyNameConfigService>();
             services.AddScoped<ISimpsonsQuoteService, SimpsonsQuoteService>();
             services.AddScoped<IEggService, EggService>();
-            services.AddScoped<IRadioService, RadioService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();
