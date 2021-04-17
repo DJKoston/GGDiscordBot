@@ -34,7 +34,20 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
         {
             _embed.WithDescription("Please find detailed information for the command below.");
 
-            _embed.AddField(command.Name, command.Description);
+            if (command is CommandGroup commandGroup)
+            {
+                var children = commandGroup.Children;
+
+                foreach (var child in children)
+                {
+                    _embed.AddField(child.Name, child.Description);
+                }
+            }
+
+            else
+            {
+                _embed.AddField(command.Name, command.Description);
+            }
 
             return this;
         }
