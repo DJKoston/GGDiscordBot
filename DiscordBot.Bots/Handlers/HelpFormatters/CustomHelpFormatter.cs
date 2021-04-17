@@ -8,6 +8,7 @@ using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace DiscordBot.Bots.Handlers.HelpFormatters
 {
@@ -16,6 +17,7 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
         protected DiscordEmbedBuilder _embed;
         private readonly RPGContext _context;
         protected List<CustomCommand> CustomCommands;
+        protected Command currentCommand;
 
         public CustomHelpFormatter(CommandContext ctx, RPGContext context) : base(ctx)
         {
@@ -32,30 +34,13 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
         public override BaseHelpFormatter WithCommand(Command command)
         {
-            _embed.WithDescription("Please find detailed information for the command below.");
-
-            if (command is CommandGroup commandGroup)
-            {
-                var children = commandGroup.Children;
-
-                foreach (var child in children)
-                {
-                    _embed.AddField(child.Name, child.Description);
-                }
-            }
-
-            else
-            {
-                _embed.AddField(command.Name, command.Description);
-            }
+            currentCommand = command;
 
             return this;
         }
 
         public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
         {
-            _embed.WithDescription("Please find a full list of commands that are avaliable to you!");
-
             List<string> configCommands = new List<string>();
             List<string> gameCommands = new List<string>();
             List<string> manageCommands = new List<string>();
@@ -68,11 +53,11 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
             List<string> setupCommands = new List<string>();
             List<string> streamerCommands = new List<string>();
             List<string> suggestionCommands = new List<string>();
-            List<string> serverSpecificCommands = new List<string>();
+            
 
             foreach (var cmd in cmds)
             {
-                if (cmd.Module.ModuleType.Name == "ConfigCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ConfigCommands"))
                 {
                     if(cmd is CommandGroup commandGroup)
                     {
@@ -80,17 +65,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            configCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            configCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        configCommands.Add($"`!{cmd.Name}`");
+                        configCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "GameCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("GameCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -98,17 +83,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            gameCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            gameCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        gameCommands.Add($"`!{cmd.Name}`");
+                        gameCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "ManageCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ManageCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -116,17 +101,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            manageCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            manageCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        manageCommands.Add($"`!{cmd.Name}`");
+                        manageCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "MiscCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("MiscCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -134,17 +119,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            miscCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            miscCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        miscCommands.Add($"`!{cmd.Name}`");
+                        miscCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "ModCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ModCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -152,17 +137,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            modCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            modCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        modCommands.Add($"`!{cmd.Name}`");
+                        modCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "NowLiveCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("NowLiveCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -176,24 +161,24 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                                 foreach (var subchildCommand in subchildCommands)
                                 {
-                                    nowLiveCommands.Add($"`!{cmd.Name} {childCommand.Name} {subchildCommand.Name}`");
+                                    nowLiveCommands.Add($"`!{subchildCommand.QualifiedName}`");
                                 }
                             }
 
                             else
                             {
-                                nowLiveCommands.Add($"`!{cmd.Name} {childCommand.Name}");
+                                nowLiveCommands.Add($"`!{childCommand.QualifiedName}`");
                             }
                         }
                     }
 
                     else
                     {
-                        nowLiveCommands.Add($"`!{cmd.Name}`");
+                        nowLiveCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "ProfileCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ProfileCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -201,17 +186,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            profileCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            profileCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        profileCommands.Add($"`!{cmd.Name}`");
+                        profileCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "QuoteCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("QuoteCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -219,17 +204,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            quoteCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            quoteCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        quoteCommands.Add($"`!{cmd.Name}`");
+                        quoteCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "ReactionRoleCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ReactionRoleCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -237,17 +222,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            reactionRoleCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            reactionRoleCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        reactionRoleCommands.Add($"`!{cmd.Name}`");
+                        reactionRoleCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "SetupCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("SetupCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -255,17 +240,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            setupCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            setupCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        setupCommands.Add($"`!{cmd.Name}`");
+                        setupCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "StreamerCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("StreamerCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -273,17 +258,17 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            streamerCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            streamerCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        streamerCommands.Add($"`!{cmd.Name}`");
+                        streamerCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
-                if (cmd.Module.ModuleType.Name == "SuggestionCommands")
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("SuggestionCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -291,20 +276,15 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
                         foreach (var childCommand in childCommands)
                         {
-                            suggestionCommands.Add($"`!{cmd.Name} {childCommand.Name}`");
+                            suggestionCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        suggestionCommands.Add($"`!{cmd.Name}`");
+                        suggestionCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
-            }
-
-            foreach (var ccmd in CustomCommands)
-            {
-                serverSpecificCommands.Add(ccmd.Trigger.Replace($"{ccmd.Trigger}", $"`{ccmd.Trigger}`"));
             }
 
             if (configCommands.Count != 0)
@@ -367,16 +347,33 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
                 _embed.AddField("Suggestion Commands:", String.Join(", ", suggestionCommands.ToArray()));
             }
 
-            if (serverSpecificCommands.Count != 0)
-            {
-                _embed.AddField("Server Specific Custom Commands:", String.Join(", ", serverSpecificCommands.ToArray()));
-            }
-
             return this;
         }
 
         public override CommandHelpMessage Build()
         {
+            if (currentCommand == null) 
+            {
+                List<string> serverSpecificCommands = new List<string>();
+
+                _embed.WithDescription("Please find a full list of commands that are avaliable to you!");
+
+                foreach (var ccmd in CustomCommands)
+                {
+                    serverSpecificCommands.Add(ccmd.Trigger.Replace($"{ccmd.Trigger}", $"`{ccmd.Trigger}`"));
+                }
+
+                if (serverSpecificCommands.Count != 0)
+                {
+                    _embed.AddField("Server Specific Custom Commands:", String.Join(", ", serverSpecificCommands.ToArray()));
+                }
+            }
+
+            else 
+            {
+                _embed.WithDescription("Please find the specified commands below!"); 
+            }
+
             return new CommandHelpMessage(embed: _embed);
         }
     }

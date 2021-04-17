@@ -30,6 +30,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("Set2xpRole")]
+        [Description("This command will configure the Double XP role in your server to give them 2x XP in your server!")]
         public async Task CreateNewNitroBoosterConfig(CommandContext ctx, DiscordRole role)
         {
             var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
@@ -76,6 +77,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("Get2xpRole")]
+        [Description("This command will get the current Double XP role configured for your server.")]
         public async Task ViewCurrentNitroBoosterRole(CommandContext ctx)
         {
             var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
@@ -106,6 +108,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("Reset2xpRole")]
+        [Description("This command will reset the Double XP role configured for your server. Please note that you will have to run this command if you change or remove the Double XP role.")]
         public async Task ResetNitroBoosterRole(CommandContext ctx)
         {
             var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
@@ -141,6 +144,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("SetWelcomeChannel")]
+        [Description("This command will trigger an interactive dialogue with the bot to configure the Welcome Channel and Message for your server.")]
         public async Task CreateWelcomeMessageConfig(CommandContext ctx, DiscordChannel channel)
         {
             var config = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
@@ -239,6 +243,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("GetWelcomeChannel")]
+        [Description("This Command will get the current Welcome Channel configuration for your server.")]
         public async Task ViewCurrentWelcomeChannel(CommandContext ctx)
         {
             var config = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
@@ -268,6 +273,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("ResetWelcomeChannel")]
+        [Description("This command will reset the current Welcome Channel configuration for your server. Please note you will have to run this command if you wish to change your Welcome Message.")]
         public async Task ResetWelcomeChannel(CommandContext ctx)
         {
             var config = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
@@ -303,6 +309,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("SetGameChannel")]
+        [Description("This command will set the channel in which members can use the games coded into the bot. Please note that if you do not set a channel, your server will not be able to play any of the games. - This Channel is also the location for Bot Downtime notifications. You can also have multiple Game Channels in your server.")]
         public async Task CreateGameChannelConfig(CommandContext ctx, DiscordChannel channel)
         {
             var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
@@ -347,6 +354,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("GetGameChannel")]
+        [Description("This command will get the current Game Channel for your server.")]
         public async Task GetGameChannelConfig(CommandContext ctx)
         {
             var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
@@ -377,6 +385,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("ResetGameChannel")]
+        [Description("This command will reset the server's Game Channel to null.")]
         public async Task ResetGameChannelConfig(CommandContext ctx)
         {
             var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
@@ -412,6 +421,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("SetUpSuggestionChannel")]
+        [Description("Does exactly what it says on the tin. It sets up the Suggestion Moderation Channel.")]
         public async Task SetUpSuggestionChannel(CommandContext ctx)
         {
             var suggestionChannel = await ctx.Guild.CreateChannelAsync("suggestions-log", DSharpPlus.ChannelType.Text, null, "This is where the Suggestions Live!");
@@ -420,6 +430,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("SetUpStreamerChannel")]
+        [Description("This command creates the Streamer Request logging channel for you to keep track of who is being added to the bot.")]
         public async Task SetUpStreamerLogChannel(CommandContext ctx)
         {
             var suggestionChannel = await ctx.Guild.CreateChannelAsync("streamers-to-approve", DSharpPlus.ChannelType.Text, null, "This is where the streamers to approve Live!");
@@ -428,6 +439,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("SetNowLiveRole")]
+        [Description("This command will set the role that members will receive when they go live. Please note that this uses Discord Live Discovery and all users must have Twitch connected to their account for the role to be given.")]
         public async Task CreateNowLiveRoleConfig(CommandContext ctx, DiscordRole role)
         {
             var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
@@ -472,6 +484,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("GetNowLiveRole")]
+        [Description("This command will get the current Now Live Role for your server.")]
         public async Task GetNowLiveRoleConfig(CommandContext ctx)
         {
             var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
@@ -502,6 +515,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("ResetNowLiveRole")]
+        [Description("This command will reset the server's Now Live Role to null.")]
         public async Task ResetNowLiveRoleConfig(CommandContext ctx)
         {
             var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
@@ -537,6 +551,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("SetCurrencyName")]
+        [Description("This command will set the currency name in your server.")]
         public async Task SetCurrencyName(CommandContext ctx, [RemainingText]string currencyName)
         {
             var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
@@ -581,6 +596,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("GetCurrencyName")]
+        [Description("This command will get the current currency name in your server.")]
         public async Task ViewCurrentCurrencyName(CommandContext ctx)
         {
             var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
@@ -609,6 +625,7 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("ResetCurrencyName")]
+        [Description("This command will reset the server's currency name to null.")]
         public async Task ResetCustomCurrency(CommandContext ctx)
         {
             var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
