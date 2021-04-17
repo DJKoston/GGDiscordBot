@@ -1,4 +1,5 @@
 ﻿using DiscordBot.Bots.Commands;
+using DiscordBot.Bots.Handlers.HelpFormatters;
 using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Profiles;
@@ -110,6 +111,8 @@ namespace DiscordBot.Bots
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
+
+            Commands.SetHelpFormatter<CustomHelpFormatter>();
 
             Commands.RegisterCommands<ConfigCommands>();
             Commands.RegisterCommands<GameCommands>();
@@ -351,48 +354,64 @@ namespace DiscordBot.Bots
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"{e.Stream.UserName} just went Live!");
             Log($"{e.Stream.UserName} just went Live.");
+            Log($"Game is: {e.Stream.GameName}");
+            Log($"Stream Started at: {e.Stream.StartedAt}");
             Console.ResetColor();
             
             var configs = _guildStreamerConfigService.GetGuildStreamerConfig(e.Stream.UserId);
 
             foreach (GuildStreamerConfig config in configs)
             {
+                Log("Getting Message Store Info");
                 var storedMessage = _messageStoreService.GetMessageStore(config.GuildId, config.StreamerId).Result;
 
                 if (storedMessage != null) { continue; }
 
+                Log("Getting Guild");
                 DiscordGuild guild = Client.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
                 if (guild == null) { continue; }
 
+                Log("Getting Discord Channel to post Now Live");
                 DiscordChannel channel = guild.GetChannel(config.AnnounceChannelId);
 
+                Log("Getting Stream Info");
                 var stream = api.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
+
+                Log("Getting Streamer Info");
                 var streamer = api.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
                 if (e.Stream.UserName.Contains("_"))
                 {
                     var toReplaceMessage = config.AnnouncementMessage;
 
+                    Log("Replacing _ with \\_");
                     var username = e.Stream.UserName.Replace("_", "\\_");
 
                     Log($"Username _ replaced to resolve to: {username}");
                     var channelReplace = toReplaceMessage.Replace("%USER%", username);
 
-                    Log($"Game is: {stream.Stream.Game}");
-                    var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
+                    string gameReplace = null;
+
+                    Log("Replacing Game");
+                    if (e.Stream.GameName == null) { Log("Replacing Game with Default"); gameReplace = channelReplace.Replace("%GAME%", "A Game"); }
+                    if(e.Stream.GameName != null) { Log("Replacing Game with Twitch Game"); gameReplace = channelReplace.Replace("%GAME%", e.Stream.GameName); }
+                    
 
                     Log($"URL is: https://twitch.tv/{e.Stream.UserName}");
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
+                    Log("Setting Discord Colour");
                     var color = new DiscordColor("9146FF");
 
+                    Log("Creating Embed");
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = $"{e.Stream.UserName} has gone live!",
                         Color = color,
                     };
 
+                    Log("Checking if the Stream Title is null.");
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
 
                     Log($"Follower Count is: {stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###")}");
@@ -406,7 +425,6 @@ namespace DiscordBot.Bots
                     embed.WithThumbnail(streamer.Logo);
                     embed.WithImageUrl(twitchImageURL);
 
-                    Log($"Stream went live at: {e.Stream.StartedAt}");
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
@@ -433,8 +451,7 @@ namespace DiscordBot.Bots
 
                     var channelReplace = toReplaceMessage.Replace("%USER%", username);
 
-                    Log($"Game is: {stream.Stream.Game}");
-                    var gameReplace = channelReplace.Replace("%GAME%", stream.Stream.Game);
+                    var gameReplace = channelReplace.Replace("%GAME%", e.Stream.GameName);
 
                     Log($"URL is: https://twitch.tv/{e.Stream.UserName}");
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");

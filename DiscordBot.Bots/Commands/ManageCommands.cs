@@ -116,33 +116,5 @@ namespace DiscordBot.Bots.Commands
 
             await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
-
-        [Command("commands")]
-        [Description("Shows custom commands avaliable.")]
-        public async Task ShowCommandList(CommandContext ctx)
-        {
-            var serverCommands = _context.CustomCommands.Where(x => x.GuildId == ctx.Guild.Id);
-            var listCommands = serverCommands.Where(x => x.Trigger.Contains("!")).OrderBy(x => x.Trigger);
-            var listedCommands = string.Join(", ", listCommands.Select(x => x.Trigger));
-
-            var customCommandEmbed = new DiscordEmbedBuilder
-            {
-                Title = "Custom Commands",
-                Color = DiscordColor.Lilac,
-            };
-
-            customCommandEmbed.AddField("Custom Commands:", listedCommands);
-
-            var messageBuilder2 = new DiscordMessageBuilder
-            {
-                Embed = customCommandEmbed,
-            };
-
-            messageBuilder2.WithReply(ctx.Message.Id, true);
-
-            await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
-
-            return;
-        }
     }
 }

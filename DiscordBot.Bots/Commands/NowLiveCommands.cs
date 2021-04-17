@@ -12,8 +12,8 @@ using TwitchLib.Api;
 
 namespace DiscordBot.Bots.Commands
 {
-    [Group("NowLive")]
-    [Aliases("nl")]
+    [Group("nl")]
+    [Aliases("NowLive")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
 
     public class NowLiveCommands : BaseCommandModule
