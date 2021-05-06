@@ -5,7 +5,7 @@
     <AssemblyName>DiscordBot</AssemblyName>
     <Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <UserSecretsId>34b56b5f-2361-41bd-96ec-2648e2719edc</UserSecretsId>
-    <Version>0.14.0</Version>
+    <Version>0.14.1</Version>
     <Authors>DJKoston</Authors>
     <Company>Generation Gamers</Company>
     <Product>GG Discord Bot</Product>
@@ -61,5 +61,13 @@
     <ProjectReference Include="..\DiscordBot.DAL.Migrations\DiscordBot.DAL.Migrations.csproj" />
     <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="taskkill /s 192.168.0.202 /u Administrator /p Charlie2012 /IM discordbot.exe" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="WMIC /node:192.168.0.202 /user:administrator /password:Charlie2012 process call create &quot;cmd.exe /c c:\TaskHandler\TaskHandler.exe&quot;" />
+  </Target>
 
 </Project>

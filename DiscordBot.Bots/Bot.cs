@@ -451,19 +451,26 @@ namespace DiscordBot.Bots
 
                     var channelReplace = toReplaceMessage.Replace("%USER%", username);
 
-                    var gameReplace = channelReplace.Replace("%GAME%", e.Stream.GameName);
+                    string gameReplace = null;
+
+                    Log("Replacing Game");
+                    if (e.Stream.GameName == null) { Log("Replacing Game with Default"); gameReplace = channelReplace.Replace("%GAME%", "A Game"); }
+                    if (e.Stream.GameName != null) { Log("Replacing Game with Twitch Game"); gameReplace = channelReplace.Replace("%GAME%", e.Stream.GameName); }
 
                     Log($"URL is: https://twitch.tv/{e.Stream.UserName}");
                     var announcementMessage = gameReplace.Replace("%URL%", $"https://twitch.tv/{e.Stream.UserName} ");
 
+                    Log("Setting Discord Colour");
                     var color = new DiscordColor("9146FF");
 
+                    Log("Creating Embed");
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = $"{e.Stream.UserName} has gone live!",
                         Color = color,
                     };
 
+                    Log("Checking if the Stream Title is null.");
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
 
                     Log($"Follower Count is: {stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###")}");
@@ -479,8 +486,6 @@ namespace DiscordBot.Bots
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
-
-                    if (guild.Id == 136613758045913088) { Log("Skipped saving Message Store for ProjectExie Server"); return; }
 
                     var messageStore = new NowLiveMessages
                     {
