@@ -62,12 +62,4 @@
     <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="taskkill /s 192.168.0.202 /u Administrator /p Charlie2012 /IM discordbot.exe" />
-  </Target>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="WMIC /node:192.168.0.202 /user:administrator /password:Charlie2012 process call create &quot;cmd.exe /c c:\TaskHandler\TaskHandler.exe&quot;" />
-  </Target>
-
 </Project>
