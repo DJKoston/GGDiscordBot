@@ -751,7 +751,7 @@ namespace DiscordBot.Bots
 
         private async Task OnClientReady(DiscordClient c, ReadyEventArgs e)
         {
-            if(Environment.MachineName == "Haydon-PC")
+            if(Environment.MachineName.ToLower() == "haydon-pc")
             {
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
