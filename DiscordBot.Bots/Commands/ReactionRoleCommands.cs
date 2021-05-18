@@ -25,26 +25,74 @@ namespace DiscordBot.Bots.Commands
         }
 
         [Command("add")]
-        public async Task AddReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordRole Role, DiscordEmoji Emoji)
+        public async Task AddReactionRole(CommandContext ctx)
         {
-            DiscordChannel channel = ctx.Guild.GetChannel(Channel.Id);
-            DiscordMessage message = await channel.GetMessageAsync(MessageId);
-
-            var ReactionRole = new ReactionRole()
+            var messageBuilder = new DiscordMessageBuilder
             {
-                GuildId = ctx.Guild.Id,
-                ChannelId = channel.Id,
-                MessageId = message.Id,
-                RoleId = Role.Id,
-                EmoteId = Emoji.Id,
-                UnicodeEmote = Emoji.Name
+                Content = $"You need to specify some information before you can add a reaction role. \n\nUSAGE: !rr add #channel-name MessageIDNumber @Role Emoji (add/remove)"
             };
 
-            await _reactionRoleService.CreateNewReactionRole(ReactionRole);
+            messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await message.CreateReactionAsync(Emoji);
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+        }
 
-            await ctx.Channel.SendMessageAsync("Reaction Role added!");
+            [Command("add")]
+        public async Task AddReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordRole Role, DiscordEmoji Emoji)
+        {
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = $"You need to specify whether to add or remove the role when the emote is clicked. \n\nUSAGE: !rr add {Channel.Mention} {MessageId} {Role.Mention} {Emoji} (add/remove)"
+            };
+
+            messageBuilder.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+        }
+
+        [Command("add")]
+        public async Task AddReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordRole Role, DiscordEmoji Emoji, string RemoveRoleAddRole)
+        {
+            if(RemoveRoleAddRole.ToLower() == "remove" || RemoveRoleAddRole.ToLower() == "add") 
+            {
+                DiscordChannel channel = ctx.Guild.GetChannel(Channel.Id);
+                DiscordMessage message = await channel.GetMessageAsync(MessageId);
+
+                if (message == null) { await ctx.Channel.SendMessageAsync("There is no message with that ID. Please check the ID again."); }
+
+                var ReactionRole = new ReactionRole();
+
+                if (RemoveRoleAddRole.ToLower() == "remove")
+                {
+                    ReactionRole.GuildId = ctx.Guild.Id;
+                    ReactionRole.ChannelId = channel.Id;
+                    ReactionRole.MessageId = message.Id;
+                    ReactionRole.RoleId = Role.Id;
+                    ReactionRole.EmoteId = Emoji.Id;
+                    ReactionRole.UnicodeEmote = Emoji.Name;
+                    ReactionRole.RemoveAddRole = "remove";
+                }
+                else if (RemoveRoleAddRole.ToLower() == "add")
+                {
+                    ReactionRole.GuildId = ctx.Guild.Id;
+                    ReactionRole.ChannelId = channel.Id;
+                    ReactionRole.MessageId = message.Id;
+                    ReactionRole.RoleId = Role.Id;
+                    ReactionRole.EmoteId = Emoji.Id;
+                    ReactionRole.UnicodeEmote = Emoji.Name;
+                    ReactionRole.RemoveAddRole = "add";
+                }
+
+                await _reactionRoleService.CreateNewReactionRole(ReactionRole);
+
+                await message.CreateReactionAsync(Emoji);
+
+                await ctx.Channel.SendMessageAsync("Reaction Role added!");
+            }
+            else
+            {
+                await ctx.Channel.SendMessageAsync("You need to specify `add` or `remove` in your final argument.").ConfigureAwait(false);
+            }
         }
 
         [Command("delete")]
@@ -80,14 +128,14 @@ namespace DiscordBot.Bots.Commands
 
                 if(reactionRole.EmoteId == 0)
                 {
-                    ReactionRoleList.AddField($"MessageID: {reactionRole.MessageId}", $"Channel: {channel.Name}, Role: {role.Mention}, Emote: {reactionRole.UnicodeEmote}");
+                    ReactionRoleList.AddField($"MessageID: {reactionRole.MessageId}", $"Channel: {channel.Name}, Role: {role.Mention}, Emote: {reactionRole.UnicodeEmote}, Add/Remove on React: {reactionRole.RemoveAddRole}");
                 }
 
                 else
                 {
                     DiscordEmoji emoji = await ctx.Guild.GetEmojiAsync(reactionRole.EmoteId);
 
-                    ReactionRoleList.AddField($"MessageID: {reactionRole.MessageId}", $"Channel: {channel.Name}, Role: {role.Mention}, Emote: {emoji}");
+                    ReactionRoleList.AddField($"MessageID: {reactionRole.MessageId}", $"Channel: {channel.Name}, Role: {role.Mention}, Emote: {emoji}, Add/Remove on React: {reactionRole.RemoveAddRole}");
                 }
             }
 
@@ -101,7 +149,7 @@ namespace DiscordBot.Bots.Commands
             var HelpEmbed = new DiscordEmbedBuilder
             {
                 Title = "How to add a Reaction Role",
-                Description = "`!rr add #channel-name MessageId @Role :Emote:`",
+                Description = "`!rr add #channel-name MessageId @Role :Emote: add/remove`",
                 Color = DiscordColor.Purple
             };
 
