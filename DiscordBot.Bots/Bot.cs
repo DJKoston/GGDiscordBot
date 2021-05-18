@@ -722,8 +722,17 @@ namespace DiscordBot.Bots
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
             DiscordRole role = guild.GetRole(reactionRole.RoleId);
 
-            await member.RevokeRoleAsync(role);
-            Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name}.");
+            if (reactionRole.RemoveAddRole == "add")
+            {
+                await member.RevokeRoleAsync(role);
+                Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name}.");
+            }
+
+            else if (reactionRole.RemoveAddRole == "remove")
+            {
+                await member.GrantRoleAsync(role);
+                Log($"Granted {role.Name} Role to {member.Username} in {guild.Name}.");
+            }
 
             return;
         }
@@ -735,7 +744,7 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
+            var reactionRole = await _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name);
 
             if (reactionRole == null) { return; }
 
@@ -743,8 +752,17 @@ namespace DiscordBot.Bots
             DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
             DiscordRole role = guild.GetRole(reactionRole.RoleId);
 
-            await member.GrantRoleAsync(role);
-            Log($"Granted {role.Name} Role to {member.Username} in {guild.Name}.");
+            if (reactionRole.RemoveAddRole == "add")
+            {
+                await member.GrantRoleAsync(role);
+                Log($"Granted {role.Name} Role to {member.Username} in {guild.Name}.");
+            }
+
+            else if (reactionRole.RemoveAddRole == "remove")
+            {
+                await member.RevokeRoleAsync(role);
+                Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name}.");
+            }
 
             return;
         }

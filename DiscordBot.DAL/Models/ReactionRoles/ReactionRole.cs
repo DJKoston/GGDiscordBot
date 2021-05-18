@@ -8,5 +8,6 @@
         public ulong RoleId { get; set; }
         public ulong EmoteId { get; set; }
         public string UnicodeEmote { get; set; }
+        public string RemoveAddRole { get; set; }
     }
 }
