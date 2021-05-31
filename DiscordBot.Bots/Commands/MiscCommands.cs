@@ -522,6 +522,41 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        [Command("randomcat")]
+        public async Task RandomCat(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var request = new HttpClient
+            {
+                BaseAddress = new Uri("https://cataas.com/")
+            };
+
+            HttpResponseMessage response = await request.GetAsync("cat?json=true");
+
+            var resp = await response.Content.ReadAsStringAsync();
+
+            var cat = JsonConvert.DeserializeObject<RandomCat>(resp);
+
+            var catUrl = $"https://cataas.com{cat.Url}";
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"Here is your random cat {ctx.Member.DisplayName}",
+                ImageUrl = catUrl,
+                Color = DiscordColor.Aquamarine
+            };
+
+            var messageBuilder1 = new DiscordMessageBuilder
+            {
+                Embed = embed,
+            };
+
+            messageBuilder1.WithReply(ctx.Message.Id, true);
+
+            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+        }
+
         [Command("starwars")]
         public async Task StarWarsQuote(CommandContext ctx)
         {
