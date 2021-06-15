@@ -47,6 +47,7 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
             List<string> miscCommands = new List<string>();
             List<string> modCommands = new List<string>();
             List<string> nowLiveCommands = new List<string>();
+            List<string> pollCommands = new List<string>();
             List<string> profileCommands = new List<string>();
             List<string> quoteCommands = new List<string>();
             List<string> reactionRoleCommands = new List<string>();
@@ -175,6 +176,37 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
                     else
                     {
                         nowLiveCommands.Add($"`!{cmd.QualifiedName}`");
+                    }
+                }
+
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("PollCommands"))
+                {
+                    if (cmd is CommandGroup commandGroup)
+                    {
+                        var childCommands = commandGroup.Children;
+
+                        foreach (var childCommand in childCommands)
+                        {
+                            if (childCommand is CommandGroup childGroup)
+                            {
+                                var subchildCommands = childGroup.Children;
+
+                                foreach (var subchildCommand in subchildCommands)
+                                {
+                                    pollCommands.Add($"`!{subchildCommand.QualifiedName}`");
+                                }
+                            }
+
+                            else
+                            {
+                                pollCommands.Add($"`!{childCommand.QualifiedName}`");
+                            }
+                        }
+                    }
+
+                    else
+                    {
+                        pollCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
@@ -315,6 +347,11 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
             if (nowLiveCommands.Count != 0)
             {
                 _embed.AddField("Now Live Management Commands:", String.Join(", ", nowLiveCommands.ToArray()));
+            }
+
+            if (pollCommands.Count != 0)
+            {
+                _embed.AddField("Poll Commands:", String.Join(", ", pollCommands.ToArray()));
             }
 
             if (profileCommands.Count != 0)

@@ -120,6 +120,7 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<MiscCommands>();
             Commands.RegisterCommands<ModCommands>();
             Commands.RegisterCommands<NowLiveCommands>();
+            Commands.RegisterCommands<PollCommands>();
             Commands.RegisterCommands<ProfileCommands>();
             Commands.RegisterCommands<QuoteCommands>();
             Commands.RegisterCommands<ReactionRoleCommands>();
