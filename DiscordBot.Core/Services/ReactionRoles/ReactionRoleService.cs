@@ -50,7 +50,7 @@ namespace DiscordBot.Core.Services.ReactionRoles
 
             var MessageReactionRoles = ChannelReactionRoles.Where(x => x.MessageId == MessageId);
 
-            return await MessageReactionRoles.FirstOrDefaultAsync(x => x.UnicodeEmote == EmoteName).ConfigureAwait(false);              
+            return await MessageReactionRoles.FirstOrDefaultAsync(x => x.EmoteId == EmoteId && x.UnicodeEmote == EmoteName).ConfigureAwait(false);              
         }
     }
 }
