@@ -789,6 +789,11 @@ namespace DiscordBot.Bots
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)
         {
+            if (e.Channel.Type.ToString() == "News") 
+            {
+                await e.Channel.CrosspostMessageAsync(e.Message);
+            }
+
             DiscordEmoji praisedEmote = DiscordEmoji.FromName(c, ":blush:");
             DiscordEmoji scoldedEmote = DiscordEmoji.FromName(c, ":disappointed:");
 
