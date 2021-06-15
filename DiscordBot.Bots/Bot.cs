@@ -744,6 +744,8 @@ namespace DiscordBot.Bots
                 return;
             }
 
+            DiscordEmoji emoji = e.Emoji;
+
             var reactionRole = await _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name);
 
             if (reactionRole == null) { return; }
