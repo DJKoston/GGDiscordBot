@@ -234,13 +234,13 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            //Servers to Uptime
+            //Servers to Minecraft
             if (currentStatus.Name.Contains("Server"))
             {
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
                     ActivityType = ActivityType.Playing,
-                    Name = $"Online for: {botUptime.Days}d {botUptime.Hours:00}h {botUptime.Minutes:00}m",
+                    Name = $"minecraft.koston.eu",
                 }, UserStatus.Online);
 
                 return;
@@ -251,11 +251,24 @@ namespace DiscordBot.Bots
                 await Client.UpdateStatusAsync(new DiscordActivity
                 {
                     ActivityType = ActivityType.Playing,
+                    Name = $"minecraft.koston.eu",
+                }, UserStatus.Online);
+
+                return;
+            }
+
+            //Minecraft to Uptime
+            if (currentStatus.Name.Contains("minecraft"))
+            {
+                await Client.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Playing,
                     Name = $"Online for: {botUptime.Days}d {botUptime.Hours:00}h {botUptime.Minutes:00}m",
                 }, UserStatus.Online);
 
                 return;
             }
+
 
             //Uptme to Twitch Channels
             if (currentStatus.Name.Contains("Online for:"))
