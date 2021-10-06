@@ -3,6 +3,7 @@ using DiscordBot.Core.Services.Configs;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Egg;
 using DiscordBot.Core.Services.Items;
+using DiscordBot.Core.Services.Music;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.Quotes;
 using DiscordBot.Core.Services.ReactionRoles;
@@ -55,6 +56,7 @@ namespace DiscordBot.Bots
             services.AddScoped<ICurrencyNameConfigService, CurrencyNameConfigService>();
             services.AddScoped<ISimpsonsQuoteService, SimpsonsQuoteService>();
             services.AddScoped<IEggService, EggService>();
+            services.AddScoped<IMusicService, MusicService>();
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();

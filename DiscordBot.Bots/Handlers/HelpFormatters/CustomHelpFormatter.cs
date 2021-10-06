@@ -46,6 +46,7 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
             List<string> manageCommands = new List<string>();
             List<string> miscCommands = new List<string>();
             List<string> modCommands = new List<string>();
+            List<string> musicCommands = new List<string>();
             List<string> nowLiveCommands = new List<string>();
             List<string> pollCommands = new List<string>();
             List<string> profileCommands = new List<string>();
@@ -145,6 +146,24 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
                     else
                     {
                         modCommands.Add($"`!{cmd.QualifiedName}`");
+                    }
+                }
+
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("MusicCommands"))
+                {
+                    if (cmd is CommandGroup commandGroup)
+                    {
+                        var childCommands = commandGroup.Children;
+
+                        foreach (var childCommand in childCommands)
+                        {
+                            musicCommands.Add($"`!{childCommand.QualifiedName}`");
+                        }
+                    }
+
+                    else
+                    {
+                        musicCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
@@ -340,6 +359,11 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
             }
 
             if (modCommands.Count != 0)
+            {
+                _embed.AddField("Moderator Commands:", String.Join(", ", modCommands.ToArray()));
+            }
+
+            if (musicCommands.Count != 0)
             {
                 _embed.AddField("Moderator Commands:", String.Join(", ", modCommands.ToArray()));
             }

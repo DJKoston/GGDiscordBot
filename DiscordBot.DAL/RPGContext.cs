@@ -4,6 +4,7 @@ using DiscordBot.DAL.Models.CustomCommands;
 using DiscordBot.DAL.Models.Egg;
 using DiscordBot.DAL.Models.Items;
 using DiscordBot.DAL.Models.MessageStores;
+using DiscordBot.DAL.Models.Playlists;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
 using DiscordBot.DAL.Models.ReactionRoles;
@@ -35,5 +36,6 @@ namespace DiscordBot.DAL
         public DbSet <EggChannel> EggChannels { get; set; }
         public DbSet <EggNickname> EggNicknames { get; set; }
         public DbSet <EggRole> EggRoles { get; set; }
+        public DbSet <Playlist> Playlists { get; set; }
     }
 }

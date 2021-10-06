@@ -9,6 +9,8 @@ using DiscordBot.DAL.Models.Configs;
 using DiscordBot.DAL.Models.MessageStores;
 using DiscordBot.DAL.Models.Profiles;
 using DSharpPlus;
+using DSharpPlus.Net;
+using DSharpPlus.Lavalink;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
@@ -29,6 +31,7 @@ using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
+using DiscordBot.Core.Services.Music;
 
 namespace DiscordBot.Bots
 {
@@ -37,6 +40,9 @@ namespace DiscordBot.Bots
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
+        public LavalinkExtension LavaLink { get; private set; }
+        public LavalinkConfiguration LavalinkConfiguration;
+        public LavalinkNodeConnection nodeConnection;
         public LiveStreamMonitorService Monitor;
         public TwitchAPI api;
 
@@ -53,6 +59,7 @@ namespace DiscordBot.Bots
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
             _currencyNameService = services.GetService<ICurrencyNameConfigService>();
+            _musicService = services.GetService<IMusicService>();
 
             api = new TwitchAPI();
 
@@ -69,6 +76,19 @@ namespace DiscordBot.Bots
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
                 Intents = DiscordIntents.All
+            };
+
+            var lavalinkEndpoint = new ConnectionEndpoint
+            {
+                Hostname = configuration["lavalink-host"],
+                Port = 2333
+            };
+
+            LavalinkConfiguration = new LavalinkConfiguration
+            {
+                Password = configuration["lavalink-password"],
+                RestEndpoint = lavalinkEndpoint,
+                SocketEndpoint = lavalinkEndpoint,
             };
 
             api.Settings.ClientId = clientid;
@@ -119,6 +139,7 @@ namespace DiscordBot.Bots
             Commands.RegisterCommands<ManageCommands>();
             Commands.RegisterCommands<MiscCommands>();
             Commands.RegisterCommands<ModCommands>();
+            Commands.RegisterCommands<MusicCommands>();
             Commands.RegisterCommands<NowLiveCommands>();
             Commands.RegisterCommands<PollCommands>();
             Commands.RegisterCommands<ProfileCommands>();
@@ -168,13 +189,8 @@ namespace DiscordBot.Bots
             Console.WriteLine("Connected to Discord!");
             Log("Connected to Discord Service.");
             Console.ResetColor();
-        }
 
-        private Task OnCommandExecuted(CommandsNextExtension c, CommandExecutionEventArgs e)
-        {
-            Log($"{e.Context.Member.DisplayName} ran command !{e.Command.Name} in the #{e.Context.Channel.Name} Channel in {e.Context.Guild.Name}");
-
-            return Task.CompletedTask;
+            LavaLink = Client.UseLavalink();
         }
 
         private readonly IReactionRoleService _reactionRoleService;
@@ -188,6 +204,14 @@ namespace DiscordBot.Bots
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly ICurrencyNameConfigService _currencyNameService;
+        private readonly IMusicService _musicService;
+
+        private Task OnCommandExecuted(CommandsNextExtension c, CommandExecutionEventArgs e)
+        {
+            Log($"{e.Context.Member.DisplayName} ran command !{e.Command.Name} in the #{e.Context.Channel.Name} Channel in {e.Context.Guild.Name}");
+
+            return Task.CompletedTask;
+        }
 
         private async Task OnHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
@@ -798,6 +822,10 @@ namespace DiscordBot.Bots
             Console.WriteLine($"{c.CurrentUser.Username} is Ready");
             Log($"{c.CurrentUser.Username} is Ready.");
             Console.ResetColor();
+
+            await LavaLink.ConnectAsync(LavalinkConfiguration);
+
+
         }
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)
