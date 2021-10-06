@@ -112,6 +112,61 @@ namespace DiscordBot.Bots.Commands
             await conn.ResumeAsync();
         }
 
+        [Command("simulatorradio")]
+        public async Task SimulatorRadio(CommandContext ctx)
+        {
+            var lava = ctx.Client.GetLavalink();
+            if (!lava.ConnectedNodes.Any())
+            {
+                await ctx.RespondAsync("The Lavalink connection is not established");
+                return;
+            }
+
+            var node = lava.ConnectedNodes.Values.First();
+
+            if (ctx.Member.VoiceState == null)
+            {
+                await ctx.RespondAsync("You are not in a VC. Please connect to one before running this command again.");
+                return;
+            }
+
+            var channel = ctx.Member.VoiceState.Channel;
+
+            var botMember = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+
+            if (botMember.VoiceState == null || botMember.VoiceState.Channel == null)
+            {
+                await node.ConnectAsync(channel);
+            }
+
+            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
+
+            Uri srURL = new Uri("https://simulatorradio.stream/stream.mp3");
+
+            var loadResult = await node.Rest.GetTracksAsync(srURL);
+
+            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
+                || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+            {
+                await ctx.RespondAsync($"Simulator Radio could not be played at this time.");
+                return;
+            }
+
+            var track = loadResult.Tracks.First();
+
+            var playlist = await _musicService.GetNextGuildSong(ctx.Guild.Id);
+
+            if (playlist == null)
+            {
+                await conn.PlayAsync(track);
+
+                await ctx.RespondAsync($"Now playing Simulator Radio!");
+
+                conn.PlaybackFinished += this.LavalinkNode_TrackFinished;
+                conn.TrackException += this.LavalinkNode_TrackError;
+            }
+        }
+
         [Command("play")]
         public async Task Play(CommandContext ctx, Uri url)
         {

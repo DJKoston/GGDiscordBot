@@ -14,6 +14,7 @@ namespace DiscordBot.Core.Services.Quotes
         Task CreateNewQuoteAsync(Quote quote);
         Task DeleteQuoteAsync(Quote quote);
         Task<Quote> GetQuoteAsync(int quoteId, ulong discordId);
+        List<Quote> GetGuildQuotes(ulong guildId);
     }
 
     public class QuoteService : IQuoteService
@@ -50,6 +51,22 @@ namespace DiscordBot.Core.Services.Quotes
             var serverQuotes = context.Quotes.Where(x => x.GuildId == discordId);
 
             return await serverQuotes.FirstOrDefaultAsync(x => x.QuoteId == quoteId).ConfigureAwait(false);
+        }
+
+        public List<Quote> GetGuildQuotes(ulong guildId)
+        {
+            using var context = new RPGContext(_options);
+
+            var list = new List<Quote>();
+
+            var guildQuotes = context.Quotes.Where(x => x.GuildId == guildId);
+
+            foreach(Quote quote in guildQuotes)
+            {
+                list.Add(quote);
+            }
+
+            return list;
         }
     }
 }

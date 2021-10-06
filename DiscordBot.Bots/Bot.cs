@@ -32,6 +32,10 @@ using TwitchLib.Api;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using DiscordBot.Core.Services.Music;
+using DiscordBot.DAL;
+using DiscordBot.Core.Services.Quotes;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace DiscordBot.Bots
 {
@@ -60,6 +64,8 @@ namespace DiscordBot.Bots
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
             _currencyNameService = services.GetService<ICurrencyNameConfigService>();
             _musicService = services.GetService<IMusicService>();
+            _currencyNameConfig = services.GetService<ICurrencyNameConfigService>();
+            _quoteService = services.GetService<IQuoteService>();
 
             api = new TwitchAPI();
 
@@ -193,6 +199,8 @@ namespace DiscordBot.Bots
             LavaLink = Client.UseLavalink();
         }
 
+        public string currencyName;
+
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IProfileService _profileService;
         private readonly IExperienceService _experienceService;
@@ -205,6 +213,8 @@ namespace DiscordBot.Bots
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly ICurrencyNameConfigService _currencyNameService;
         private readonly IMusicService _musicService;
+        private readonly ICurrencyNameConfigService _currencyNameConfig;
+        private readonly IQuoteService _quoteService;
 
         private Task OnCommandExecuted(CommandsNextExtension c, CommandExecutionEventArgs e)
         {
@@ -825,7 +835,7 @@ namespace DiscordBot.Bots
 
             await LavaLink.ConnectAsync(LavalinkConfiguration);
 
-
+            await _musicService.ClearAllPlaylists();
         }
 
         private async Task OnMessageCreated(DiscordClient c, MessageCreateEventArgs e)

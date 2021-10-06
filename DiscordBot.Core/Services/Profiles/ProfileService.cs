@@ -11,6 +11,7 @@ namespace DiscordBot.Core.Services.Profiles
     {
         Task<Profile> GetOrCreateProfileAsync(ulong discordId, ulong guildId, string discordName);
         Task<Profile> DeleteProfileAsync(ulong discordId, ulong guildId, string discordName);
+        Task<int> GetNextXP(int profileLevel);
     }
     public class ProfileService : IProfileService
     {
@@ -56,6 +57,17 @@ namespace DiscordBot.Core.Services.Profiles
             await context.SaveChangesAsync().ConfigureAwait(false);
 
             return profile;
+        }
+
+        public async Task<int> GetNextXP (int profileLevel)
+        {
+            using var context = new RPGContext(_options);
+
+            var nextLevel = profileLevel + 1;
+
+            var nextXP = await context.ToNextXP.FirstOrDefaultAsync(x => x.Level == nextLevel);
+
+            return nextXP.XPAmount;
         }
     }
 }
