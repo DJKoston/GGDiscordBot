@@ -365,6 +365,11 @@ namespace DiscordBot.Bots.Handlers.HelpFormatters
 
             if (musicCommands.Count != 0)
             {
+                _embed.AddField("Music Commands:", String.Join(", ", musicCommands.ToArray()));
+            }
+
+            if (musicCommands.Count != 0)
+            {
                 _embed.AddField("Moderator Commands:", String.Join(", ", modCommands.ToArray()));
             }
 

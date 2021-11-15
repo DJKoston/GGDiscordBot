@@ -1,15 +1,11 @@
 ﻿using DiscordBot.Core.Services.Music;
 using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Playlists;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
-using Emzi0767.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
