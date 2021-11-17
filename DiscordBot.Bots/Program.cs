@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-
-namespace DiscordBot.Bots
+﻿namespace DiscordBot.Bots
 {
     public class Program
     {

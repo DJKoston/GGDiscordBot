@@ -1,65 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>DiscordBot</AssemblyName>
-    <Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
-    <UserSecretsId>34b56b5f-2361-41bd-96ec-2648e2719edc</UserSecretsId>
-    <Version>1.0.0</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<Version>1.0.0</Version>
     <Authors>DJKoston</Authors>
-    <Company>Generation Gamers</Company>
-    <Product>GG Discord Bot</Product>
-    <NeutralLanguage>en-GB</NeutralLanguage>
-    <RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
-    <Copyright>DJKoston 2020</Copyright>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Build|AnyCPU'">
-    <OutputPath>V:\DiscordBot_Dev\DiscordBot.Build\</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test_Build|AnyCPU'">
-    <OutputPath>V:\DiscordBot_Test\DiscordBot.Build\</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Live_Build|AnyCPU'">
-    <OutputPath>V:\DiscordBot_Live\DiscordBot.Build\</OutputPath>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>C:\LocalDebug\</OutputPath>
+	<Company>Generation Gamers</Company>
+	<Product>GG Discord Bot</Product>
+	<NeutralLanguage>en-GB</NeutralLanguage>
+	<RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
+	<Copyright>DJKoston 2020</Copyright>
+	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	<StartupObject>DiscordBot.Bots.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="logs\**" />
-    <Content Remove="logs\**" />
-    <EmbeddedResource Remove="logs\**" />
-    <None Remove="logs\**" />
+    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
+    <PackageReference Include="TwitchLib" Version="3.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-	 <PackageReference Include="DSharpPlus" Version="4.1.0" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.1.0" />
-    <PackageReference Include="DSharpPlus.Lavalink" Version="4.1.0" />
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
-    <PackageReference Include="GiphyDotNet" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="TwitchLib" Version="3.2.0" />
+    <Folder Include="Commands\" />
+    <Folder Include="Handlers\" />
+    <Folder Include="JsonConversions\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DiscordBot.Core\DiscordBot.Core.csproj" />
-    <ProjectReference Include="..\DiscordBot.DAL.Migrations\DiscordBot.DAL.Migrations.csproj" />
     <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />
   </ItemGroup>
 
