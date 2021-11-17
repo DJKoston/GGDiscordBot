@@ -73,7 +73,6 @@ namespace DiscordBot.Bots
             var prefix = configuration["prefix"];
             var clientid = configuration["twitch-clientid"];
             var accesstoken = configuration["twitch-accesstoken"];
-            var refreshtoken = configuration["twitch-refreshtoken"];
 
             var config = new DiscordConfiguration
             {
