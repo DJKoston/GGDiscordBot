@@ -363,5 +363,3 @@ MigrationBackup/
 FodyWeavers.xsd
 /DiscordBot.Bots/appsettings.json
 /DiscordBot.Bots/appsettings.Live.json
-/DiscordBot.Bots/GlobalSuppressions2.cs
-/DiscordBot.Bots/GlobalSuppressions.cs

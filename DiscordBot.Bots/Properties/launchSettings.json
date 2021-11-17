@@ -10,12 +10,14 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "DiscordBot.Bots": {
       "commandName": "Project",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

@@ -3,52 +3,36 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-	<Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2.0.0</Version>
+    <Nullable>enable</Nullable>
+	<Version>1.0.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
 	<NeutralLanguage>en-GB</NeutralLanguage>
 	<RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
-	<Copyright>DJKoston 2022</Copyright>
+	<Copyright>DJKoston 2020</Copyright>
 	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	<StartupObject>DiscordBot.Bots.Program</StartupObject>
   </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Build|AnyCPU'">
-		<OutputPath>V:\DiscordBot_Dev\DiscordBot.Build\</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test_Build|AnyCPU'">
-		<OutputPath>V:\DiscordBot_Test\DiscordBot.Build\</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Live_Build|AnyCPU'">
-		<OutputPath>V:\DiscordBot_Live\DiscordBot.Build\</OutputPath>
-		<Optimize>true</Optimize>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>C:\LocalDebug\</OutputPath>
-	</PropertyGroup>
-	
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
+    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
     <PackageReference Include="TwitchLib" Version="3.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DiscordBot.Core\DiscordBot.Core.csproj" />
-    <ProjectReference Include="..\DiscordBot.DAL.Migrations\DiscordBot.DAL.Migrations.csproj" />
+    <Folder Include="Commands\" />
+    <Folder Include="Handlers\" />
+    <Folder Include="JsonConversions\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />
   </ItemGroup>
 
