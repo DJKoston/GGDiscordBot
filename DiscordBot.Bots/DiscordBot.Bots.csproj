@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<Version>1.0.0</Version>
+	<Version>2.0.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
@@ -28,8 +28,9 @@
 
   <ItemGroup>
     <Folder Include="Commands\" />
-    <Folder Include="Handlers\" />
+    <Folder Include="Handlers\HelpFormatters\" />
     <Folder Include="JsonConversions\" />
+    <Folder Include="SlashCommands\" />
   </ItemGroup>
 
   <ItemGroup>
