@@ -1,8 +1,4 @@
-﻿using DiscordBot.DAL.Models.Items;
-using System;
-using System.Collections.Generic;
-
-namespace DiscordBot.DAL.Models.Profiles
+﻿namespace DiscordBot.DAL.Models.Profiles
 {
     public class ToNextXP : Entity
     {
