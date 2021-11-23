@@ -1,4 +1,4 @@
-﻿namespace DiscordBot.DAL.Models.ReactionRoles
+﻿namespace DiscordBot.DAL.Models.Suggestions
 {
     public class Suggestion : Entity
     {
