@@ -2,8 +2,9 @@
 
 namespace DiscordBot.Core.ViewModels
 {
-    public class GrantGoldViewModel
+    public class GrantXpViewModel
     {
         public Profile Profile;
+        public bool LevelledUp;
     }
 }

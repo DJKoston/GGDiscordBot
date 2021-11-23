@@ -1,11 +1,6 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Quotes;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.Quotes
 {
@@ -61,7 +56,7 @@ namespace DiscordBot.Core.Services.Quotes
 
             var guildQuotes = context.Quotes.Where(x => x.GuildId == guildId);
 
-            foreach(Quote quote in guildQuotes)
+            foreach (Quote quote in guildQuotes)
             {
                 list.Add(quote);
             }

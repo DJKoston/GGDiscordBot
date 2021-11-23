@@ -21,7 +21,6 @@ namespace DiscordBot.DAL
 
         //Configurations
         public DbSet<CurrencyNameConfig> CurrencyNameConfigs { get; set; }
-        public DbSet<GameChannelConfig> GameChannelConfigs { get; set; }
         public DbSet<DoubleXPRoleConfig> DoubleXPRoleConfigs { get; set; }
         public DbSet<NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }
         public DbSet<WelcomeMessageConfig> WelcomeMessageConfigs { get; set; }

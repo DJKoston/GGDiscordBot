@@ -1,8 +1,6 @@
 ﻿using DiscordBot.DAL;
-using DiscordBot.DAL.Models.ReactionRoles;
+using DiscordBot.DAL.Models.Suggestions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.Suggestions
 {
