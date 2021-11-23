@@ -2,7 +2,7 @@
 using DiscordBot.DAL.Models.NowLive;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordBot.Core.Services.NowLive
+namespace DiscordBot.Core.Services.Configs
 {
     public interface INowLiveMessageService
     {
@@ -10,11 +10,11 @@ namespace DiscordBot.Core.Services.NowLive
         Task RemoveMessageStore(NowLiveMessage config);
         Task<NowLiveMessage> GetMessageStore(ulong GuildId, string streamerId);
     }
-    public class NowLiveMessageService : INowLiveMessageService
+    public class MessageStoreService : INowLiveMessageService
     {
         private readonly DbContextOptions<RPGContext> _options;
 
-        public NowLiveMessageService(DbContextOptions<RPGContext> options)
+        public MessageStoreService(DbContextOptions<RPGContext> options)
         {
             _options = options;
         }

@@ -6,11 +6,10 @@ namespace DiscordBot.Core.Services.Configurations
 {
     public interface INowLiveRoleConfigService
     {
-        Task AddNowLiveRole(NowLiveRoleConfig config);
-        Task EditNowLiveRole(NowLiveRoleConfig config);
-        Task RemoveNowLiveRole(NowLiveRoleConfig config);
-        Task<NowLiveRoleConfig> GetNowLiveRole(ulong GuildId);
-        List<NowLiveRoleConfig> GetAllNowLiveRoles();
+        Task CreateNowLiveRoleConfig(NowLiveRoleConfig config);
+        Task RemoveNowLiveRoleConfig(NowLiveRoleConfig config);
+        Task<NowLiveRoleConfig> GetNowLiveRoleConfig(ulong GuildId);
+        List<NowLiveRoleConfig> GetAllConfigs();
     }
     public class NowLiveRoleConfigService : INowLiveRoleConfigService
     {
@@ -21,7 +20,7 @@ namespace DiscordBot.Core.Services.Configurations
             _options = options;
         }
 
-        public async Task AddNowLiveRole(NowLiveRoleConfig config)
+        public async Task CreateNowLiveRoleConfig(NowLiveRoleConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -30,16 +29,7 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task EditNowLiveRole(NowLiveRoleConfig config)
-        {
-            using var context = new RPGContext(_options);
-
-            context.Update(config);
-
-            await context.SaveChangesAsync();
-        }
-
-        public async Task RemoveNowLiveRole(NowLiveRoleConfig config)
+        public async Task RemoveNowLiveRoleConfig(NowLiveRoleConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -48,14 +38,14 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<NowLiveRoleConfig> GetNowLiveRole(ulong GuildId)
+        public async Task<NowLiveRoleConfig> GetNowLiveRoleConfig(ulong GuildId)
         {
             using var context = new RPGContext(_options);
 
             return await context.NowLiveRoleConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId);
         }
 
-        public List<NowLiveRoleConfig> GetAllNowLiveRoles()
+        public List<NowLiveRoleConfig> GetAllConfigs()
         {
             using var context = new RPGContext(_options);
 

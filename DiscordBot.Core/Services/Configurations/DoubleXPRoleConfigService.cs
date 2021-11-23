@@ -6,48 +6,38 @@ namespace DiscordBot.Core.Services.Configurations
 {
     public interface IDoubleXPRoleConfigService
     {
-        Task AddDoubleXPRole(DoubleXPRoleConfig config);
-        Task EditDoubleXPRole(DoubleXPRoleConfig config);
-        Task DeleteDoubleXPRole(DoubleXPRoleConfig config);
-        Task<DoubleXPRoleConfig> GetDoubleXPRole(ulong GuildId);
+        Task CreateNewNitroBoosterRoleConfig(DoubleXPRoleConfig config);
+        Task RemoveNitroBoosterConfig(DoubleXPRoleConfig config);
+        Task<DoubleXPRoleConfig> GetNitroBoosterConfig(ulong GuildId);
     }
-    public class DoubleXPRoleConfigService : IDoubleXPRoleConfigService
+    public class NitroBoosterRoleConfigService : IDoubleXPRoleConfigService
     {
         private readonly DbContextOptions<RPGContext> _options;
 
-        public DoubleXPRoleConfigService(DbContextOptions<RPGContext> options)
+        public NitroBoosterRoleConfigService(DbContextOptions<RPGContext> options)
         {
             _options = options;
         }
 
-        public async Task AddDoubleXPRole(DoubleXPRoleConfig config)
+        public async Task CreateNewNitroBoosterRoleConfig(DoubleXPRoleConfig config)
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(config);
+            await context.AddAsync(config).ConfigureAwait(false);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task EditDoubleXPRole(DoubleXPRoleConfig config)
-        {
-            using var context = new RPGContext(_options);
-
-            context.Update(config);
-
-            await context.SaveChangesAsync();
-        }
-
-        public async Task DeleteDoubleXPRole(DoubleXPRoleConfig config)
+        public async Task RemoveNitroBoosterConfig(DoubleXPRoleConfig config)
         {
             using var context = new RPGContext(_options);
 
             context.Remove(config);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<DoubleXPRoleConfig> GetDoubleXPRole(ulong GuildId)
+        public async Task<DoubleXPRoleConfig> GetNitroBoosterConfig(ulong GuildId)
         {
             using var context = new RPGContext(_options);
 
