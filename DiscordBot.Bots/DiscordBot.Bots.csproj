@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
 	<Version>2.0.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
@@ -22,6 +21,10 @@
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01044" />
     <PackageReference Include="DSharpPlus.Lavalink" Version="4.2.0-nightly-01044" />
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01044" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
     <PackageReference Include="TwitchLib" Version="3.3.0" />
   </ItemGroup>
@@ -29,6 +32,7 @@
   <ItemGroup>
     <Folder Include="Commands\" />
     <Folder Include="Handlers\HelpFormatters\" />
+    <Folder Include="Handlers\Dialogue\" />
     <Folder Include="JsonConversions\" />
     <Folder Include="SlashCommands\" />
   </ItemGroup>
