@@ -10,11 +10,11 @@ namespace DiscordBot.Core.Services.Configurations
         Task RemoveNitroBoosterConfig(DoubleXPRoleConfig config);
         Task<DoubleXPRoleConfig> GetNitroBoosterConfig(ulong GuildId);
     }
-    public class NitroBoosterRoleConfigService : IDoubleXPRoleConfigService
+    public class DoubleXPRoleConfigService : IDoubleXPRoleConfigService
     {
         private readonly DbContextOptions<RPGContext> _options;
 
-        public NitroBoosterRoleConfigService(DbContextOptions<RPGContext> options)
+        public DoubleXPRoleConfigService(DbContextOptions<RPGContext> options)
         {
             _options = options;
         }

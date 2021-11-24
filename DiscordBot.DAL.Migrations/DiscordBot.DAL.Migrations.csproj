@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DiscordBot.DAL\DiscordBot.DAL.csproj" />
+  </ItemGroup>
+
 </Project>

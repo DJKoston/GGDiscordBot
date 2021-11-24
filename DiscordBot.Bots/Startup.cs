@@ -1,4 +1,14 @@
-﻿using DiscordBot.DAL;
+﻿using DiscordBot.Core.Services.CommunityStreamers;
+using DiscordBot.Core.Services.Configurations;
+using DiscordBot.Core.Services.Counters;
+using DiscordBot.Core.Services.CustomCommands;
+using DiscordBot.Core.Services.Egg;
+using DiscordBot.Core.Services.NowLive;
+using DiscordBot.Core.Services.Profiles;
+using DiscordBot.Core.Services.Quotes;
+using DiscordBot.Core.Services.ReactionRoles;
+using DiscordBot.Core.Services.Suggestions;
+using DiscordBot.DAL;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.Bots
@@ -21,7 +31,45 @@ namespace DiscordBot.Bots
                 options.UseSqlServer(SqlServerConnectionString,
                    x => x.MigrationsAssembly("DiscordBot.DAL.Migrations"));
             });
+            //Services
 
+            //Community Streamer Services
+            services.AddScoped<ICommunityStreamerService, CommunityStreamerService>();
+
+            //Configuration Services
+            services.AddScoped<ICurrencyNameConfigService, CurrencyNameConfigService>();
+            services.AddScoped<IDoubleXPRoleConfigService, DoubleXPRoleConfigService>();
+            services.AddScoped<INowLiveRoleConfigService, NowLiveRoleConfigService>();
+            services.AddScoped<IWelcomeMessageConfigService, WelcomeMessageConfigService>();
+
+            //Counter Services
+            services.AddScoped<IGoodBotBadBotService, GoodBotBadBotService>();
+
+            //Custom Command Services
+            services.AddScoped<ICustomCommandService, CustomCommandService>();
+
+            //Egg Services
+            services.AddScoped<IEggService, EggService>();
+
+            //Now Live Services
+            services.AddScoped<INowLiveMessageService, NowLiveMessageService>();
+            services.AddScoped<INowLiveStreamerService, NowLiveStreamerService>();
+
+            //Profile Services
+            services.AddScoped<IGoldService, GoldService>();
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IXPService, XPService>();
+
+            //Quote Services
+            services.AddScoped<IQuoteService, QuoteService>();
+            services.AddScoped<ISimpsonsQuoteService, SimpsonsQuoteService>();
+
+            //Reaction Role Services
+            services.AddScoped<IReactionRoleService, ReactionRoleService>();
+
+            //Suggestion Services
+            services.AddScoped<ISuggestionService, SuggestionService>();
+            
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -36,6 +84,7 @@ namespace DiscordBot.Bots
             {
                 app.UseDeveloperExceptionPage();
             }
+
             else
             {
                 app.UseExceptionHandler("/Error");
