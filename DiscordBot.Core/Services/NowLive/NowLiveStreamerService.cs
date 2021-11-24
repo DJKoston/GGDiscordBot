@@ -15,11 +15,11 @@ namespace DiscordBot.Core.Services.NowLive
         List<NowLiveStreamer> GetAllStreamers();
         Task EditNowLiveStreamer(NowLiveStreamer config);
     }
-    public class GuildStreamerConfigService : INowLiveStreamerService
+    public class NowLiveStreamerService : INowLiveStreamerService
     {
         private readonly DbContextOptions<RPGContext> _options;
 
-        public GuildStreamerConfigService(DbContextOptions<RPGContext> options)
+        public NowLiveStreamerService(DbContextOptions<RPGContext> options)
         {
             _options = options;
         }
