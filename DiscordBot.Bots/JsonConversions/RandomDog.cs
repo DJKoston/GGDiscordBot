@@ -1,4 +1,6 @@
-﻿namespace DiscordBot.Bots.JsonConversions
+﻿using Newtonsoft.Json;
+
+namespace DiscordBot.Bots.JsonConversions
 {
     public struct RandomDog
     {

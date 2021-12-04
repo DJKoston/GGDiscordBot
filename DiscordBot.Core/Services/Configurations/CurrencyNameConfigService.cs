@@ -6,8 +6,9 @@ namespace DiscordBot.Core.Services.Configurations
 {
     public interface ICurrencyNameConfigService
     {
-        Task CreateCurrencyNameConfig(CurrencyNameConfig config);
-        Task RemoveCurrencyNameConfig(CurrencyNameConfig config);
+        Task NewCurrencyName(CurrencyNameConfig config);
+        Task EditCurrencyName(CurrencyNameConfig config);
+        Task RemoveCurrencyName(CurrencyNameConfig config);
         Task<CurrencyNameConfig> GetCurrencyNameConfig(ulong GuildId);
     }
     public class CurrencyNameConfigService : ICurrencyNameConfigService
@@ -19,7 +20,7 @@ namespace DiscordBot.Core.Services.Configurations
             _options = options;
         }
 
-        public async Task CreateCurrencyNameConfig(CurrencyNameConfig config)
+        public async Task NewCurrencyName(CurrencyNameConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -28,7 +29,16 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task RemoveCurrencyNameConfig(CurrencyNameConfig config)
+        public async Task EditCurrencyName(CurrencyNameConfig config)
+        {
+            using var context = new RPGContext(_options);
+
+            context.Update(config);
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task RemoveCurrencyName(CurrencyNameConfig config)
         {
             using var context = new RPGContext(_options);
 

@@ -6,9 +6,10 @@ namespace DiscordBot.Core.Services.Configurations
 {
     public interface IWelcomeMessageConfigService
     {
-        Task CreateNewWelcomeMessageConfig(WelcomeMessageConfig config);
-        Task RemoveWelcomeMessageConfig(WelcomeMessageConfig config);
-        Task<WelcomeMessageConfig> GetWelcomeMessageConfig(ulong GuildId);
+        Task AddWelcomeMessage(WelcomeConfig config);
+        Task EditWelcomeMessage(WelcomeConfig config);
+        Task RemoveWelcomeMessage(WelcomeConfig config);
+        Task<WelcomeConfig> GetWelcomeMessage(ulong GuildId);
     }
     public class WelcomeMessageConfigService : IWelcomeMessageConfigService
     {
@@ -19,7 +20,7 @@ namespace DiscordBot.Core.Services.Configurations
             _options = options;
         }
 
-        public async Task CreateNewWelcomeMessageConfig(WelcomeMessageConfig config)
+        public async Task AddWelcomeMessage(WelcomeConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -28,7 +29,16 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task RemoveWelcomeMessageConfig(WelcomeMessageConfig config)
+        public async Task EditWelcomeMessage(WelcomeConfig config)
+        {
+            using var context = new RPGContext(_options);
+
+            context.Update(config);
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task RemoveWelcomeMessage(WelcomeConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -37,11 +47,11 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<WelcomeMessageConfig> GetWelcomeMessageConfig(ulong GuildId)
+        public async Task<WelcomeConfig> GetWelcomeMessage(ulong GuildId)
         {
             using var context = new RPGContext(_options);
 
-            return await context.WelcomeMessageConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId);
+            return await context.WelcomeConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId);
         }
     }
 }

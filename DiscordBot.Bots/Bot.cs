@@ -1,4 +1,6 @@
-﻿using DiscordBot.Core.Services.CommunityStreamers;
+﻿using DiscordBot.Bots.Commands;
+using DiscordBot.Bots.SlashCommands;
+using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configurations;
 using DiscordBot.Core.Services.Counters;
 using DiscordBot.Core.Services.CustomCommands;
@@ -53,23 +55,18 @@ namespace DiscordBot.Bots
 
             //Load Services
             Log("Loading Core Services...");
-            _communityStreamerService = services.GetService<ICommunityStreamerService>();
             _currencyNameConfigService = services.GetService<ICurrencyNameConfigService>();
             _doubleXPRoleConfigService = services.GetService<IDoubleXPRoleConfigService>();
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
+            _leaveMessageConfigService = services.GetService<ILeaveMessageConfigService>();
             _welcomeMessageConfigService = services.GetService<IWelcomeMessageConfigService>();
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
             _customCommandService = services.GetService<ICustomCommandService>();
-            _eggService = services.GetService<IEggService>();
             _nowLiveMessageService = services.GetService<INowLiveMessageService>();
             _nowLiveStreamerService =  services.GetService<INowLiveStreamerService>();
-            _goldService = services.GetService<IGoldService>();
             _profileService = services.GetService<IProfileService>();
             _xpService = services.GetService<IXPService>();
-            _quoteService = services.GetService<IQuoteService>();
-            _simpsonsQuoteService = services.GetService<ISimpsonsQuoteService>();
             _reactionRoleService = services.GetService<IReactionRoleService>();
-            _suggestionService = services.GetService<ISuggestionService>();
             Log("Loaded Core Services.");
 
             //Get Configuration Information from appsettings.json
@@ -90,7 +87,7 @@ namespace DiscordBot.Bots
 
             //Discord Connection
             Log("Creating Discord Bot Configuration...");
-            var discordConfig = new DiscordConfiguration
+            var discordConfig = new DiscordConfiguration()
             {
                 Token = discordToken,
                 TokenType = TokenType.Bot,
@@ -138,6 +135,15 @@ namespace DiscordBot.Bots
             DiscordClient.GuildUnavailable += DiscordGuildUnavaliable;
             Log("Discord Client Events Registered.");
 
+            Log("Registering Discord Commands...");
+            DiscordCommands.RegisterCommands<ConfigCommands>();
+            Log("Discord Commands Registered.");
+
+            Log("Registering Slash Commands...");
+            DiscordSlashCommands.RegisterCommands<GameSlashCommands>(697270003027804190);
+            DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>(697270003027804190);
+            Log("Slash Commands Registered.");
+
             Log("Registering Discord Client Interactivity...");
             DiscordClient.UseInteractivity(new InteractivityConfiguration
             {
@@ -167,7 +173,7 @@ namespace DiscordBot.Bots
             Monitor.OnStreamOnline += OnTwitchStreamOnline;
             Monitor.OnStreamOffline += OnTwitchStreamOffline;
             Log("Twitch Monitor Events Registered.");
-
+            
             Log("Retrieving Now Live Streamer List...");
             var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
             Log("Now Live Streamer List Retrieved.");
@@ -200,23 +206,18 @@ namespace DiscordBot.Bots
 
         public string currencyName;
 
-        private readonly ICommunityStreamerService _communityStreamerService;
         private readonly ICurrencyNameConfigService _currencyNameConfigService;
         private readonly IDoubleXPRoleConfigService _doubleXPRoleConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
+        private readonly ILeaveMessageConfigService _leaveMessageConfigService;
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly ICustomCommandService _customCommandService;
-        private readonly IEggService _eggService;
         private readonly INowLiveMessageService _nowLiveMessageService;
         private readonly INowLiveStreamerService _nowLiveStreamerService;
-        private readonly IGoldService _goldService;
         private readonly IProfileService _profileService;
         private readonly IXPService _xpService;
-        private readonly IQuoteService _quoteService;
-        private readonly ISimpsonsQuoteService _simpsonsQuoteService;
         private readonly IReactionRoleService _reactionRoleService;
-        private readonly ISuggestionService _suggestionService;
 
         private void OnTwitchStreamOffline(object sender, OnStreamOfflineArgs e)
         {
@@ -278,7 +279,7 @@ namespace DiscordBot.Bots
 
                 var streamer = Twitch.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
-                if (e.Stream.UserName.Contains("_"))
+                if (e.Stream.UserName.Contains('_'))
                 {
                     var toReplaceMessage = config.AnnouncementMessage;
 
@@ -385,7 +386,20 @@ namespace DiscordBot.Bots
 
         private Task OnDiscordSlashCommandExecuted(SlashCommandsExtension sender, SlashCommandExecutedEventArgs e)
         {
-            Log($"{e.Context.Member.DisplayName} ran Slash Command \"{e.Context.CommandName}\" in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
+            if(e.Context.Interaction.Data.Options == null)
+            {
+                Log($"{e.Context.Member.DisplayName} ran Slash Command \"{e.Context.CommandName}\" in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
+            }
+
+            else
+            {
+                var options = e.Context.Interaction.Data.Options.FirstOrDefault();
+
+                if (options.Type == ApplicationCommandOptionType.SubCommand)
+                {
+                    Log($"{e.Context.Member.DisplayName} ran Slash Command \"{e.Context.CommandName} {options.Name}\" in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
+                }
+            }
 
             return Task.CompletedTask;
         }
@@ -405,6 +419,11 @@ namespace DiscordBot.Bots
 
                 if (command == null)
                 {
+                    if(e.Context.Message.Content == "!cancel")
+                    {
+                        return;
+                    }
+
                     Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: {e.Exception.Message}");
 
                     return;
@@ -545,7 +564,7 @@ namespace DiscordBot.Bots
         {
             if (e.User.IsBot) { return; }
 
-            var configs = _nowLiveRoleConfigService.GetAllConfigs();
+            var configs = _nowLiveRoleConfigService.GetAllNowLiveRoles();
 
             foreach (NowLiveRoleConfig config in configs)
             {
@@ -620,7 +639,7 @@ namespace DiscordBot.Bots
 
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
-                var config = await _nowLiveRoleConfigService.GetNowLiveRoleConfig(e.Guild.Id);
+                var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
 
                 if (config == null) { return; }
 
@@ -735,7 +754,7 @@ namespace DiscordBot.Bots
         {
             Log($"{e.Member.DisplayName} just left {e.Guild.Name}.");
 
-            var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
+            var WMConfig = _leaveMessageConfigService.GetLeaveMessageConfig(e.Guild.Id).Result;
 
             if (WMConfig == null) { return; }
 
@@ -779,7 +798,7 @@ namespace DiscordBot.Bots
         {
             Log($"{e.Member.DisplayName} just joined {e.Guild.Name}.");
 
-            var WMConfig = _welcomeMessageConfigService.GetWelcomeMessageConfig(e.Guild.Id).Result;
+            var WMConfig = _welcomeMessageConfigService.GetWelcomeMessage(e.Guild.Id).Result;
 
             if (WMConfig == null) { return; }
 
@@ -854,12 +873,12 @@ namespace DiscordBot.Bots
 
             if (e.Author.IsBot) { return; }
 
-            if (e.Message.Content.Contains("!")) { return; }
+            if (e.Message.Content.Contains('!')) { return; }
 
             DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 
-            var NBConfig = _doubleXPRoleConfigService.GetNitroBoosterConfig(e.Guild.Id).Result;
+            var NBConfig = _doubleXPRoleConfigService.GetDoubleXPRole(e.Guild.Id).Result;
 
             if (NBConfig == null)
             {
@@ -997,7 +1016,17 @@ namespace DiscordBot.Bots
 
             var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
 
-            Monitor.SetChannelsById(lst);
+            if(lst.Count != 0)
+            {
+                Monitor.SetChannelsById(lst);
+
+                if(!Monitor.Enabled)
+                {
+                    Monitor.Start();
+                }
+            }
+
+            
 
             var guildCount = c.Guilds.Count;
 
@@ -1163,7 +1192,7 @@ namespace DiscordBot.Bots
 
         public static void Log(string logItem)
         {
-            var lineToWrite1 = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz")}]";
+            var lineToWrite1 = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}]";
             var lineToWrite2 = $"[Log ]";
             var lineToWrite3 = $"{logItem}";
 
@@ -1196,7 +1225,7 @@ namespace DiscordBot.Bots
 
         public static void Log(string logItem, ConsoleColor color)
         {
-            var lineToWrite1 = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz")}]";
+            var lineToWrite1 = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}]";
             var lineToWrite2 = $"[Log ]";
             var lineToWrite3 = $"{logItem}";
 
@@ -1231,7 +1260,7 @@ namespace DiscordBot.Bots
 
         public static void Heartbeat(string message)
         {
-            var lineToWrite1 = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz")}]";
+            var lineToWrite1 = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}]";
             var lineToWrite2 = $"[Heartbeat ]";
             var lineToWrite3 = $"{message}";
 

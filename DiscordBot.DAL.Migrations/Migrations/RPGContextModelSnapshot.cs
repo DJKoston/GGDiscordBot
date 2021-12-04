@@ -87,26 +87,7 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.ToTable("DoubleXPRoleConfigs");
                 });
 
-            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.NowLiveRoleConfig", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal>("RoleId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("NowLiveRoleConfigs");
-                });
-
-            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.WelcomeMessageConfig", b =>
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.LeaveConfig", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -126,6 +107,44 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.Property<string>("LeaveMessage")
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("LeaveConfigs");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.NowLiveRoleConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NowLiveRoleConfigs");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.WelcomeConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
                     b.Property<string>("WelcomeImage")
                         .HasColumnType("nvarchar(max)");
 
@@ -134,7 +153,7 @@ namespace DiscordBot.DAL.Migrations.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WelcomeMessageConfigs");
+                    b.ToTable("WelcomeConfigs");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Counters.GoodBotBadBot", b =>

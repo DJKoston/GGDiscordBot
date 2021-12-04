@@ -40,6 +40,7 @@ namespace DiscordBot.Bots
             services.AddScoped<ICurrencyNameConfigService, CurrencyNameConfigService>();
             services.AddScoped<IDoubleXPRoleConfigService, DoubleXPRoleConfigService>();
             services.AddScoped<INowLiveRoleConfigService, NowLiveRoleConfigService>();
+            services.AddScoped<ILeaveMessageConfigService, LeaveMessageConfigService>();
             services.AddScoped<IWelcomeMessageConfigService, WelcomeMessageConfigService>();
 
             //Counter Services
@@ -69,7 +70,7 @@ namespace DiscordBot.Bots
 
             //Suggestion Services
             services.AddScoped<ISuggestionService, SuggestionService>();
-            
+
             services.AddRazorPages();
 
             var serviceProvider = services.BuildServiceProvider();
