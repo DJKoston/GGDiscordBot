@@ -23,7 +23,8 @@ namespace DiscordBot.DAL
         public DbSet<CurrencyNameConfig> CurrencyNameConfigs { get; set; }
         public DbSet<DoubleXPRoleConfig> DoubleXPRoleConfigs { get; set; }
         public DbSet<NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }
-        public DbSet<WelcomeMessageConfig> WelcomeMessageConfigs { get; set; }
+        public DbSet<WelcomeConfig> WelcomeConfigs { get; set; }
+        public DbSet<LeaveConfig> LeaveConfigs { get; set; }
 
         //Counters
         public DbSet<GoodBotBadBot> GoodBotBadBotCounters { get; set; }

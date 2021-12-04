@@ -1,664 +1,470 @@
-﻿using DiscordBot.Bots.Handlers.Dialogue.Steps;
-using DiscordBot.Core.Services.Configs;
-using DiscordBot.DAL.Models.Configs;
-using DiscordBot.Handlers.Dialogue;
+﻿using DiscordBot.Core.Services.Configurations;
+using DiscordBot.DAL.Models.Configurations;
+using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
 {
-    [Group("Config")]
+    [Group("config")]
+    [Description("Configure the bot for this server.")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
-
     public class ConfigCommands : BaseCommandModule
     {
-        private readonly INitroBoosterRoleConfigService _nitroBoosterRoleService;
+        private readonly IDoubleXPRoleConfigService _doubleXPRoleConfigService;
+        private readonly ILeaveMessageConfigService _leaveMessageConfigService;
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
-        private readonly IGameChannelConfigService _gameChannelConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
         private readonly ICurrencyNameConfigService _currencyNameConfigService;
 
-        public ConfigCommands(INitroBoosterRoleConfigService nitroBoosterRoleService, IWelcomeMessageConfigService welcomeMessageConfigService, IGameChannelConfigService gameChannelConfigService, INowLiveRoleConfigService nowLiveRoleConfigService, ICurrencyNameConfigService currencyNameConfigService)
+        public ConfigCommands(IDoubleXPRoleConfigService doubleXPRoleConfigService, ILeaveMessageConfigService leaveMessageConfigService, IWelcomeMessageConfigService welcomeMessageConfigService, INowLiveRoleConfigService nowLiveRoleConfigService, ICurrencyNameConfigService currencyNameConfigService)
         {
-            _nitroBoosterRoleService = nitroBoosterRoleService;
+            _doubleXPRoleConfigService = doubleXPRoleConfigService;
+            _leaveMessageConfigService = leaveMessageConfigService;
             _welcomeMessageConfigService = welcomeMessageConfigService;
-            _gameChannelConfigService = gameChannelConfigService;
             _nowLiveRoleConfigService = nowLiveRoleConfigService;
             _currencyNameConfigService = currencyNameConfigService;
         }
 
-        [Command("Set2xpRole")]
-        [Description("This command will configure the Double XP role in your server to give them 2x XP in your server!")]
-        public async Task CreateNewNitroBoosterConfig(CommandContext ctx, DiscordRole role)
+        [Command("view")]
+        [Description("View the config of this Server.")]
+        public async Task ViewConfig(CommandContext ctx)
         {
-            var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+            var doubleXPRoleConfig = await _doubleXPRoleConfigService.GetDoubleXPRole(ctx.Guild.Id);
+            var welcomeMessageConfig = await _welcomeMessageConfigService.GetWelcomeMessage(ctx.Guild.Id);
+            var leaveMessageConfig = await _leaveMessageConfigService.GetLeaveMessageConfig(ctx.Guild.Id);
+            var nowLiveRoleConfig = await _nowLiveRoleConfigService.GetNowLiveRole(ctx.Guild.Id);
+            var currencyNameConfig = await _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+            var embed = new DiscordEmbedBuilder()
+            {
+                Color = DiscordColor.Blurple,
+                Title = $"{ctx.Guild.Name} Configuration:",
+                Description = "Please see the configuration for your server below."
+            };
+
+            if (doubleXPRoleConfig != null)
+            {
+                var guildDoubleXPRole = ctx.Guild.GetRole(doubleXPRoleConfig.RoleId);
+
+                embed.AddField("Double XP Role:", $"{guildDoubleXPRole.Mention}");
+            }
+
+            else if (doubleXPRoleConfig == null)
+            {
+                embed.AddField("Double XP Role:", "Not Configured.");
+            }
+
+            if (welcomeMessageConfig != null)
+            {
+                var guildWelcomeMessageChannel = ctx.Guild.GetChannel(welcomeMessageConfig.ChannelId);
+
+                embed.AddField("Welcome Message Channel:", $"{guildWelcomeMessageChannel.Mention}");
+                embed.AddField("Welcome Message:", $"{welcomeMessageConfig.WelcomeMessage}", true);
+                embed.AddField("Welcome Image:", $"[Click here for Image]({welcomeMessageConfig.WelcomeImage})", true);
+            }
+
+            else if (welcomeMessageConfig == null)
+            {
+                embed.AddField("Welcome Message:", "Not Configured.");
+            }
+
+            if (leaveMessageConfig != null)
+            {
+                var guildLeaveMessageChannel = ctx.Guild.GetChannel(leaveMessageConfig.ChannelId);
+
+                embed.AddField("Leave Message Channel:", $"{guildLeaveMessageChannel.Mention}");
+                embed.AddField("Leave Message:", $"{leaveMessageConfig.LeaveMessage}", true);
+                embed.AddField("Leave Image:", $"[Click here for Image]({leaveMessageConfig.LeaveImage})", true);
+            }
+
+            else if (leaveMessageConfig == null)
+            {
+                embed.AddField("Leave Message:", "Not Configured.");
+            }
+
+            if (nowLiveRoleConfig != null)
+            {
+                var guildNowLiveRole = ctx.Guild.GetRole(nowLiveRoleConfig.RoleId);
+
+                embed.AddField("Now Live Role:", $"{guildNowLiveRole.Mention}");
+            }
+
+            else if (nowLiveRoleConfig == null)
+            {
+                embed.AddField("Now Live Role:", "Not Configured.");
+            }
+
+            if (currencyNameConfig != null)
+            {
+                embed.AddField("Currency Name:", $"{currencyNameConfig.CurrencyName}");
+            }
+
+            else if (currencyNameConfig == null)
+            {
+                embed.AddField("Custom Currency Name:", "Not Configured.");
+            }
+
+            var responseBuilder = new DiscordMessageBuilder();
+
+            responseBuilder.AddEmbed(embed);
+
+            await ctx.RespondAsync(responseBuilder);
+        }
+
+        [Command("reset")]
+        [Description("Reset the Config for the Server.")]
+        public async Task ResetConfig(CommandContext ctx, string configType)
+        {
+            if (configType == "xprole")
+            {
+                var doubleXPRoleConfig = await _doubleXPRoleConfigService.GetDoubleXPRole(ctx.Guild.Id);
+
+                if (doubleXPRoleConfig != null)
+                {
+                    await _doubleXPRoleConfigService.DeleteDoubleXPRole(doubleXPRoleConfig);
+
+                    await ctx.RespondAsync($"Deleted Double XP Role Configuration for {ctx.Guild.Name}");
+                }
+
+                else
+                {
+                    await ctx.RespondAsync($"There is no Double XP Role Configuration for {ctx.Guild.Name}");
+                }
+            }
+
+            else if (configType == "welcome")
+            {
+                var welcomeMessageConfig = await _welcomeMessageConfigService.GetWelcomeMessage(ctx.Guild.Id);
+
+                if (welcomeMessageConfig != null)
+                {
+                    await _welcomeMessageConfigService.RemoveWelcomeMessage(welcomeMessageConfig);
+
+                    await ctx.RespondAsync($"Deleted Welcome Message Configuration for {ctx.Guild.Name}");
+                }
+
+                else
+                {
+                    await ctx.RespondAsync($"There is no Welcome Message Configuration for {ctx.Guild.Name}");
+                }
+            }
+
+            else if (configType == "leave")
+            {
+                var leaveMessageConfig = await _leaveMessageConfigService.GetLeaveMessageConfig(ctx.Guild.Id);
+
+                if (leaveMessageConfig != null)
+                {
+                    await _leaveMessageConfigService.RemoveLeaveMessage(leaveMessageConfig);
+
+                    await ctx.RespondAsync($"Deleted Leave Message Configuration for {ctx.Guild.Name}");
+                }
+
+                else
+                {
+                    await ctx.RespondAsync($"There is no Leave Message Configuration for {ctx.Guild.Name}");
+                }
+            }
+
+            else if (configType == "nowlive")
+            {
+                var nowLiveRoleConfig = await _nowLiveRoleConfigService.GetNowLiveRole(ctx.Guild.Id);
+
+                if (nowLiveRoleConfig != null)
+                {
+                    await _nowLiveRoleConfigService.RemoveNowLiveRole(nowLiveRoleConfig);
+
+                    await ctx.RespondAsync($"Deleted Now Live Role Configuration for {ctx.Guild.Name}");
+                }
+
+                else
+                {
+                    await ctx.RespondAsync($"There is no Now Live Role Configuration for {ctx.Guild.Name}");
+                }
+            }
+
+            else if (configType == "currency")
+            {
+                var customCurrencyConfig = await _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id);
+
+                if (customCurrencyConfig != null)
+                {
+                    await _currencyNameConfigService.RemoveCurrencyName(customCurrencyConfig);
+
+                    await ctx.RespondAsync($"Deleted Custom Currency Name Configuration for {ctx.Guild.Name}");
+                }
+
+                else
+                {
+                    await ctx.RespondAsync($"There is no Custom Currency Name Configuration for {ctx.Guild.Name}");
+                }
+            }
+        }
+
+        [Command("doublexprole")]
+        [Description("Set the Double XP Role for the Server.")]
+        public async Task DoubleXPRole(CommandContext ctx, DiscordRole role)
+        {
+            var config = await _doubleXPRoleConfigService.GetDoubleXPRole(ctx.Guild.Id);
 
             if (config == null)
             {
-                var NitroBoosterConfig = new NitroBoosterRoleConfig()
+                DoubleXPRoleConfig newDoubleXPRole = new()
                 {
                     GuildId = ctx.Guild.Id,
                     RoleId = role.Id,
                 };
 
-                await _nitroBoosterRoleService.CreateNewNitroBoosterRoleConfig(NitroBoosterConfig);
+                await _doubleXPRoleConfigService.AddDoubleXPRole(newDoubleXPRole);
 
-                var embed = new DiscordEmbedBuilder
+                var embed = new DiscordEmbedBuilder()
                 {
                     Title = $"New Double XP Role Config\nAdded for {ctx.Guild.Name}",
                     Description = $"{role.Mention} is the Double XP Role for the Server!"
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                var responseBuilder = new DiscordMessageBuilder();
 
-                return;
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
 
             else
             {
-                DiscordRole NitroRole = ctx.Guild.GetRole(config.RoleId);
+                config.RoleId = role.Id;
 
-                var embed = new DiscordEmbedBuilder
+                await _doubleXPRoleConfigService.EditDoubleXPRole(config);
+
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"There is already a Double XP Role Set!",
-                    Description = $"{NitroRole.Mention} is the Double XP Role for the Server!"
+                    Title = $"New Double XP Role Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{role.Mention} is the Double XP Role for the Server!"
                 };
 
-                embed.AddField("To Clear the Config for the Double XP Role", "Do `!config reset2xprole`");
+                var responseBuilder = new DiscordMessageBuilder();
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                responseBuilder.AddEmbed(embed);
 
-                return;
-            }
-
-
-        }
-
-        [Command("Get2xpRole")]
-        [Description("This command will get the current Double XP role configured for your server.")]
-        public async Task ViewCurrentNitroBoosterRole(CommandContext ctx)
-        {
-            var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
-
-            if(config == null)
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Double XP Role Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Double XP Role Config, do `!config set2xprole @Role`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            }
-
-            else
-            {
-                DiscordRole NitroBooster = ctx.Guild.GetRole(config.RoleId);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Double XP Role Configured\nfor {ctx.Guild.Name}",
-                    Description = $"{NitroBooster.Mention} is the Double XP Role for the Server!"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await ctx.RespondAsync(responseBuilder);
             }
         }
 
-        [Command("Reset2xpRole")]
-        [Description("This command will reset the Double XP role configured for your server. Please note that you will have to run this command if you change or remove the Double XP role.")]
-        public async Task ResetNitroBoosterRole(CommandContext ctx)
+        [Command("welcomemessage")]
+        [Description("Set the Welcome Message for the Server.")]
+        public async Task WelcomeMessage(CommandContext ctx, DiscordChannel channel, string imageurl, [RemainingText] string message)
         {
-            var config = _nitroBoosterRoleService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+            var config = await _welcomeMessageConfigService.GetWelcomeMessage(ctx.Guild.Id);
 
             if (config == null)
             {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Double XP Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Double XP Role Config, do `!config set2xprole @Role`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-
-            else
-            {
-                await _nitroBoosterRoleService.RemoveNitroBoosterConfig(config);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Double XP Role Config has been reset!",
-                };
-
-                embed.AddField("To Add the Config for the Double XP Role", "Do `!config set2xprole @Role`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-        }
-
-        [Command("SetWelcomeChannel")]
-        [Description("This command will trigger an interactive dialogue with the bot to configure the Welcome Channel and Message for your server.")]
-        public async Task CreateWelcomeMessageConfig(CommandContext ctx, DiscordChannel channel)
-        {
-            var config = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var LeaveImageStep = new welcomeChannelAddStep("What image would you like to display on the leave message?", null);
-                var LeaveMessageStep = new welcomeChannelAddStep("What will the Leave Message be?", LeaveImageStep);
-                var WelcomeImageStep = new welcomeChannelAddStep("What Image would you like to display on the welcome message?", LeaveMessageStep);
-                var WelcomeMessageStep = new welcomeChannelAddStep("What will the Welcome Message be?", WelcomeImageStep);
-
-                var WMConfig = new WelcomeMessageConfig();
-
-                WelcomeMessageStep.OnValidResult += (result) => WMConfig.WelcomeMessage = $"{result}";
-                WelcomeImageStep.OnValidResult += (result) => WMConfig.WelcomeImage = $"{result}";
-                LeaveMessageStep.OnValidResult += (result) => WMConfig.LeaveMessage = $"{result}";
-                LeaveImageStep.OnValidResult += (result) => WMConfig.LeaveImage = $"{result}";
-
-                WMConfig.GuildId = ctx.Guild.Id;
-                WMConfig.ChannelId = channel.Id;
-
-                var inputDialogueHandler = new DialogueHandler(
-                    ctx.Client,
-                    ctx.Channel,
-                    ctx.User,
-                    WelcomeMessageStep
-                    );
-
-                bool succeeded = await inputDialogueHandler.ProcessDialogue().ConfigureAwait(false);
-
-                if (!succeeded) { return; }
-
-                await _welcomeMessageConfigService.CreateNewWelcomeMessageConfig(WMConfig).ConfigureAwait(false);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"New Welcome Channel Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"{channel.Mention} is the Welcome Channel for the Server!"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                var WMConfig2 = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
-
-                await ctx.Channel.SendMessageAsync("Here is what your Welcome Message will look like!").ConfigureAwait(false);
-                
-                var joinEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"Welcome to the Server {ctx.Member.DisplayName}",
-                    Description = $"{WMConfig2.WelcomeMessage}",
-                    ImageUrl = $"{WMConfig2.WelcomeImage}",
-                    Color = DiscordColor.Purple,
-                };
-
-                var totalMembers = ctx.Guild.MemberCount;
-                var otherMembers = totalMembers - 1;
-
-                joinEmbed.WithThumbnail(ctx.Member.AvatarUrl);
-                joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
-
-                await ctx.Channel.SendMessageAsync(ctx.Member.Mention, embed: joinEmbed);
-
-                await ctx.Channel.SendMessageAsync("Here is what your Leave Message will look like!").ConfigureAwait(false);
-
-                var leaveEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"Big Oof! {ctx.Member.DisplayName} has just left the server!",
-                    Description = $"{WMConfig2.LeaveMessage}",
-                    ImageUrl = $"{WMConfig2.LeaveImage}",
-                    Color = DiscordColor.Yellow,
-                };
-
-                leaveEmbed.WithThumbnail(ctx.Member.AvatarUrl);
-
-                await ctx.Channel.SendMessageAsync(embed: leaveEmbed);
-            }
-
-            else
-            {
-                DiscordChannel WelcomeChannel = ctx.Guild.GetChannel(config.ChannelId);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is already a Welcome Channel Set!",
-                    Description = $"{WelcomeChannel.Mention} is the Welcome Channel for the Server!"
-                };
-
-                embed.AddField("To Clear the Config for the Welcome Channel", "Do `!config resetwelcomechannel`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-
-
-        }
-
-        [Command("GetWelcomeChannel")]
-        [Description("This Command will get the current Welcome Channel configuration for your server.")]
-        public async Task ViewCurrentWelcomeChannel(CommandContext ctx)
-        {
-            var config = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
-
-            if(config == null)
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Welcome Channel Configured\nfor {ctx.Guild.Name}",
-                    Description = $"To add a Welcome Channel Config, do `!config setwelcomechannel #channel-name`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            }
-            else
-            {
-                DiscordChannel WelcomeChannel = ctx.Guild.GetChannel(config.ChannelId);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Welcome Channel Configured\nfor {ctx.Guild.Name}",
-                    Description = $"{WelcomeChannel.Mention} is the Welcome Channel for the Server!"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            }
-        }
-
-        [Command("ResetWelcomeChannel")]
-        [Description("This command will reset the current Welcome Channel configuration for your server. Please note you will have to run this command if you wish to change your Welcome Message.")]
-        public async Task ResetWelcomeChannel(CommandContext ctx)
-        {
-            var config = _welcomeMessageConfigService.GetWelcomeMessageConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Welcome Channel Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Welcome Channel Config, do `!config setwelcomechannel #channel-name`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-
-            else
-            {
-                await _welcomeMessageConfigService.RemoveWelcomeMessageConfig(config);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Welcome Channel Config has been reset!",
-                };
-
-                embed.AddField("To Add the Config for the Welcome Channel", "Do `!config setwelcomechannel #channel-name`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-        }
-
-        [Command("SetGameChannel")]
-        [Description("This command will set the channel in which members can use the games coded into the bot. Please note that if you do not set a channel, your server will not be able to play any of the games. - This Channel is also the location for Bot Downtime notifications. You can also have multiple Game Channels in your server.")]
-        public async Task CreateGameChannelConfig(CommandContext ctx, DiscordChannel channel)
-        {
-            var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var gameChannelConfig = new GameChannelConfig()
+                var newWelcomeConfig = new WelcomeConfig()
                 {
                     GuildId = ctx.Guild.Id,
                     ChannelId = channel.Id,
+                    WelcomeMessage = message,
+                    WelcomeImage = imageurl,
                 };
 
-                await _gameChannelConfigService.CreateGameChannelConfigService(gameChannelConfig);
+                await _welcomeMessageConfigService.AddWelcomeMessage(newWelcomeConfig);
 
-                var embed = new DiscordEmbedBuilder
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"New Game Channel Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"{channel.Mention} is the Game Channel for the Server! No other channel will accept commands for games."
+                    Title = $"New Welcome Message Config\nAdded for {ctx.Guild.Name}",
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                embed.AddField("Welcome Channel:", $"{channel.Mention}");
+                embed.AddField("Welcome Message:", message);
+                embed.WithImageUrl(imageurl);
 
-                return;
+                var responseBuilder = new DiscordMessageBuilder();
+
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
 
             else
             {
-                DiscordChannel gameChannel = ctx.Guild.GetChannel(config.ChannelId);
+                config.ChannelId = channel.Id;
+                config.WelcomeMessage = message;
+                config.WelcomeImage = imageurl;
 
-                var embed = new DiscordEmbedBuilder
+                await _welcomeMessageConfigService.EditWelcomeMessage(config);
+
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"There is already a Game Channel Set!",
-                    Description = $"{gameChannel.Mention} is the Game Channel for the Server!"
+                    Title = $"New Welcome Message Config\nAdded for {ctx.Guild.Name}",
                 };
 
-                embed.AddField("To Clear the Config for the Game Channel", "Do `!config resetgamechannel`");
+                embed.AddField("Welcome Channel:", $"{channel.Mention}");
+                embed.AddField("Welcome Message:", message);
+                embed.WithImageUrl(imageurl);
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                var responseBuilder = new DiscordMessageBuilder();
 
-                return;
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
         }
 
-        [Command("GetGameChannel")]
-        [Description("This command will get the current Game Channel for your server.")]
-        public async Task GetGameChannelConfig(CommandContext ctx)
+        [Command("leavemessage")]
+        [Description("Set the Leave Message for the Server.")]
+        public async Task LeaveMessage(CommandContext ctx, DiscordChannel channel, string imageurl, [RemainingText] string message)
         {
-            var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
+            var config = await _leaveMessageConfigService.GetLeaveMessageConfig(ctx.Guild.Id);
 
             if (config == null)
             {
-                var embed = new DiscordEmbedBuilder
+                var newLeaveConfig = new LeaveConfig()
                 {
-                    Title = $"There is no Game Channel Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Game Channel Config, do `!config setgamechannel #channel-name`"
+                    GuildId = ctx.Guild.Id,
+                    ChannelId = channel.Id,
+                    LeaveMessage = message,
+                    LeaveImage = imageurl,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await _leaveMessageConfigService.AddLeaveMessage(newLeaveConfig);
+
+                var embed = new DiscordEmbedBuilder()
+                {
+                    Title = $"New Leave Message Config\nAdded for {ctx.Guild.Name}",
+                };
+
+                embed.AddField("Leave Channel:", $"{channel.Mention}");
+                embed.AddField("Leave Message:", message);
+                embed.WithImageUrl(imageurl);
+
+                var  responseBuilder = new DiscordMessageBuilder();
+
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
 
             else
             {
-                DiscordChannel channel = ctx.Guild.GetChannel(config.ChannelId);
+                config.ChannelId = channel.Id;
+                config.LeaveMessage = message;
+                config.LeaveImage = imageurl;
 
-                var embed = new DiscordEmbedBuilder
+                await _leaveMessageConfigService.EditLeaveMessage(config);
+
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"The Game Channel Configured\nfor {ctx.Guild.Name}",
-                    Description = $"{channel.Mention} is the Game Channel for the Server!"
+                    Title = $"New Leave Message Config\nAdded for {ctx.Guild.Name}",
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                embed.AddField("Leave Channel:", $"{channel.Mention}");
+                embed.AddField("Leave Message:", message);
+                embed.WithImageUrl(imageurl);
+
+                var responseBuilder = new DiscordMessageBuilder();
+
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
         }
 
-        [Command("ResetGameChannel")]
-        [Description("This command will reset the server's Game Channel to null.")]
-        public async Task ResetGameChannelConfig(CommandContext ctx)
+        [Command("nowliverole")]
+        [Description("Set the Now Live Role for the Server.")]
+        public async Task NowLiveRole(CommandContext ctx,  DiscordRole role)
         {
-            var config = _gameChannelConfigService.GetGameChannelConfigService(ctx.Guild.Id).Result;
+            var config = await _nowLiveRoleConfigService.GetNowLiveRole(ctx.Guild.Id);
 
             if (config == null)
             {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Game Channel Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Game Channel Config, do `!config setgamechannel #channel-name`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-
-            else
-            {
-                await _gameChannelConfigService.RemoveGameChannelConfigService(config);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Game Channel Config has been reset!",
-                };
-
-                embed.AddField("To Add the Config for the Game Channel", "Do `!config setgamechannel #channel-name`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-        }
-
-        [Command("SetUpSuggestionChannel")]
-        [Description("Does exactly what it says on the tin. It sets up the Suggestion Moderation Channel.")]
-        public async Task SetUpSuggestionChannel(CommandContext ctx)
-        {
-            var suggestionChannel = await ctx.Guild.CreateChannelAsync("suggestions-log", DSharpPlus.ChannelType.Text, null, "This is where the Suggestions Live!");
-
-            await ctx.Channel.SendMessageAsync($"Suggestion Channel Created! {suggestionChannel.Mention}\n\nPlease do not rename this channel as the bot will not know where to post suggestions for your admins to approve!\n\nYou may move the channel to another tab, just ensure {ctx.Client.CurrentUser.Mention} has permissions to access the channel and send messages to it!");
-        }
-
-        [Command("SetUpStreamerChannel")]
-        [Description("This command creates the Streamer Request logging channel for you to keep track of who is being added to the bot.")]
-        public async Task SetUpStreamerLogChannel(CommandContext ctx)
-        {
-            var suggestionChannel = await ctx.Guild.CreateChannelAsync("streamers-to-approve", DSharpPlus.ChannelType.Text, null, "This is where the streamers to approve Live!");
-
-            await ctx.Channel.SendMessageAsync($"Streamer Log Channel Created! {suggestionChannel.Mention}\n\nPlease do not rename this channel as the bot will not know where to post streamers for your admins to approve!\n\nYou may move the channel to another tab, just ensure {ctx.Client.CurrentUser.Mention} has permissions to access the channel and send messages to it!");
-        }
-
-        [Command("SetNowLiveRole")]
-        [Description("This command will set the role that members will receive when they go live. Please note that this uses Discord Live Discovery and all users must have Twitch connected to their account for the role to be given.")]
-        public async Task CreateNowLiveRoleConfig(CommandContext ctx, DiscordRole role)
-        {
-            var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var nowLiveRoleConfig = new NowLiveRoleConfig()
+                var newNowLiveRole = new NowLiveRoleConfig()
                 {
                     GuildId = ctx.Guild.Id,
                     RoleId = role.Id,
                 };
 
-                await _nowLiveRoleConfigService.CreateNowLiveRoleConfig(nowLiveRoleConfig);
+                await _nowLiveRoleConfigService.AddNowLiveRole(newNowLiveRole);
 
-                var embed = new DiscordEmbedBuilder
+                var embed = new DiscordEmbedBuilder()
                 {
                     Title = $"New Now Live Role Config\nAdded for {ctx.Guild.Name}",
                     Description = $"{role.Mention} is the Now Live Role for the Server!"
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                var responseBuilder = new DiscordMessageBuilder();
 
-                return;
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
 
             else
             {
-                DiscordRole role2 = ctx.Guild.GetRole(config.RoleId);
+                config.RoleId = role.Id;
 
-                var embed = new DiscordEmbedBuilder
+                await _nowLiveRoleConfigService.EditNowLiveRole(config);
+
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"There is already a Now Live Role Set!",
-                    Description = $"{role2.Mention} is the Now Live Role for the Server!"
-                };
-
-                embed.AddField("To Clear the Config for the Now Live Role", "Do `!config resetnowliverole`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-        }
-
-        [Command("GetNowLiveRole")]
-        [Description("This command will get the current Now Live Role for your server.")]
-        public async Task GetNowLiveRoleConfig(CommandContext ctx)
-        {
-            var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Now Live Role Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Now Live Role Config, do `!config setnowliverole @role`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            }
-
-            else
-            {
-                DiscordRole role = ctx.Guild.GetRole(config.RoleId);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Now Live Role Configured\nfor {ctx.Guild.Name}",
+                    Title = $"New Now Live Role Config\nAdded for {ctx.Guild.Name}",
                     Description = $"{role.Mention} is the Now Live Role for the Server!"
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                var responseBuilder = new DiscordMessageBuilder();
+
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
         }
 
-        [Command("ResetNowLiveRole")]
-        [Description("This command will reset the server's Now Live Role to null.")]
-        public async Task ResetNowLiveRoleConfig(CommandContext ctx)
+        [Command("customcurrency")]
+        [Description("Set the Custom Currency Name for the Server.")]
+        public async Task CustomCurrency(CommandContext ctx, string currencyName)
         {
-            var config = _nowLiveRoleConfigService.GetNowLiveRoleConfig(ctx.Guild.Id).Result;
+            var config = await _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id);
 
             if (config == null)
             {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Now Live Role Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Game Channel Config, do `!config setnowliverole @role`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-
-            else
-            {
-                await _nowLiveRoleConfigService.RemoveNowLiveRoleConfig(config);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Now Live Role Config has been reset!",
-                };
-
-                embed.AddField("To Add the Config for the Now Live Role", "Do `!config setnowliverole @role`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-        }
-
-        [Command("SetCurrencyName")]
-        [Description("This command will set the currency name in your server.")]
-        public async Task SetCurrencyName(CommandContext ctx, [RemainingText]string currencyName)
-        {
-            var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var CurrencyNameConfig = new CurrencyNameConfig()
+                var newCurrencyName = new CurrencyNameConfig()
                 {
                     GuildId = ctx.Guild.Id,
                     CurrencyName = currencyName,
                 };
 
-                await _currencyNameConfigService.CreateCurrencyNameConfig(CurrencyNameConfig);
+                await _currencyNameConfigService.NewCurrencyName(newCurrencyName);
 
-                var embed = new DiscordEmbedBuilder
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"New Custom Currency Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"{currencyName} is the Currency Name for the Server!"
+                    Title = $"New Custom Currency Name Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{currencyName} is now the Custom Currency for the Server!"
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                var responseBuilder = new DiscordMessageBuilder();
 
-                return;
+                responseBuilder.AddEmbed(embed);
+
+                await ctx.RespondAsync(responseBuilder);
             }
 
             else
             {
-                var embed = new DiscordEmbedBuilder
+                config.CurrencyName = currencyName;
+
+                await _currencyNameConfigService.EditCurrencyName(config);
+
+                var embed = new DiscordEmbedBuilder()
                 {
-                    Title = $"There is already a Custom Currency Name Set!",
-                    Description = $"{config.CurrencyName} is the current Custom Currency Name for the Server!"
+                    Title = $"New Custom Currency Name Config\nAdded for {ctx.Guild.Name}",
+                    Description = $"{currencyName} is now the Custom Currency for the Server!"
                 };
 
-                embed.AddField("To Clear the Config", "Do `!config resetcurrencyname`");
+                var responseBuilder = new DiscordMessageBuilder();
 
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                responseBuilder.AddEmbed(embed);
 
-                return;
-            }
-
-
-        }
-
-        [Command("GetCurrencyName")]
-        [Description("This command will get the current currency name in your server.")]
-        public async Task ViewCurrentCurrencyName(CommandContext ctx)
-        {
-            var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Custom Currency Name Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Custom Currency Name Config, do `!config setcurrencyname 'currencyname'`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-            }
-
-            else
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Custom Currency Name Configured\nfor {ctx.Guild.Name}",
-                    Description = $"{config.CurrencyName} is the Custom Currency Name for the Server!"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await ctx.RespondAsync(responseBuilder);
             }
         }
-
-        [Command("ResetCurrencyName")]
-        [Description("This command will reset the server's currency name to null.")]
-        public async Task ResetCustomCurrency(CommandContext ctx)
-        {
-            var config = _currencyNameConfigService.GetCurrencyNameConfig(ctx.Guild.Id).Result;
-
-            if (config == null)
-            {
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"There is no Custom Currency Name Config\nAdded for {ctx.Guild.Name}",
-                    Description = $"To add a Custom Currency Name Config, do `!config setcurrencyname 'currencyname'`"
-                };
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-
-            else
-            {
-                await _currencyNameConfigService.RemoveCurrencyNameConfig(config);
-
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = $"The Custom Currency Name Config has been reset!",
-                };
-
-                embed.AddField("To Add the Config for the Custom Currency Name", "Do `!config setcurrencyname Currency Name`");
-
-                await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-
-                return;
-            }
-        }
-
     }
 }

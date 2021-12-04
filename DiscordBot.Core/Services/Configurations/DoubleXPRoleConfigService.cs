@@ -6,9 +6,10 @@ namespace DiscordBot.Core.Services.Configurations
 {
     public interface IDoubleXPRoleConfigService
     {
-        Task CreateNewNitroBoosterRoleConfig(DoubleXPRoleConfig config);
-        Task RemoveNitroBoosterConfig(DoubleXPRoleConfig config);
-        Task<DoubleXPRoleConfig> GetNitroBoosterConfig(ulong GuildId);
+        Task AddDoubleXPRole(DoubleXPRoleConfig config);
+        Task EditDoubleXPRole(DoubleXPRoleConfig config);
+        Task DeleteDoubleXPRole(DoubleXPRoleConfig config);
+        Task<DoubleXPRoleConfig> GetDoubleXPRole(ulong GuildId);
     }
     public class DoubleXPRoleConfigService : IDoubleXPRoleConfigService
     {
@@ -19,25 +20,34 @@ namespace DiscordBot.Core.Services.Configurations
             _options = options;
         }
 
-        public async Task CreateNewNitroBoosterRoleConfig(DoubleXPRoleConfig config)
+        public async Task AddDoubleXPRole(DoubleXPRoleConfig config)
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(config).ConfigureAwait(false);
+            await context.AddAsync(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
-        public async Task RemoveNitroBoosterConfig(DoubleXPRoleConfig config)
+        public async Task EditDoubleXPRole(DoubleXPRoleConfig config)
+        {
+            using var context = new RPGContext(_options);
+
+            context.Update(config);
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task DeleteDoubleXPRole(DoubleXPRoleConfig config)
         {
             using var context = new RPGContext(_options);
 
             context.Remove(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
-        public async Task<DoubleXPRoleConfig> GetNitroBoosterConfig(ulong GuildId)
+        public async Task<DoubleXPRoleConfig> GetDoubleXPRole(ulong GuildId)
         {
             using var context = new RPGContext(_options);
 

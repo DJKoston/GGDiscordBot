@@ -4,23 +4,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.Core.Services.Configurations
 {
-    public interface ICurrencyNameConfigService
+    public interface ILeaveMessageConfigService
     {
-        Task NewCurrencyName(CurrencyNameConfig config);
-        Task EditCurrencyName(CurrencyNameConfig config);
-        Task RemoveCurrencyName(CurrencyNameConfig config);
-        Task<CurrencyNameConfig> GetCurrencyNameConfig(ulong GuildId);
+        Task AddLeaveMessage(LeaveConfig config);
+        Task EditLeaveMessage(LeaveConfig config);
+        Task RemoveLeaveMessage(LeaveConfig config);
+        Task<LeaveConfig> GetLeaveMessageConfig(ulong GuildId);
     }
-    public class CurrencyNameConfigService : ICurrencyNameConfigService
+    public class LeaveMessageConfigService : ILeaveMessageConfigService
     {
         private readonly DbContextOptions<RPGContext> _options;
 
-        public CurrencyNameConfigService(DbContextOptions<RPGContext> options)
+        public LeaveMessageConfigService(DbContextOptions<RPGContext> options)
         {
             _options = options;
         }
 
-        public async Task NewCurrencyName(CurrencyNameConfig config)
+        public async Task AddLeaveMessage(LeaveConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -29,7 +29,7 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task EditCurrencyName(CurrencyNameConfig config)
+        public async Task EditLeaveMessage(LeaveConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -38,7 +38,7 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync();
         }
 
-        public async Task RemoveCurrencyName(CurrencyNameConfig config)
+        public async Task RemoveLeaveMessage(LeaveConfig config)
         {
             using var context = new RPGContext(_options);
 
@@ -47,11 +47,11 @@ namespace DiscordBot.Core.Services.Configurations
             await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<CurrencyNameConfig> GetCurrencyNameConfig(ulong GuildId)
+        public async Task<LeaveConfig> GetLeaveMessageConfig(ulong GuildId)
         {
             using var context = new RPGContext(_options);
 
-            return await context.CurrencyNameConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId);
+            return await context.LeaveConfigs.FirstOrDefaultAsync(x => x.GuildId == GuildId);
         }
     }
 }

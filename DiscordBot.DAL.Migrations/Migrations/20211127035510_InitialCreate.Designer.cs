@@ -3,6 +3,7 @@ using DiscordBot.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
-    partial class RPGContextModelSnapshot : ModelSnapshot
+    [Migration("20211127035510_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,31 +89,6 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.ToTable("DoubleXPRoleConfigs");
                 });
 
-            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.LeaveConfig", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<decimal>("ChannelId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<string>("LeaveImage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LeaveMessage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LeaveConfigs");
-                });
-
             modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.NowLiveRoleConfig", b =>
                 {
                     b.Property<int>("Id")
@@ -131,7 +108,7 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.ToTable("NowLiveRoleConfigs");
                 });
 
-            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.WelcomeConfig", b =>
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.WelcomeMessageConfig", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -145,6 +122,12 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<string>("LeaveImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LeaveMessage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("WelcomeImage")
                         .HasColumnType("nvarchar(max)");
 
@@ -153,7 +136,7 @@ namespace DiscordBot.DAL.Migrations.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WelcomeConfigs");
+                    b.ToTable("WelcomeMessageConfigs");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Counters.GoodBotBadBot", b =>
