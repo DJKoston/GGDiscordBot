@@ -4,17 +4,15 @@
     {
         private readonly RPGContext _context;
         private readonly IProfileService _profileService;
-        private readonly IXPService _XPService;
         private readonly IGoldService _goldService;
         private readonly IDoubleXPRoleConfigService _doubleXPRoleConfig;
         private readonly ICurrencyNameConfigService _currencyNameConfig;
         public string currencyName;
 
-        public ProfileSlashCommands(RPGContext context, IProfileService profileService, IXPService xpService, IGoldService goldService, IDoubleXPRoleConfigService doubleXPRoleConfig, ICurrencyNameConfigService currencyNameConfig)
+        public ProfileSlashCommands(RPGContext context, IProfileService profileService, IGoldService goldService, IDoubleXPRoleConfigService doubleXPRoleConfig, ICurrencyNameConfigService currencyNameConfig)
         {
             _context = context;
             _profileService = profileService;
-            _XPService = xpService;
             _goldService = goldService;
             _doubleXPRoleConfig = doubleXPRoleConfig;
             _currencyNameConfig = currencyNameConfig;
