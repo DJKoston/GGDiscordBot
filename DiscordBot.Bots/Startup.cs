@@ -24,6 +24,7 @@
             services.AddScoped<ICommunityStreamerService, CommunityStreamerService>();
 
             //Configuration Services
+            services.AddScoped<IButtonRoleService, ButtonRoleService>();
             services.AddScoped<ICurrencyNameConfigService, CurrencyNameConfigService>();
             services.AddScoped<IDoubleXPRoleConfigService, DoubleXPRoleConfigService>();
             services.AddScoped<INowLiveRoleConfigService, NowLiveRoleConfigService>();

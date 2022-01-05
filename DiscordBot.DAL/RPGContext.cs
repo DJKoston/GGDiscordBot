@@ -21,6 +21,7 @@ namespace DiscordBot.DAL
         public DbSet<CommunityStreamer> CommunityStreamers { get; set; }
 
         //Configurations
+        public DbSet<ButtonRoleConfig> ButtonRoleConfigs { get; set; }
         public DbSet<CurrencyNameConfig> CurrencyNameConfigs { get; set; }
         public DbSet<DoubleXPRoleConfig> DoubleXPRoleConfigs { get; set; }
         public DbSet<NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }

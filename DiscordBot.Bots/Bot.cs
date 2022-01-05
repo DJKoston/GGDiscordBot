@@ -27,6 +27,7 @@
 
             //Load Services
             Log("Loading Core Services...");
+            _buttonRoleService = services.GetService<IButtonRoleService>();
             _currencyNameConfigService = services.GetService<ICurrencyNameConfigService>();
             _doubleXPRoleConfigService = services.GetService<IDoubleXPRoleConfigService>();
             _nowLiveRoleConfigService = services.GetService<INowLiveRoleConfigService>();
@@ -107,11 +108,13 @@
             DiscordClient.PresenceUpdated += DiscordPresenceUpdated;
             DiscordClient.GuildCreated += DiscordGuildCreated;
             DiscordClient.GuildUnavailable += DiscordGuildUnavaliable;
+            DiscordClient.ComponentInteractionCreated += DiscordComponentInteraction;
             Log("Discord Client Events Registered.");
 
             Log("Registering Discord Commands...");
             DiscordCommands.RegisterCommands<ConfigCommands>();
             DiscordCommands.RegisterCommands<CustomCommands>();
+            DiscordCommands.RegisterCommands<ButtonRoleCommands>();
             DiscordCommands.RegisterCommands<GameCommands>();
             DiscordCommands.RegisterCommands<MiscCommands>();
             DiscordCommands.RegisterCommands<ModCommands>();
@@ -191,6 +194,7 @@
 
         public string currencyName;
 
+        private readonly IButtonRoleService _buttonRoleService;
         private readonly ICurrencyNameConfigService _currencyNameConfigService;
         private readonly IDoubleXPRoleConfigService _doubleXPRoleConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
@@ -203,6 +207,42 @@
         private readonly IProfileService _profileService;
         private readonly IXPService _xpService;
         private readonly IReactionRoleService _reactionRoleService;
+
+        private async Task DiscordComponentInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+        {
+            var button = await _buttonRoleService.GetButtonRole(e.Guild.Id, e.Id);
+
+            var role = e.Guild.GetRole(button.RoleId);
+            var member = await e.Guild.GetMemberAsync(e.User.Id);
+
+            var memberRoles = member.Roles;
+
+            if ((memberRoles.Contains(role) && (button.GiveRemove == "give" || button.GiveRemove == "add")) || (!memberRoles.Contains(role) && button.GiveRemove == "remove"))
+            {
+                await member.RevokeRoleAsync(role);
+
+                var responseBuilder = new DiscordInteractionResponseBuilder
+                {
+                    Content = $"You now no longer have the {role.Mention} Role!",
+                    IsEphemeral = true,
+                };
+
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, responseBuilder);
+            }
+
+            else if ((!memberRoles.Contains(role) && (button.GiveRemove == "give" || button.GiveRemove == "add")) || (memberRoles.Contains(role) && button.GiveRemove == "remove"))
+            {
+                await member.GrantRoleAsync(role);
+
+                var responseBuilder = new DiscordInteractionResponseBuilder
+                {
+                    Content = $"You now have the {role.Mention} Role!",
+                    IsEphemeral = true,
+                };
+
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, responseBuilder);
+            }
+        }
 
         private void OnTwitchStreamOffline(object sender, OnStreamOfflineArgs e)
         {

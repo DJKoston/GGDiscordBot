@@ -49,6 +49,31 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.ToTable("CommunityStreamers");
                 });
 
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.ButtonRoleConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ButtonId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GiveRemove")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ButtonRoleConfigs");
+                });
+
             modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.CurrencyNameConfig", b =>
                 {
                     b.Property<int>("Id")
