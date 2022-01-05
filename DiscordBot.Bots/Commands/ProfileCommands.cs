@@ -20,12 +20,12 @@
             _currencyNameConfig = currencyNameConfig;
         }
 
-        //Make as Slash Command
         [Command("myinfo")]
         public async Task Profile(CommandContext ctx)
         {
             var NBConfig = await _doubleXPRoleConfig.GetDoubleXPRole(ctx.Guild.Id);
-
+            DiscordRole doubleXPRole = null;
+            if (NBConfig != null) { doubleXPRole = ctx.Guild.GetRole(NBConfig.RoleId); }
             var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
 
             if (CNConfig == null) { currencyName = "Gold"; }
@@ -33,101 +33,38 @@
 
             var memberId = ctx.Member.Id;
 
-            if (NBConfig == null)
+            var memberUsername = ctx.Guild.Members[memberId].Username;
+
+            Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
+
+            var member = ctx.Guild.Members[profile.DiscordId];
+
+            var profileEmbed = new DiscordEmbedBuilder
             {
-                var memberUsername = ctx.Guild.Members[memberId].Username;
+                Title = $"{member.DisplayName}'s Profile",
+                Color = member.Color
+            };
 
-                var quotescount = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
-                var quotes = quotescount.Count(x => x.DiscordUserQuotedId == memberId);
-                var quotesby = quotescount.Count(x => x.AddedById == memberId);
+            profileEmbed.WithThumbnail(member.AvatarUrl);
 
-                Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
+            var nextLevel = _context.ToNextXPs.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
 
-                var member = ctx.Guild.Members[profile.DiscordId];
+            profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
+            profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
 
-                var profileEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"{member.DisplayName}'s Profile",
-                    Color = member.Color
-                };
+            if (profile.Gold == 0) { profileEmbed.AddField(currencyName, profile.Gold.ToString()); }
+            if (profile.Gold >= 1) { profileEmbed.AddField(currencyName, profile.Gold.ToString("###,###,###,###,###")); }
 
-                profileEmbed.WithThumbnail(member.AvatarUrl);
+            if (member.Roles.Contains(doubleXPRole)) { profileEmbed.AddField("You have the Double XP Role!", "You currently get 2x XP and 2x Tax!"); }
 
-                var nextLevel = _context.ToNextXPs.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
-
-                profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
-                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
-
-                if (profile.Gold == 0) { profileEmbed.AddField(currencyName, profile.Gold.ToString()); }
-                if (profile.Gold >= 1) { profileEmbed.AddField(currencyName, profile.Gold.ToString("###,###,###,###,###")); };
-
-                if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
-                if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
-                if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
-
-                if (quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
-                if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
-                if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
-
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Embed = profileEmbed,
-                };
-
-                messageBuilder.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
-            }
-
-            else
+            var messageBuilder = new DiscordMessageBuilder
             {
-                var memberUsername = ctx.Guild.Members[memberId].Username;
+                Embed = profileEmbed
+            };
 
-                var NitroBoosterRole = ctx.Guild.GetRole(NBConfig.RoleId);
+            messageBuilder.WithReply(ctx.Message.Id, true);
 
-                var quotescount = _context.Quotes.Where(x => x.GuildId == ctx.Guild.Id);
-                var quotes = quotescount.Count(x => x.DiscordUserQuotedId == memberId);
-                var quotesby = quotescount.Count(x => x.AddedById == memberId);
-
-                Profile profile = await _profileService.GetOrCreateProfileAsync(memberId, ctx.Guild.Id, memberUsername);
-
-                var member = ctx.Guild.Members[profile.DiscordId];
-
-                var profileEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"{member.DisplayName}'s Profile",
-                    Color = member.Color
-                };
-
-                profileEmbed.WithThumbnail(member.AvatarUrl);
-
-                if (profile.Gold == 0) { profileEmbed.AddField(currencyName, profile.Gold.ToString()); }
-                if (profile.Gold >= 1) { profileEmbed.AddField(currencyName, profile.Gold.ToString("###,###,###,###,###")); };
-
-                var nextLevel = _context.ToNextXPs.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
-
-                profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
-                profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
-
-                if (quotes == 0) { profileEmbed.AddField("You have been Quoted:", $"{quotes} Times"); }
-                if (quotes == 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Time"); }
-                if (quotes > 1) { profileEmbed.AddField("You have been Quoted:", $"{quotes:###,###,###,###,###} Times"); }
-
-                if (quotesby == 0) { profileEmbed.AddField("You have Quoted:", $"{quotesby} Quotes"); }
-                if (quotesby == 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quote"); }
-                if (quotesby > 1) { profileEmbed.AddField("You have Quoted:", $"{quotesby:###,###,###,###,###} Quotes"); }
-
-                if (member.Roles.Contains(NitroBoosterRole)) { profileEmbed.AddField("You have the Double XP Role!", "You currently get 2x XP and 2x Tax!"); }
-
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Embed = profileEmbed,
-                };
-
-                messageBuilder.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
-            }
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("grantxp")]
@@ -243,7 +180,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("pay")]
         [Description("Usage: !pay {user} {amount}")]
         public async Task PayUser(CommandContext ctx, DiscordMember member, int payAmount)
@@ -256,65 +192,38 @@
             Profile userProfile = await _profileService.GetOrCreateProfileAsync(ctx.Member.Id, ctx.Guild.Id, ctx.Member.Username);
             await _profileService.GetOrCreateProfileAsync(member.Id, ctx.Guild.Id, member.Username);
 
+            DiscordEmbedBuilder embed = new();
+
             if (userProfile.Gold < payAmount)
             {
-                var userProfileCheckFailEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"You can't pay that much {ctx.Member.DisplayName}!",
-                    Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount:###,###,###,###,###} {currencyName}! Try paying them a smaller amount... We have shown you how much {currencyName} you have below!",
-                    Color = DiscordColor.IndianRed,
-                };
+                embed.Title = $"You can't pay that much {ctx.Member.DisplayName}!";
+                embed.Description = $"Seems like you're too poor to afford to pay {member.DisplayName} {payAmount:###,###,###,###,###} {currencyName}! Try paying them a smaller amount... We have shown you how much {currencyName} you have below!";
+                embed.Color = DiscordColor.IndianRed;
 
-                if (userProfile.Gold == 0) { userProfileCheckFailEmbed.AddField(currencyName, userProfile.Gold.ToString()); }
-                if (userProfile.Gold >= 1) { userProfileCheckFailEmbed.AddField(currencyName, userProfile.Gold.ToString("###,###,###,###,###")); }
-
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Embed = userProfileCheckFailEmbed,
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-
-                return;
+                if (userProfile.Gold == 0) { embed.AddField(currencyName, userProfile.Gold.ToString()); }
+                if (userProfile.Gold >= 1) { embed.AddField(currencyName, userProfile.Gold.ToString("###,###,###,###,###")); }
             }
 
             if (payAmount < 0)
             {
-
-                var lessThanCheck = new DiscordEmbedBuilder
-                {
-                    Title = $"You cannot pay less than 0 {currencyName} {ctx.Member.DisplayName}!",
-                    Description = "Nice try suckka!",
-                    Color = DiscordColor.IndianRed,
-                };
-
-                var messageBuilder2 = new DiscordMessageBuilder
-                {
-                    Embed = lessThanCheck,
-                };
-
-                messageBuilder2.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
-
-                return;
+                embed.Title = $"You cannot pay less than 0 {currencyName} {ctx.Member.DisplayName}!";
+                embed.Description = $"You cannot pay less than 0 {currencyName} {ctx.Member.DisplayName}!";
+                embed.Color = DiscordColor.IndianRed;
             }
 
-            await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -payAmount, ctx.Member.Username);
-            await _goldService.GrantGoldAsync(member.Id, ctx.Guild.Id, payAmount, ctx.Member.Username);
-
-            var paidEmbed = new DiscordEmbedBuilder
+            else
             {
-                Title = $"You have paid {member.DisplayName} {payAmount:###,###,###,###,###} {currencyName}!",
-                Description = $"Thank you for using the GG Bot Payment Network {ctx.Member.DisplayName}!",
-                Color = DiscordColor.SpringGreen,
-            };
+                await _goldService.GrantGoldAsync(ctx.Member.Id, ctx.Guild.Id, -payAmount, ctx.Member.Username);
+                await _goldService.GrantGoldAsync(member.Id, ctx.Guild.Id, payAmount, ctx.Member.Username);
+
+                embed.Title = $"You have paid {member.DisplayName} {payAmount:###,###,###,###,###} {currencyName}!";
+                embed.Description = $"Thank you for using the GG Bot Payment Network {ctx.Member.DisplayName}!";
+                embed.Color = DiscordColor.SpringGreen;
+            }
 
             var messageBuilder = new DiscordMessageBuilder
             {
-                Embed = paidEmbed,
+                Embed = embed,
             };
 
             messageBuilder.WithReply(ctx.Message.Id, true);
@@ -489,7 +398,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("top10")]
         [Description("Displays the Top 10 users!")]
         public async Task Top10(CommandContext ctx, [RemainingText] string XPorGold)
