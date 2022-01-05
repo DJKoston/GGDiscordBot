@@ -126,6 +126,7 @@
             Log("Registering Slash Commands...");
             DiscordSlashCommands.RegisterCommands<GameSlashCommands>(697270003027804190);
             DiscordSlashCommands.RegisterCommands<MiscSlashCommands>(697270003027804190);
+            DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>(697270003027804190);
             Log("Slash Commands Registered.");
 
             Log("Registering Discord Client Interactivity...");
