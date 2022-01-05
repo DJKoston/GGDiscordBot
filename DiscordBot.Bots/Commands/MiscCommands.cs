@@ -396,54 +396,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        [Command("praised")]
-        public async Task BotPraised(CommandContext ctx)
-        {
-            
-        }
-
-        [Command("scolded")]
-        public async Task BotScolded(CommandContext ctx)
-        {
-            var goodBot = await _goodBotBadBotService.GetGoodBot();
-
-            if (goodBot.BadBot == 0)
-            {
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Content = $"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!",
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-            }
-
-            if (goodBot.BadBot == 1)
-            {
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Content = $"I have been scolded {goodBot.BadBot} time! 😞 I'll try to do better!",
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-            }
-
-            if (goodBot.BadBot > 1)
-            {
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Content = $"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!",
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-            }
-        }
-
         [Command("simpsons")]
         public async Task SimpsonsQuote(CommandContext ctx)
         {
