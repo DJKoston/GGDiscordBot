@@ -1,14 +1,10 @@
 ﻿using DiscordBot.Core.Services.CommunityStreamers;
-using DiscordBot.Core.Services.Configs;
+using DiscordBot.Core.Services.NowLive;
 using DiscordBot.DAL;
-using DiscordBot.DAL.Models.Configs;
+using DiscordBot.DAL.Models.NowLive;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.Extensions.Configuration;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using TwitchLib.Api;
 
 namespace DiscordBot.Bots.Commands
@@ -18,16 +14,14 @@ namespace DiscordBot.Bots.Commands
 
     public class StreamerCommands : BaseCommandModule
     {
-        private readonly RPGContext _context;
         private readonly ICommunityStreamerService _communityStreamerService;
-        private readonly IGuildStreamerConfigService _guildStreamerConfigService;
+        private readonly INowLiveStreamerService _nowLiveStreamerService;
         private readonly IConfiguration _configuration;
 
-        public StreamerCommands(RPGContext context, ICommunityStreamerService communityStreamerService, IGuildStreamerConfigService guildStreamerConfigService, IConfiguration configuration)
+        public StreamerCommands(ICommunityStreamerService communityStreamerService, INowLiveStreamerService nowLiveStreamerService, IConfiguration configuration)
         {
-            _context = context;
             _communityStreamerService = communityStreamerService;
-            _guildStreamerConfigService = guildStreamerConfigService;
+            _nowLiveStreamerService = nowLiveStreamerService;
             _configuration = configuration;
         }
 
@@ -36,7 +30,7 @@ namespace DiscordBot.Bots.Commands
         {
             var suggestion = await _communityStreamerService.GetStreamer(ctx.Guild.Id, suggestionId);
 
-            if (suggestion == null) 
+            if (suggestion == null)
             {
                 await ctx.Message.DeleteAsync();
 
@@ -45,7 +39,7 @@ namespace DiscordBot.Bots.Commands
                 Thread.Sleep(5000);
 
                 await approveRespnse.DeleteAsync();
-                
+
                 return;
             }
 
@@ -58,11 +52,11 @@ namespace DiscordBot.Bots.Commands
                 Thread.Sleep(5000);
 
                 await approvedResponse.DeleteAsync();
-                
+
                 return;
             };
 
-            if (suggestion.DealtWith == "DENIED") 
+            if (suggestion.DealtWith == "DENIED")
             {
                 await ctx.Message.DeleteAsync();
 
@@ -75,7 +69,7 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.requestorId);
+            DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.RequestorId);
 
             var api = new TwitchAPI();
 
@@ -85,17 +79,17 @@ namespace DiscordBot.Bots.Commands
             api.Settings.ClientId = clientid;
             api.Settings.AccessToken = accesstoken;
 
-            var searchStreamer = await api.V5.Search.SearchChannelsAsync(suggestion.streamerName);
+            var searchStreamer = await api.V5.Search.SearchChannelsAsync(suggestion.StreamerName);
 
-            if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.streamerName}."); return; }
+            if (searchStreamer.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.StreamerName}."); return; }
 
-            var stream = await api.V5.Users.GetUserByNameAsync(suggestion.streamerName);
+            var stream = await api.V5.Users.GetUserByNameAsync(suggestion.StreamerName);
 
-            if (stream.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.streamerName}."); return; }
+            if (stream.Total == 0) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.StreamerName}."); return; }
 
             var streamResults = stream.Matches.FirstOrDefault();
 
-            if (streamResults.DisplayName.ToLower() != suggestion.streamerName.ToLower()) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.streamerName}."); return; }
+            if (streamResults.DisplayName.ToLower() != suggestion.StreamerName.ToLower()) { await ctx.Channel.SendMessageAsync($"There was no channel with the username {suggestion.StreamerName}."); return; }
 
             var streamerId = streamResults.Id;
 
@@ -103,7 +97,7 @@ namespace DiscordBot.Bots.Commands
 
             var announcementMessage = "%USER% has gone live streaming %GAME%! You should check them out over at: %URL%";
 
-            var config = new GuildStreamerConfig
+            var config = new NowLiveStreamer
             {
                 AnnounceChannelId = announceChannel.Id,
                 GuildId = ctx.Guild.Id,
@@ -112,7 +106,7 @@ namespace DiscordBot.Bots.Commands
                 StreamerName = getStreamId.DisplayName
             };
 
-            await _guildStreamerConfigService.CreateNewGuildStreamerConfig(config);
+            await _nowLiveStreamerService.CreateNewNowLiveStreamer(config);
 
             suggestion.DealtWith = "APPROVED";
 
@@ -125,7 +119,7 @@ namespace DiscordBot.Bots.Commands
             var suggestionEmbed = new DiscordEmbedBuilder
             {
                 Title = $"Request for streamer to be added to the bot by: {suggestor.DisplayName}",
-                Description = suggestion.streamerName,
+                Description = suggestion.StreamerName,
                 Color = DiscordColor.Green,
             };
 
@@ -192,21 +186,21 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.requestorId);
+            DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.RequestorId);
 
-            if(reason == null) {}
+            if (reason == null) { }
 
             if (suggestor != null)
             {
-                if(reason == null)
+                if (reason == null)
                 {
-                    await suggestor.SendMessageAsync($"Your Request to add `{suggestion.streamerName}` to the Now Live bot has been rejected in the {ctx.Guild.Name} server!");
+                    await suggestor.SendMessageAsync($"Your Request to add `{suggestion.StreamerName}` to the Now Live bot has been rejected in the {ctx.Guild.Name} server!");
                 }
                 else
                 {
-                    await suggestor.SendMessageAsync($"Your Request to add `{suggestion.streamerName}` to the Now Live bot has been approved in the {ctx.Guild.Name} server for the following reason:\n\n {reason}");
+                    await suggestor.SendMessageAsync($"Your Request to add `{suggestion.StreamerName}` to the Now Live bot has been approved in the {ctx.Guild.Name} server for the following reason:\n\n {reason}");
                 }
-                
+
             }
 
             suggestion.DealtWith = "DENIED";
@@ -220,7 +214,7 @@ namespace DiscordBot.Bots.Commands
             var suggestionEmbed = new DiscordEmbedBuilder
             {
                 Title = $"Request for streamer to be added to the bot by: {suggestor.DisplayName}",
-                Description = suggestion.streamerName,
+                Description = suggestion.StreamerName,
                 Color = DiscordColor.Red,
             };
 

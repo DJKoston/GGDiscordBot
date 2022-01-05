@@ -1,10 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
 {
@@ -15,7 +11,7 @@ namespace DiscordBot.Bots.Commands
         [Description("Deletes a certain amount of messages from the server. Warning, Max 100.")]
         public async Task Purge(CommandContext ctx, int deleteString)
         {
-           if(deleteString > 100)
+            if (deleteString > 100)
             {
                 var errorMessage = new DiscordEmbedBuilder
                 {
@@ -35,7 +31,7 @@ namespace DiscordBot.Bots.Commands
 
             var messagesToDelete = beforeTwoWeek.Except(twoWeekMarker);
 
-            if (messagesToDelete.Count() == 0) { await ctx.Channel.SendMessageAsync("I'm sorry, I can only purge messages that are within 2 weeks of today's date."); return; }
+            if (!messagesToDelete.Any()) { await ctx.Channel.SendMessageAsync("I'm sorry, I can only purge messages that are within 2 weeks of today's date."); return; }
 
             await ctx.Channel.DeleteMessagesAsync(messagesToDelete).ConfigureAwait(false);
 

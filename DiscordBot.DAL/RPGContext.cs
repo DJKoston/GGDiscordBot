@@ -3,6 +3,7 @@ using DiscordBot.DAL.Models.Configurations;
 using DiscordBot.DAL.Models.Counters;
 using DiscordBot.DAL.Models.CustomCommands;
 using DiscordBot.DAL.Models.Egg;
+using DiscordBot.DAL.Models.Games;
 using DiscordBot.DAL.Models.NowLive;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
@@ -28,6 +29,9 @@ namespace DiscordBot.DAL
 
         //Counters
         public DbSet<GoodBotBadBot> GoodBotBadBotCounters { get; set; }
+
+        //Games
+        public DbSet<NumberGuess> NumberGuesses { get; set; }
 
         //Custom Commands
         public DbSet<CustomCommand> CustomCommands { get; set; }

@@ -1,4 +1,4 @@
-﻿using DiscordBot.Core.Services.Configs;
+﻿using DiscordBot.Core.Services.Configurations;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.ViewModels;
 using DiscordBot.DAL;
@@ -7,10 +7,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Bots.Commands
 {
@@ -18,42 +14,34 @@ namespace DiscordBot.Bots.Commands
     {
         private readonly RPGContext _context;
         private readonly IProfileService _profileService;
-        private readonly IExperienceService _experienceService;
+        private readonly IXPService _XPService;
         private readonly IGoldService _goldService;
-        private readonly INitroBoosterRoleConfigService _nitroBoosterRoleConfigService;
+        private readonly IDoubleXPRoleConfigService _doubleXPRoleConfig;
         private readonly ICurrencyNameConfigService _currencyNameConfig;
         public string currencyName;
 
-        public ProfileCommands(RPGContext context, IProfileService profileService, IExperienceService experienceService, IGoldService goldService, INitroBoosterRoleConfigService nitroBoosterRoleConfigService, ICurrencyNameConfigService currencyNameConfig)
+        public ProfileCommands(RPGContext context, IProfileService profileService, IXPService xpService, IGoldService goldService, IDoubleXPRoleConfigService doubleXPRoleConfig, ICurrencyNameConfigService currencyNameConfig)
         {
             _context = context;
             _profileService = profileService;
-            _experienceService = experienceService;
+            _XPService = xpService;
             _goldService = goldService;
-            _nitroBoosterRoleConfigService = nitroBoosterRoleConfigService;
+            _doubleXPRoleConfig = doubleXPRoleConfig;
             _currencyNameConfig = currencyNameConfig;
         }
 
+        //Make as Slash Command
         [Command("myinfo")]
         public async Task Profile(CommandContext ctx)
         {
-            await GetProfileToDisplayAsync(ctx, ctx.Member.Id);
-        }
-
-        [Command("myinfo")]
-        public async Task Profile(CommandContext ctx, DiscordMember member)
-        {
-            await GetProfileToDisplayAsync(ctx, member.Id);
-        }
-
-        private async Task GetProfileToDisplayAsync(CommandContext ctx, ulong memberId)
-        {
-            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+            var NBConfig = await _doubleXPRoleConfig.GetDoubleXPRole(ctx.Guild.Id);
 
             var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
 
             if (CNConfig == null) { currencyName = "Gold"; }
             else { currencyName = CNConfig.CurrencyName; }
+
+            var memberId = ctx.Member.Id;
 
             if (NBConfig == null)
             {
@@ -75,7 +63,7 @@ namespace DiscordBot.Bots.Commands
 
                 profileEmbed.WithThumbnail(member.AvatarUrl);
 
-                var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
+                var nextLevel = _context.ToNextXPs.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
 
                 profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
@@ -126,7 +114,7 @@ namespace DiscordBot.Bots.Commands
                 if (profile.Gold == 0) { profileEmbed.AddField(currencyName, profile.Gold.ToString()); }
                 if (profile.Gold >= 1) { profileEmbed.AddField(currencyName, profile.Gold.ToString("###,###,###,###,###")); };
 
-                var nextLevel = _context.ToNextXP.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
+                var nextLevel = _context.ToNextXPs.FirstOrDefault(x => x.Level == profile.Level + 1).XPAmount;
 
                 profileEmbed.AddField("XP", $"{profile.XP:###,###,###,###,###} / {nextLevel:###,###,###,###,###}");
                 profileEmbed.AddField("Level", profile.Level.ToString("###,###,###,###,###"));
@@ -164,7 +152,7 @@ namespace DiscordBot.Bots.Commands
             var member = ctx.Guild.Members[memberId];
             var memberUsername = ctx.Guild.Members[memberId].Username;
 
-            GrantXpViewModel viewModel = await _experienceService.GrantXpAsync(memberId, ctx.Guild.Id, xpGranted, memberUsername);
+            GrantXpViewModel viewModel = await _XPService.GrantXpAsync(memberId, ctx.Guild.Id, xpGranted, memberUsername);
 
             var XPAddedEmbed = new DiscordEmbedBuilder
             {
@@ -265,6 +253,7 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("pay")]
         [Description("Usage: !pay {user} {amount}")]
         public async Task PayUser(CommandContext ctx, DiscordMember member, int payAmount)
@@ -301,7 +290,7 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            if(payAmount < 0)
+            if (payAmount < 0)
             {
 
                 var lessThanCheck = new DiscordEmbedBuilder
@@ -348,7 +337,7 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 3600, CooldownBucketType.User)]
         public async Task HourlyCollect(CommandContext ctx)
         {
-            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+            var NBConfig = await _doubleXPRoleConfig.GetDoubleXPRole(ctx.Guild.Id);
 
             var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
 
@@ -422,7 +411,7 @@ namespace DiscordBot.Bots.Commands
         [Cooldown(1, 86400, CooldownBucketType.User)]
         public async Task DailyCollect(CommandContext ctx)
         {
-            var NBConfig = _nitroBoosterRoleConfigService.GetNitroBoosterConfig(ctx.Guild.Id).Result;
+            var NBConfig = await _doubleXPRoleConfig.GetDoubleXPRole(ctx.Guild.Id);
 
             var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
 
@@ -510,9 +499,10 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("top10")]
         [Description("Displays the Top 10 users!")]
-        public async Task Top10(CommandContext ctx, [RemainingText]string XPorGold)
+        public async Task Top10(CommandContext ctx, [RemainingText] string XPorGold)
         {
             var CNConfig = await _currencyNameConfig.GetCurrencyNameConfig(ctx.Guild.Id);
 

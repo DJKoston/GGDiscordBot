@@ -15,15 +15,11 @@ namespace DiscordBot.Bots.Commands
 
     public class SuggestionCommands : BaseCommandModule
     {
-        private readonly RPGContext _context;
         private readonly ISuggestionService _suggestionService;
-        private readonly ICommunityStreamerService _communityStreamerService;
 
-        public SuggestionCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService)
+        public SuggestionCommands(ISuggestionService suggestionService)
         {
-            _context = context;
             _suggestionService = suggestionService;
-            _communityStreamerService = communityStreamerService;
         }
 
         [Command("approve")]
@@ -72,7 +68,7 @@ namespace DiscordBot.Bots.Commands
 
             DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.SuggestorId);
 
-            if(suggestor != null) { await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been approved in the {ctx.Guild.Name} server!"); }
+            if (suggestor != null) { await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been approved in the {ctx.Guild.Name} server!"); }
 
             suggestion.RespondedTo = "APPROVED";
 
@@ -152,11 +148,11 @@ namespace DiscordBot.Bots.Commands
 
             DiscordMember suggestor = await ctx.Guild.GetMemberAsync(suggestion.SuggestorId);
 
-            if(reason == null) {}
+            if (reason == null) { }
 
             if (suggestor != null)
             {
-                if(reason == null)
+                if (reason == null)
                 {
                     await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been rejected in the {ctx.Guild.Name} server for the following reason:\n\n No reason given.");
                 }
@@ -164,7 +160,7 @@ namespace DiscordBot.Bots.Commands
                 {
                     await suggestor.SendMessageAsync($"Your Suggestion: `{suggestion.SuggestionText}` has been rejected in the {ctx.Guild.Name} server for the following reason:\n\n {reason}");
                 }
-                
+
             }
 
             suggestion.RespondedTo = "DENIED";
