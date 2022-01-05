@@ -1,4 +1,13 @@
-﻿namespace DiscordBot.Bots.SlashCommands
+﻿using DiscordBot.Core.Services.Configurations;
+using DiscordBot.Core.Services.Games;
+using DiscordBot.Core.Services.Profiles;
+using DiscordBot.DAL.Models.Profiles;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+
+
+namespace DiscordBot.Bots.SlashCommands
 {
     public class GameCommands : BaseCommandModule
     {
@@ -16,6 +25,7 @@
             _numberGuessService = numberGuessService;
         }
 
+        //Make as Slash Command
         [Command("spin")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         [Description("Spin's a wheel and gets a random bonus!")]
@@ -128,6 +138,7 @@
             }
         }
 
+        //Make as Slash Command
         [Command("spinall")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         [Description("Spin's all your currency and gets a random bonus!")]
@@ -250,6 +261,7 @@
             return;
         }
 
+        //Make as Slash Command
         [Command("steal")]
         [Cooldown(1, 60, CooldownBucketType.User)]
         public async Task Steal(CommandContext ctx, DiscordMember member)
@@ -382,6 +394,7 @@
             }
         }
 
+        //Make as Slash Command
         [Command("guess")]
         [Description("Guess a number between 1 and 10, if you're right - Win 2,500 Currency if you are right!!")]
         [Cooldown(1, 60, CooldownBucketType.User)]
@@ -461,6 +474,7 @@
             }
         }
 
+        //Make as Slash Command
         [Command("coinflip")]
         [Description("")]
         [Cooldown(1, 60, CooldownBucketType.User)]

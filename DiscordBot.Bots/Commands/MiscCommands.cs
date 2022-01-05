@@ -1,4 +1,20 @@
-﻿namespace DiscordBot.Bots.Commands
+﻿using DiscordBot.Bots.JsonConversions;
+using DiscordBot.Core.Services.CommunityStreamers;
+using DiscordBot.Core.Services.Counters;
+using DiscordBot.Core.Services.NowLive;
+using DiscordBot.Core.Services.Quotes;
+using DiscordBot.Core.Services.Suggestions;
+using DiscordBot.DAL;
+using DiscordBot.DAL.Models.CommunityStreamers;
+using DiscordBot.DAL.Models.Suggestions;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using Newtonsoft.Json;
+using System.Diagnostics;
+using TwitchLib.Api;
+
+namespace DiscordBot.Bots.Commands
 {
     public class MiscCommands : BaseCommandModule
     {
@@ -6,19 +22,22 @@
         private readonly ISuggestionService _suggestionService;
         private readonly ICommunityStreamerService _communityStreamerService;
         private readonly INowLiveStreamerService _nowLiveStreamerService;
+        private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly IConfiguration _configuration;
         private readonly ISimpsonsQuoteService _simpsonsQuoteService;
 
-        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, INowLiveStreamerService nowLiveStreamerService, IConfiguration configuration, ISimpsonsQuoteService simpsonsQuoteService)
+        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, INowLiveStreamerService nowLiveStreamerService, IGoodBotBadBotService goodBotBadBotService, IConfiguration configuration, ISimpsonsQuoteService simpsonsQuoteService)
         {
             _context = context;
             _suggestionService = suggestionService;
             _communityStreamerService = communityStreamerService;
             _nowLiveStreamerService = nowLiveStreamerService;
+            _goodBotBadBotService = goodBotBadBotService;
             _configuration = configuration;
             _simpsonsQuoteService = simpsonsQuoteService;
         }
 
+        //Make as Slash Command
         [Command("d12")]
         [Description("Rolls a 12 sided Dice")]
         public async Task RollTwelveDie(CommandContext ctx)
@@ -28,6 +47,7 @@
             await ctx.RespondAsync($"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 13)}").ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("dadjoke")]
         [Description("Get a Dad Joke!")]
         public async Task DadJoke(CommandContext ctx)
@@ -55,6 +75,7 @@
             client.Dispose();
         }
 
+        //Make as Slash Command
         [Command("suggest")]
         [Description("Make a suggestion")]
         public async Task Suggest(CommandContext ctx, [RemainingText] string suggestion)
@@ -75,48 +96,46 @@
                 return;
             }
 
-            else
+            var newSuggestion = new Suggestion
             {
-                var newSuggestion = new Suggestion
-                {
-                    GuildId = ctx.Guild.Id,
-                    SuggestorId = ctx.Member.Id,
-                    SuggestionText = suggestion,
-                    RespondedTo = "NO",
-                };
+                GuildId = ctx.Guild.Id,
+                SuggestorId = ctx.Member.Id,
+                SuggestionText = suggestion,
+                RespondedTo = "NO",
+            };
 
-                await _suggestionService.CreateNewSuggestion(newSuggestion);
+            await _suggestionService.CreateNewSuggestion(newSuggestion);
 
-                var suggestionEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"Suggestion Created by: {ctx.Member.DisplayName}",
-                    Description = suggestion,
-                    Color = DiscordColor.HotPink,
-                };
+            var suggestionEmbed = new DiscordEmbedBuilder
+            {
+                Title = $"Suggestion Created by: {ctx.Member.DisplayName}",
+                Description = suggestion,
+                Color = DiscordColor.HotPink,
+            };
 
-                suggestionEmbed.AddField("To Approve this suggestion:", $"`!suggestion approve {newSuggestion.Id}`");
-                suggestionEmbed.AddField("To Decline this suggestion:", $"`!suggestion reject {newSuggestion.Id}`");
+            suggestionEmbed.AddField("To Approve this suggestion:", $"`!suggestion approve {newSuggestion.Id}`");
+            suggestionEmbed.AddField("To Decline this suggestion:", $"`!suggestion reject {newSuggestion.Id}`");
 
-                suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
+            suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
 
-                var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
+            var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
 
-                newSuggestion.SuggestionEmbedMessage = message.Id;
+            newSuggestion.SuggestionEmbedMessage = message.Id;
 
-                await _suggestionService.EditSuggestion(newSuggestion);
+            await _suggestionService.EditSuggestion(newSuggestion);
 
-                var messageBuilder = new DiscordMessageBuilder
-                {
-                    Content = "Your suggestion has been logged!",
-                };
+            var messageBuilder = new DiscordMessageBuilder
+            {
+                Content = "Your suggestion has been logged!",
+            };
 
-                messageBuilder.WithReply(ctx.Message.Id, true);
+            messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
-            }
+            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
-        [Command("twitchchannel")]
+        //Make as Slash Command
+        [Command("TwitchChannel")]
         [Description("Let us Know Your Streamer Tag!")]
         public async Task StreamerTag(CommandContext ctx, [RemainingText] string twitchUserName)
         {
@@ -198,7 +217,8 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        [Command("botstats")]
+        //Make as Slash Command
+        [Command("stats")]
         public async Task BotStats(CommandContext ctx)
         {
             var embed = new DiscordEmbedBuilder
@@ -258,6 +278,7 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("uptime")]
         public async Task Uptime(CommandContext ctx)
         {
@@ -282,6 +303,7 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("advice")]
         public async Task Advice(CommandContext ctx)
         {
@@ -318,6 +340,7 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("serverstats")]
         public async Task ServerStats(CommandContext ctx)
         {
@@ -356,6 +379,7 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("swquote")]
         public async Task StarWarsQuote(CommandContext ctx)
         {
@@ -394,6 +418,93 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
+        [Command("praised")]
+        public async Task BotPraised(CommandContext ctx)
+        {
+            var goodBot = await _goodBotBadBotService.GetGoodBot();
+
+            if (goodBot.GoodBot == 0)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been praised {goodBot.GoodBot} times! 😊😊😊",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.GoodBot == 1)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been praised {goodBot.GoodBot} time! 😊😊😊",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.GoodBot > 1)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been praised {goodBot.GoodBot} times! 😊😊😊",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+        }
+
+        //Make as Slash Command
+        [Command("scolded")]
+        public async Task BotScolded(CommandContext ctx)
+        {
+            var goodBot = await _goodBotBadBotService.GetGoodBot();
+
+            if (goodBot.BadBot == 0)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.BadBot == 1)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been scolded {goodBot.BadBot} time! 😞 I'll try to do better!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+
+            if (goodBot.BadBot > 1)
+            {
+                var messageBuilder1 = new DiscordMessageBuilder
+                {
+                    Content = $"I have been scolded {goodBot.BadBot} times! 😞 I'll try to do better!",
+                };
+
+                messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            }
+        }
+
+        //Make as Slash Command
         [Command("simpsons")]
         public async Task SimpsonsQuote(CommandContext ctx)
         {
@@ -417,6 +528,7 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("bestgirl")]
         [Description("DudeBDR only Command!")]
         public async Task RemIsBestGirl(CommandContext ctx)

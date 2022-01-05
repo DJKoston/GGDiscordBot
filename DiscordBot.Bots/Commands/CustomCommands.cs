@@ -1,4 +1,10 @@
-﻿namespace DiscordBot.Bots.Commands
+﻿using DiscordBot.Core.Services.CustomCommands;
+using DiscordBot.DAL.Models.CustomCommands;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+
+namespace DiscordBot.Bots.Commands
 {
     public class CustomCommands : BaseCommandModule
     {

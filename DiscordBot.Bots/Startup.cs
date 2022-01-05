@@ -3,6 +3,7 @@ using DiscordBot.Core.Services.Configurations;
 using DiscordBot.Core.Services.Counters;
 using DiscordBot.Core.Services.CustomCommands;
 using DiscordBot.Core.Services.Egg;
+using DiscordBot.Core.Services.Games;
 using DiscordBot.Core.Services.NowLive;
 using DiscordBot.Core.Services.Profiles;
 using DiscordBot.Core.Services.Quotes;
@@ -51,6 +52,9 @@ namespace DiscordBot.Bots
 
             //Egg Services
             services.AddScoped<IEggService, EggService>();
+
+            //Game Services
+            services.AddScoped<INumberGuessService, NumberGuessService>();
 
             //Now Live Services
             services.AddScoped<INowLiveMessageService, NowLiveMessageService>();

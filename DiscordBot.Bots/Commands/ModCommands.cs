@@ -1,4 +1,8 @@
-﻿namespace DiscordBot.Bots.Commands
+﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+
+namespace DiscordBot.Bots.Commands
 {
     [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
     public class ModCommands : BaseCommandModule

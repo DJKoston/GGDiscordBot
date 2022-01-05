@@ -1,15 +1,12 @@
 ﻿using DiscordBot.Bots.Commands;
+using DiscordBot.Bots.Handlers.HelpFormatters;
 using DiscordBot.Bots.SlashCommands;
-using DiscordBot.Core.Services.CommunityStreamers;
 using DiscordBot.Core.Services.Configurations;
 using DiscordBot.Core.Services.Counters;
 using DiscordBot.Core.Services.CustomCommands;
-using DiscordBot.Core.Services.Egg;
 using DiscordBot.Core.Services.NowLive;
 using DiscordBot.Core.Services.Profiles;
-using DiscordBot.Core.Services.Quotes;
 using DiscordBot.Core.Services.ReactionRoles;
-using DiscordBot.Core.Services.Suggestions;
 using DiscordBot.Core.ViewModels;
 using DiscordBot.DAL.Models.Configurations;
 using DiscordBot.DAL.Models.NowLive;
@@ -41,12 +38,15 @@ namespace DiscordBot.Bots
         public ConsoleColor twitchColor;
         public ConsoleColor discordColor;
         public ConsoleColor fail;
+        public int statusPosition;
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
             twitchColor = ConsoleColor.DarkMagenta;
             discordColor = ConsoleColor.DarkCyan;
             fail = ConsoleColor.Red;
+
+            statusPosition = 0;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
             Log("-----------------------------");
@@ -104,6 +104,7 @@ namespace DiscordBot.Bots
                 EnableDms = true,
                 EnableMentionPrefix = true,
                 Services = services,
+                
             };
             Log("CommandsNext Config Created.");
 
@@ -117,6 +118,7 @@ namespace DiscordBot.Bots
             Log("Creating New Discord Client...");
             DiscordClient = new DiscordClient(discordConfig);
             DiscordCommands = DiscordClient.UseCommandsNext(discordCommandsConfig);
+            DiscordCommands.SetHelpFormatter<CustomHelpFormatter>();
             DiscordSlashCommands = DiscordClient.UseSlashCommands(discordSlashCommandsConfig);
             Log("New Discord Client Created.");
 
@@ -137,11 +139,20 @@ namespace DiscordBot.Bots
 
             Log("Registering Discord Commands...");
             DiscordCommands.RegisterCommands<ConfigCommands>();
+            DiscordCommands.RegisterCommands<CustomCommands>();
+            DiscordCommands.RegisterCommands<GameCommands>();
+            DiscordCommands.RegisterCommands<MiscCommands>();
+            DiscordCommands.RegisterCommands<ModCommands>();
+            DiscordCommands.RegisterCommands<NowLiveCommands>();
+            DiscordCommands.RegisterCommands<ProfileCommands>();
+            DiscordCommands.RegisterCommands<QuoteCommands>();
+            DiscordCommands.RegisterCommands<ReactionRoleCommands>();
+            DiscordCommands.RegisterCommands<StreamerCommands>();
+            DiscordCommands.RegisterCommands<SuggestionCommands>();
             Log("Discord Commands Registered.");
 
             Log("Registering Slash Commands...");
             DiscordSlashCommands.RegisterCommands<GameSlashCommands>(697270003027804190);
-            DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>(697270003027804190);
             Log("Slash Commands Registered.");
 
             Log("Registering Discord Client Interactivity...");
@@ -386,20 +397,7 @@ namespace DiscordBot.Bots
 
         private Task OnDiscordSlashCommandExecuted(SlashCommandsExtension sender, SlashCommandExecutedEventArgs e)
         {
-            if(e.Context.Interaction.Data.Options == null)
-            {
-                Log($"{e.Context.Member.DisplayName} ran Slash Command \"{e.Context.CommandName}\" in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
-            }
-
-            else
-            {
-                var options = e.Context.Interaction.Data.Options.FirstOrDefault();
-
-                if (options.Type == ApplicationCommandOptionType.SubCommand)
-                {
-                    Log($"{e.Context.Member.DisplayName} ran Slash Command \"{e.Context.CommandName} {options.Name}\" in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
-                }
-            }
+            Log($"{e.Context.Member.DisplayName} ran Slash Command \"{e.Context.CommandName}\" in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
 
             return Task.CompletedTask;
         }
@@ -996,18 +994,11 @@ namespace DiscordBot.Bots
             }
         }
 
-        private async Task DiscordClientReady(DiscordClient c, ReadyEventArgs e)
+        private Task DiscordClientReady(DiscordClient c, ReadyEventArgs e)
         {
-            if (Environment.MachineName.ToLower() == "haydon-pc")
-            {
-                await DiscordClient.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Watching,
-                    Name = "the latest test build",
-                }, UserStatus.Idle);
-            }
-
             Log($"{c.CurrentUser.Username} is Ready.", ConsoleColor.Green);
+
+            return Task.CompletedTask;
         }
 
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
@@ -1026,19 +1017,29 @@ namespace DiscordBot.Bots
                 }
             }
 
-            
-
             var guildCount = c.Guilds.Count;
 
             var botStartTime = Process.GetCurrentProcess().StartTime;
 
             var botUptime = DateTime.Now - botStartTime;
 
-            var currentStatus = c.CurrentUser.Presence.Activity;
-
             var liveChannels = Monitor.LiveStreams.Count;
 
-            if (currentStatus.Name == null)
+            if (statusPosition == 0)
+            {
+                await DiscordClient.UpdateStatusAsync(new DiscordActivity
+                {
+                    ActivityType = ActivityType.Streaming,
+                    Name = "Start Up Files...",
+                    StreamUrl = "https://twitch.tv/djkoston"
+                });
+                
+                statusPosition++;
+
+                return;
+            }
+
+            if (statusPosition == 1)
             {
                 if (guildCount == 1)
                 {
@@ -1058,11 +1059,13 @@ namespace DiscordBot.Bots
                     }, UserStatus.Online);
                 }
 
+                statusPosition++;
+
                 return;
             }
 
             //Servers to Minecraft
-            if (currentStatus.Name.Contains("Server"))
+            if (statusPosition == 2)
             {
                 await DiscordClient.UpdateStatusAsync(new DiscordActivity
                 {
@@ -1070,22 +1073,13 @@ namespace DiscordBot.Bots
                     Name = $"minecraft.koston.eu",
                 }, UserStatus.Online);
 
-                return;
-            }
-
-            if (currentStatus.Name.Contains("Servers!"))
-            {
-                await DiscordClient.UpdateStatusAsync(new DiscordActivity
-                {
-                    ActivityType = ActivityType.Playing,
-                    Name = $"minecraft.koston.eu",
-                }, UserStatus.Online);
+                statusPosition++;
 
                 return;
             }
 
             //Minecraft to Uptime
-            if (currentStatus.Name.Contains("minecraft"))
+            if (statusPosition == 3)
             {
                 await DiscordClient.UpdateStatusAsync(new DiscordActivity
                 {
@@ -1093,12 +1087,13 @@ namespace DiscordBot.Bots
                     Name = $"Online for: {botUptime.Days}d {botUptime.Hours:00}h {botUptime.Minutes:00}m",
                 }, UserStatus.Online);
 
+                statusPosition++;
+
                 return;
             }
 
-
             //Uptme to Twitch Channels
-            if (currentStatus.Name.Contains("Online for:"))
+            if (statusPosition == 4)
             {
                 await DiscordClient.UpdateStatusAsync(new DiscordActivity
                 {
@@ -1106,11 +1101,13 @@ namespace DiscordBot.Bots
                     Name = $"{lst.Count} Twitch Channels!",
                 }, UserStatus.Online);
 
+                statusPosition++;
+
                 return;
             }
 
             //Twitch Channels to Twitch Streamers
-            if (currentStatus.Name.Contains("Twitch Channels!"))
+            if (statusPosition == 5)
             {
                 if (liveChannels == 0)
                 {
@@ -1139,11 +1136,13 @@ namespace DiscordBot.Bots
                     }, UserStatus.Online);
                 }
 
+                statusPosition++;
+
                 return;
             }
 
             //Twitch Channels to Servers
-            if (currentStatus.Name.Contains("Twitch Stream!"))
+            if (statusPosition == 6)
             {
                 if (guildCount == 1)
                 {
@@ -1163,96 +1162,49 @@ namespace DiscordBot.Bots
                     }, UserStatus.Online);
                 }
 
-                return;
-            }
-
-            if (currentStatus.Name.Contains("Twitch Streams!"))
-            {
-                if (guildCount == 1)
-                {
-                    await DiscordClient.UpdateStatusAsync(new DiscordActivity
-                    {
-                        ActivityType = ActivityType.Watching,
-                        Name = $"{guildCount} Server!",
-                    }, UserStatus.Online);
-                }
-
-                else
-                {
-                    await DiscordClient.UpdateStatusAsync(new DiscordActivity
-                    {
-                        ActivityType = ActivityType.Watching,
-                        Name = $"{guildCount} Servers!",
-                    }, UserStatus.Online);
-                }
+                statusPosition = 1;
 
                 return;
             }
         }
 
-        public static void Log(string logItem)
+        public static void ConsoleLog(string logLine, ConsoleColor color = ConsoleColor.White)
         {
-            var lineToWrite1 = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}]";
-            var lineToWrite2 = $"[Log ]";
-            var lineToWrite3 = $"{logItem}";
-
-            Console.Write($"{lineToWrite1} ");
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write($"{lineToWrite2} ");
-            Console.ResetColor();
-            Console.Write(lineToWrite3);
-            Console.Write("\n");
-
-            var applicationName = "";
-
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-            if (environment.ToLower() == "development") { applicationName = "GGBotTest"; }
-            else if (environment.ToLower() == "live") { applicationName = "GGBot"; }
-
-            if (!Directory.Exists($"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
-            {
-                Directory.CreateDirectory($"\\Logs\\{applicationName}\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
-            }
-
-            using StreamWriter w = File.AppendText($"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt");
-
-            w.WriteLine($"{DateTime.Now}: {logItem}");
-
-            w.Close();
-            w.Dispose();
-        }
-
-        public static void Log(string logItem, ConsoleColor color)
-        {
-            var lineToWrite1 = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}]";
-            var lineToWrite2 = $"[Log ]";
-            var lineToWrite3 = $"{logItem}";
-
-            Console.Write($"{lineToWrite1} ");
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write($"{lineToWrite2} ");
-            Console.ResetColor();
             Console.ForegroundColor = color;
-            Console.Write(lineToWrite3);
+            Console.Write(logLine);
             Console.ResetColor();
-            Console.Write("\n");
+        }
 
+        public static void Log(string logItem, ConsoleColor color = ConsoleColor.White)
+        {
+            // env
             var applicationName = "";
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").ToLower();
 
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (environment == "development") { applicationName = "GGBotTest"; }
+            else if (environment == "live") { applicationName = "GGBot"; }
 
-            if (environment.ToLower() == "development") { applicationName = "GGBotTest"; }
-            else if (environment.ToLower() == "live") { applicationName = "GGBot"; }
+            var directory = $"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\";
 
-            if (!Directory.Exists($"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\"))
+            // logging strings
+            var date = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}] ";
+            var header = $"[Log ] ";
+            var log = $"{logItem}\n";
+
+            // log to console
+            ConsoleLog(date);
+            ConsoleLog(header, ConsoleColor.DarkYellow);
+            ConsoleLog(log, color);
+
+            // ensure directory exists
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory($"\\Logs\\{applicationName}\\{ DateTime.Now.Year}\\{ DateTime.Now.Month}\\");
+                Directory.CreateDirectory(directory);
             }
 
-            using StreamWriter w = File.AppendText($"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\{DateTime.Today.ToLongDateString()}.txt");
-
-            w.WriteLine($"{DateTime.Now}: {logItem}");
+            // log to file
+            using StreamWriter w = File.AppendText($"{directory}{DateTime.Today.ToLongDateString()}.txt");
+            w.WriteLine($"{date}: {logItem}");
 
             w.Close();
             w.Dispose();
@@ -1260,16 +1212,13 @@ namespace DiscordBot.Bots
 
         public static void Heartbeat(string message)
         {
-            var lineToWrite1 = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}]";
-            var lineToWrite2 = $"[Heartbeat ]";
-            var lineToWrite3 = $"{message}";
+            var date = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}] ";
+            var header = $"[Heartbeat ] ";
+            var log = $"{message}\n"; 
 
-            Console.Write($"{lineToWrite1} ");
-            Console.ForegroundColor = ConsoleColor.DarkBlue;
-            Console.Write($"{lineToWrite2} ");
-            Console.ResetColor();
-            Console.Write(lineToWrite3);
-            Console.Write("\n");
+            ConsoleLog(date);
+            ConsoleLog(header, ConsoleColor.DarkBlue);
+            ConsoleLog(log);
         }
     }
 }

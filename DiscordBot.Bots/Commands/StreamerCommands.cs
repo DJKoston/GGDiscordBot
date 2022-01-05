@@ -1,4 +1,13 @@
-﻿namespace DiscordBot.Bots.Commands
+﻿using DiscordBot.Core.Services.CommunityStreamers;
+using DiscordBot.Core.Services.NowLive;
+using DiscordBot.DAL;
+using DiscordBot.DAL.Models.NowLive;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using TwitchLib.Api;
+
+namespace DiscordBot.Bots.Commands
 {
     [Group("streamer")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
@@ -129,6 +138,8 @@
             Thread.Sleep(5000);
 
             await response.DeleteAsync();
+
+
         }
 
         [Command("reject")]
@@ -208,8 +219,10 @@
             };
 
             suggestionEmbed.AddField("This request Was Rejected by:", $"{ctx.Member.Mention}");
+            suggestionEmbed.AddField("Reason:", reason);
 
             suggestionEmbed.WithFooter($"Request: {suggestion.Id}");
+
 
             DiscordEmbed newEmbed = suggestionEmbed;
 
@@ -223,8 +236,6 @@
 
             await response.DeleteAsync();
         }
-
-
 
     }
 }
