@@ -129,8 +129,6 @@
             Thread.Sleep(5000);
 
             await response.DeleteAsync();
-
-
         }
 
         [Command("reject")]
@@ -210,10 +208,8 @@
             };
 
             suggestionEmbed.AddField("This request Was Rejected by:", $"{ctx.Member.Mention}");
-            suggestionEmbed.AddField("Reason:", reason);
 
             suggestionEmbed.WithFooter($"Request: {suggestion.Id}");
-
 
             DiscordEmbed newEmbed = suggestionEmbed;
 
@@ -227,6 +223,8 @@
 
             await response.DeleteAsync();
         }
+
+
 
     }
 }
