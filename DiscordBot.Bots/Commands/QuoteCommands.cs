@@ -1,15 +1,4 @@
-﻿using DiscordBot.Core.Services.Quotes;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.Quotes;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Microsoft.VisualBasic;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     public class QuoteCommands : BaseCommandModule
     {
@@ -56,7 +45,7 @@ namespace DiscordBot.Bots.Commands
                     AddedById = ctx.Member.Id,
                     DiscordUserQuotedId = discordMember.Id,
                     QuoteContents = quote,
-                    DateAdded = DateAndTime.Now.ToString(),
+                    DateAdded = DateTime.Now.ToString(),
                     ChannelQuotedIn = ctx.Channel.Name,
                 };
 
@@ -97,7 +86,7 @@ namespace DiscordBot.Bots.Commands
                     AddedById = ctx.Member.Id,
                     DiscordUserQuotedId = discordMember.Id,
                     QuoteContents = quote,
-                    DateAdded = DateAndTime.Now.ToString(),
+                    DateAdded = DateTime.Now.ToString(),
                     ChannelQuotedIn = ctx.Channel.Name,
                 };
 

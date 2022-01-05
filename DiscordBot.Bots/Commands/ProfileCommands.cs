@@ -1,14 +1,4 @@
-﻿using DiscordBot.Core.Services.Configurations;
-using DiscordBot.Core.Services.Profiles;
-using DiscordBot.Core.ViewModels;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.Profiles;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Microsoft.EntityFrameworkCore;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     public class ProfileCommands : BaseCommandModule
     {

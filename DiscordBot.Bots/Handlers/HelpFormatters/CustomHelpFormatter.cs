@@ -1,11 +1,4 @@
-﻿using DiscordBot.DAL;
-using DiscordBot.DAL.Models.CustomCommands;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Converters;
-using DSharpPlus.CommandsNext.Entities;
-using DSharpPlus.Entities;
-
-namespace DiscordBot.Bots.Handlers.HelpFormatters
+﻿namespace DiscordBot.Bots.Handlers.HelpFormatters
 {
     public class CustomHelpFormatter : BaseHelpFormatter
     {

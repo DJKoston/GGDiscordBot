@@ -1,10 +1,4 @@
-﻿using DiscordBot.Core.Services.Configurations;
-using DiscordBot.DAL.Models.Configurations;
-using DSharpPlus.Entities;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     [Group("config")]
     [Description("Configure the bot for this server.")]

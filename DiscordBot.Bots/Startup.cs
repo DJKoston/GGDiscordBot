@@ -1,18 +1,4 @@
-﻿using DiscordBot.Core.Services.CommunityStreamers;
-using DiscordBot.Core.Services.Configurations;
-using DiscordBot.Core.Services.Counters;
-using DiscordBot.Core.Services.CustomCommands;
-using DiscordBot.Core.Services.Egg;
-using DiscordBot.Core.Services.Games;
-using DiscordBot.Core.Services.NowLive;
-using DiscordBot.Core.Services.Profiles;
-using DiscordBot.Core.Services.Quotes;
-using DiscordBot.Core.Services.ReactionRoles;
-using DiscordBot.Core.Services.Suggestions;
-using DiscordBot.DAL;
-using Microsoft.EntityFrameworkCore;
-
-namespace DiscordBot.Bots
+﻿namespace DiscordBot.Bots
 {
     public class Startup
     {

@@ -1,12 +1,4 @@
-﻿using DiscordBot.Core.Services.NowLive;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.NowLive;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using TwitchLib.Api;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     [Group("nl")]
     [Aliases("NowLive")]
