@@ -1,12 +1,4 @@
-﻿using DiscordBot.Core.Services.Configurations;
-using DiscordBot.Core.Services.Games;
-using DiscordBot.Core.Services.Profiles;
-using DiscordBot.DAL.Models.Profiles;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-
-namespace DiscordBot.Bots.SlashCommands
+﻿namespace DiscordBot.Bots.SlashCommands
 {
     public class GameSlashCommands : ApplicationCommandModule
     {

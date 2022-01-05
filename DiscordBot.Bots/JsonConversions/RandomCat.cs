@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace DiscordBot.Bots.JsonConversions
+﻿namespace DiscordBot.Bots.JsonConversions
 {
     public struct RandomCat
     {

@@ -1,32 +1,4 @@
-﻿using DiscordBot.Bots.Commands;
-using DiscordBot.Bots.Handlers.HelpFormatters;
-using DiscordBot.Bots.SlashCommands;
-using DiscordBot.Core.Services.Configurations;
-using DiscordBot.Core.Services.Counters;
-using DiscordBot.Core.Services.CustomCommands;
-using DiscordBot.Core.Services.NowLive;
-using DiscordBot.Core.Services.Profiles;
-using DiscordBot.Core.Services.ReactionRoles;
-using DiscordBot.Core.ViewModels;
-using DiscordBot.DAL.Models.Configurations;
-using DiscordBot.DAL.Models.NowLive;
-using DiscordBot.DAL.Models.Profiles;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Exceptions;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.EventArgs;
-using System.Diagnostics;
-using TwitchLib.Api;
-using TwitchLib.Api.Services;
-using TwitchLib.Api.Services.Events.LiveStreamMonitor;
-
-namespace DiscordBot.Bots
+﻿namespace DiscordBot.Bots
 {
     public class Bot
     {

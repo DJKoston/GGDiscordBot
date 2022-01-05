@@ -1,13 +1,4 @@
-﻿using DiscordBot.Core.Services.Configurations;
-using DiscordBot.Core.Services.Games;
-using DiscordBot.Core.Services.Profiles;
-using DiscordBot.DAL.Models.Profiles;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-
-
-namespace DiscordBot.Bots.SlashCommands
+﻿namespace DiscordBot.Bots.SlashCommands
 {
     public class GameCommands : BaseCommandModule
     {

@@ -1,20 +1,4 @@
-﻿using DiscordBot.Bots.JsonConversions;
-using DiscordBot.Core.Services.CommunityStreamers;
-using DiscordBot.Core.Services.Counters;
-using DiscordBot.Core.Services.NowLive;
-using DiscordBot.Core.Services.Quotes;
-using DiscordBot.Core.Services.Suggestions;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.CommunityStreamers;
-using DiscordBot.DAL.Models.Suggestions;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Newtonsoft.Json;
-using System.Diagnostics;
-using TwitchLib.Api;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     public class MiscCommands : BaseCommandModule
     {

@@ -1,13 +1,4 @@
-﻿using DiscordBot.Core.Services.ReactionRoles;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.ReactionRoles;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     [Group("rr")]
     [Aliases("ReactionRole")]

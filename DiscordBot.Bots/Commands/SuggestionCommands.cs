@@ -1,14 +1,4 @@
-﻿using DiscordBot.Core.Services.CommunityStreamers;
-using DiscordBot.Core.Services.Suggestions;
-using DiscordBot.DAL;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     [Group("suggestion")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
