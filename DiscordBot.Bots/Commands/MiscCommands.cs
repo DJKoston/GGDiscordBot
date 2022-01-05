@@ -21,7 +21,6 @@
             _simpsonsQuoteService = simpsonsQuoteService;
         }
 
-        //Make as Slash Command
         [Command("d12")]
         [Description("Rolls a 12 sided Dice")]
         public async Task RollTwelveDie(CommandContext ctx)
@@ -31,7 +30,6 @@
             await ctx.RespondAsync($"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 13)}").ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("dadjoke")]
         [Description("Get a Dad Joke!")]
         public async Task DadJoke(CommandContext ctx)
@@ -80,42 +78,45 @@
                 return;
             }
 
-            var newSuggestion = new Suggestion
+            else
             {
-                GuildId = ctx.Guild.Id,
-                SuggestorId = ctx.Member.Id,
-                SuggestionText = suggestion,
-                RespondedTo = "NO",
-            };
+                var newSuggestion = new Suggestion
+                {
+                    GuildId = ctx.Guild.Id,
+                    SuggestorId = ctx.Member.Id,
+                    SuggestionText = suggestion,
+                    RespondedTo = "NO",
+                };
 
-            await _suggestionService.CreateNewSuggestion(newSuggestion);
+                await _suggestionService.CreateNewSuggestion(newSuggestion);
 
-            var suggestionEmbed = new DiscordEmbedBuilder
-            {
-                Title = $"Suggestion Created by: {ctx.Member.DisplayName}",
-                Description = suggestion,
-                Color = DiscordColor.HotPink,
-            };
+                var suggestionEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"Suggestion Created by: {ctx.Member.DisplayName}",
+                    Description = suggestion,
+                    Color = DiscordColor.HotPink,
+                };
 
-            suggestionEmbed.AddField("To Approve this suggestion:", $"`!suggestion approve {newSuggestion.Id}`");
-            suggestionEmbed.AddField("To Decline this suggestion:", $"`!suggestion reject {newSuggestion.Id}`");
+                suggestionEmbed.AddField("To Approve this suggestion:", $"`!suggestion approve {newSuggestion.Id}`");
+                suggestionEmbed.AddField("To Decline this suggestion:", $"`!suggestion reject {newSuggestion.Id}`");
 
-            suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
+                suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
 
-            var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
+                var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
 
-            newSuggestion.SuggestionEmbedMessage = message.Id;
+                newSuggestion.SuggestionEmbedMessage = message.Id;
 
-            await _suggestionService.EditSuggestion(newSuggestion);
+                await _suggestionService.EditSuggestion(newSuggestion);
 
-            var messageBuilder = new DiscordMessageBuilder
-            {
-                Content = "Your suggestion has been logged!",
-            };
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = "Your suggestion has been logged!",
+                };
 
-            messageBuilder.WithReply(ctx.Message.Id, true);
+                messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            }
         }
 
         //Make as Slash Command
