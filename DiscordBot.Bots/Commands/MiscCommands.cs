@@ -57,7 +57,6 @@
             client.Dispose();
         }
 
-        //Make as Slash Command
         [Command("suggest")]
         [Description("Make a suggestion")]
         public async Task Suggest(CommandContext ctx, [RemainingText] string suggestion)
@@ -119,8 +118,7 @@
             }
         }
 
-        //Make as Slash Command
-        [Command("TwitchChannel")]
+        [Command("twitchchannel")]
         [Description("Let us Know Your Streamer Tag!")]
         public async Task StreamerTag(CommandContext ctx, [RemainingText] string twitchUserName)
         {
@@ -202,8 +200,7 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
-        [Command("stats")]
+        [Command("botstats")]
         public async Task BotStats(CommandContext ctx)
         {
             var embed = new DiscordEmbedBuilder
@@ -263,7 +260,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("uptime")]
         public async Task Uptime(CommandContext ctx)
         {
@@ -288,7 +284,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("advice")]
         public async Task Advice(CommandContext ctx)
         {
@@ -325,7 +320,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("serverstats")]
         public async Task ServerStats(CommandContext ctx)
         {
@@ -364,7 +358,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("swquote")]
         public async Task StarWarsQuote(CommandContext ctx)
         {
@@ -403,50 +396,12 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("praised")]
         public async Task BotPraised(CommandContext ctx)
         {
-            var goodBot = await _goodBotBadBotService.GetGoodBot();
-
-            if (goodBot.GoodBot == 0)
-            {
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Content = $"I have been praised {goodBot.GoodBot} times! 😊😊😊",
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-            }
-
-            if (goodBot.GoodBot == 1)
-            {
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Content = $"I have been praised {goodBot.GoodBot} time! 😊😊😊",
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-            }
-
-            if (goodBot.GoodBot > 1)
-            {
-                var messageBuilder1 = new DiscordMessageBuilder
-                {
-                    Content = $"I have been praised {goodBot.GoodBot} times! 😊😊😊",
-                };
-
-                messageBuilder1.WithReply(ctx.Message.Id, true);
-
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
-            }
+            
         }
 
-        //Make as Slash Command
         [Command("scolded")]
         public async Task BotScolded(CommandContext ctx)
         {
@@ -489,7 +444,6 @@
             }
         }
 
-        //Make as Slash Command
         [Command("simpsons")]
         public async Task SimpsonsQuote(CommandContext ctx)
         {
@@ -513,7 +467,6 @@
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
-        //Make as Slash Command
         [Command("bestgirl")]
         [Description("DudeBDR only Command!")]
         public async Task RemIsBestGirl(CommandContext ctx)
