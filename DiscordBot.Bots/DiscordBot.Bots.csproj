@@ -3,18 +3,36 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+	<Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2.0.0.1035</Version>
+	<Version>2.0.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
 	<NeutralLanguage>en-GB</NeutralLanguage>
 	<RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
-	<Copyright>DJKoston 2020</Copyright>
+	<Copyright>DJKoston 2022</Copyright>
 	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	<StartupObject>DiscordBot.Bots.Program</StartupObject>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Build|AnyCPU'">
+		<OutputPath>V:\DiscordBot_Dev\DiscordBot.Build\</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test_Build|AnyCPU'">
+		<OutputPath>V:\DiscordBot_Test\DiscordBot.Build\</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Live_Build|AnyCPU'">
+		<OutputPath>V:\DiscordBot_Live\DiscordBot.Build\</OutputPath>
+		<Optimize>true</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<OutputPath>C:\LocalDebug\</OutputPath>
+	</PropertyGroup>
+	
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01056" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01056" />
