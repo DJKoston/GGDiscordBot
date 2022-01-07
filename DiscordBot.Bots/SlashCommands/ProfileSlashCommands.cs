@@ -18,7 +18,7 @@
             _currencyNameConfig = currencyNameConfig;
         }
 
-        [SlashCommand("myinfo", "Get your MyInfo Box!")]
+        [SlashCommand("myinfo", "Get your server information!")]
         public async Task SlashProfile(InteractionContext ctx)
         {
             var NBConfig = await _doubleXPRoleConfig.GetDoubleXPRole(ctx.Guild.Id);
