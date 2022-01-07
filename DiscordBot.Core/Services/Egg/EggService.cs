@@ -1,8 +1,6 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Egg;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.Egg
 {

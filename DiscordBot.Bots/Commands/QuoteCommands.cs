@@ -1,15 +1,4 @@
-﻿using DiscordBot.Core.Services.Quotes;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.Quotes;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Microsoft.VisualBasic;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     public class QuoteCommands : BaseCommandModule
     {
@@ -22,13 +11,14 @@ namespace DiscordBot.Bots.Commands
             _quoteService = quoteService;
         }
 
+        //Make as Slash Command
         [Command("addquote")]
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task AddQuote(CommandContext ctx)
         {
             var messageBuilder = new DiscordMessageBuilder
             {
-                Content = "Please add a quote as such: `!addquote @username {Remainder of Quote}` - DO NOT add the curly braces!",
+                Content = "Please add a quote as such: `!addquote @username {Quote}` - DO NOT add the curly braces!",
             };
 
             messageBuilder.WithReply(ctx.Message.Id, true);
@@ -44,7 +34,7 @@ namespace DiscordBot.Bots.Commands
             var quoteQuery = serverQuotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
-            if(lastQuoteId == null)
+            if (lastQuoteId == null)
             {
                 int newQuoteId = 1;
 
@@ -55,7 +45,7 @@ namespace DiscordBot.Bots.Commands
                     AddedById = ctx.Member.Id,
                     DiscordUserQuotedId = discordMember.Id,
                     QuoteContents = quote,
-                    DateAdded = DateAndTime.Now.ToString(),
+                    DateAdded = DateTime.Now.ToString(),
                     ChannelQuotedIn = ctx.Channel.Name,
                 };
 
@@ -85,7 +75,7 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            if(lastQuoteId.QuoteId >= 1)
+            if (lastQuoteId.QuoteId >= 1)
             {
                 int newQuoteId = lastQuoteId.QuoteId + 1;
 
@@ -96,7 +86,7 @@ namespace DiscordBot.Bots.Commands
                     AddedById = ctx.Member.Id,
                     DiscordUserQuotedId = discordMember.Id,
                     QuoteContents = quote,
-                    DateAdded = DateAndTime.Now.ToString(),
+                    DateAdded = DateTime.Now.ToString(),
                     ChannelQuotedIn = ctx.Channel.Name,
                 };
 
@@ -127,6 +117,7 @@ namespace DiscordBot.Bots.Commands
             }
         }
 
+        //Make as Slash Command
         [Command("totalquotes")]
         public async Task TotalQuotes(CommandContext ctx)
         {
@@ -134,7 +125,7 @@ namespace DiscordBot.Bots.Commands
             var quoteQuery = serverQuotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
-            if(lastQuoteId == null)
+            if (lastQuoteId == null)
             {
                 var zeroQuoteEmbed = new DiscordEmbedBuilder
                 {
@@ -154,7 +145,7 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            if(lastQuoteId.QuoteId == 1)
+            if (lastQuoteId.QuoteId == 1)
             {
                 var zeroQuoteEmbed = new DiscordEmbedBuilder
                 {
@@ -174,7 +165,7 @@ namespace DiscordBot.Bots.Commands
                 return;
             }
 
-            if(lastQuoteId.QuoteId > 1)
+            if (lastQuoteId.QuoteId > 1)
             {
                 var zeroQuoteEmbed = new DiscordEmbedBuilder
                 {
@@ -195,13 +186,14 @@ namespace DiscordBot.Bots.Commands
             }
         }
 
+        //Make as Slash Command
         [Command("deletequote")]
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task DeleteQuote(CommandContext ctx, int quoteId)
         {
             var quote = await _quoteService.GetQuoteAsync(quoteId, ctx.Guild.Id);
 
-            if(quote == null)
+            if (quote == null)
             {
                 var embed = new DiscordEmbedBuilder
                 {
@@ -251,6 +243,7 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
         }
 
+        //Make as Slash Command
         [Command("quote")]
         public async Task GetQuote(CommandContext ctx)
         {
@@ -258,7 +251,7 @@ namespace DiscordBot.Bots.Commands
             var quoteQuery = serverQuotes.Where(x => x.QuoteId > 0).OrderByDescending(x => x.QuoteId).Take(1);
             var lastQuoteId = quoteQuery.FirstOrDefault(x => x.QuoteId > 0);
 
-            if(lastQuoteId == null)
+            if (lastQuoteId == null)
             {
                 var messageBuilder3 = new DiscordMessageBuilder
                 {
@@ -313,7 +306,7 @@ namespace DiscordBot.Bots.Commands
             var quotedUser = await ctx.Client.GetUserAsync(quote.DiscordUserQuotedId);
             var quoterUser = await ctx.Client.GetUserAsync(quote.AddedById);
 
-            if(quoteNumber > lastQuoteId.Id)
+            if (quoteNumber > lastQuoteId.Id)
             {
                 var embed = new DiscordEmbedBuilder
                 {
@@ -366,8 +359,8 @@ namespace DiscordBot.Bots.Commands
             int rndQuote = rnd.Next(0, userQuotes.Count() + 1);
 
             var quote = userQuotes.Skip(rndQuote).Take(1).FirstOrDefault();
-            
-            if(quote == null) 
+
+            if (quote == null)
             {
                 var messageBuilder = new DiscordMessageBuilder
                 {
@@ -377,8 +370,8 @@ namespace DiscordBot.Bots.Commands
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
                 await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
-                
-                return; 
+
+                return;
             }
 
             var quotedUser = await ctx.Client.GetUserAsync(quote.DiscordUserQuotedId);

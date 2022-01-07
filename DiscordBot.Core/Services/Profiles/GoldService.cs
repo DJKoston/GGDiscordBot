@@ -1,7 +1,6 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Profiles;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.Profiles
 {

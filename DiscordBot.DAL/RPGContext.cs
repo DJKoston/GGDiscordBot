@@ -1,41 +1,63 @@
 ﻿using DiscordBot.DAL.Models.CommunityStreamers;
-using DiscordBot.DAL.Models.Configs;
+using DiscordBot.DAL.Models.Configurations;
+using DiscordBot.DAL.Models.Counters;
 using DiscordBot.DAL.Models.CustomCommands;
 using DiscordBot.DAL.Models.Egg;
-using DiscordBot.DAL.Models.Items;
-using DiscordBot.DAL.Models.MessageStores;
-using DiscordBot.DAL.Models.Playlists;
+using DiscordBot.DAL.Models.Games;
+using DiscordBot.DAL.Models.NowLive;
 using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
 using DiscordBot.DAL.Models.ReactionRoles;
+using DiscordBot.DAL.Models.Suggestions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.DAL
 {
     public class RPGContext : DbContext
     {
-        public RPGContext(DbContextOptions<RPGContext> options) : base(options) { }
-        public DbSet<Profile> Profiles { get; set; }
-        public DbSet<Item> Items { get; set; }
-        public DbSet<CustomCommand> CustomCommands { get; set; }
-        public DbSet<ProfileItem> ProfileItems { get; set; }
-        public DbSet<Quote> Quotes { get; set; }
-        public DbSet<ReactionRole> ReactionRoles { get; set; }
-        public DbSet<WelcomeMessageConfig> WelcomeMessageConfigs { get; set; }
-        public DbSet<NitroBoosterRoleConfig> NitroBoosterConfigs { get; set; }
-        public DbSet<GuildStreamerConfig> GuildStreamerConfigs { get; set; }
-        public DbSet<NowLiveMessages> NowLiveMessages { get; set; }
-        public DbSet<GameChannelConfig> GameChannelConfigs { get; set; }
+        public RPGContext(DbContextOptions<RPGContext> options) : base (options) { }
+
+        //Community Streamers
         public DbSet<CommunityStreamer> CommunityStreamers { get; set; }
-        public DbSet <Suggestion> Suggestions { get; set; }
-        public DbSet <ToNextXP> ToNextXP { get; set; }
-        public DbSet <NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }
-        public DbSet <GoodBotBadBot> GoodBotBadBots { get; set; }
-        public DbSet <CurrencyNameConfig> CurrencyNameConfigs { get; set; }
-        public DbSet <SimpsonsQuotes> SimpsonsQuotes { get; set; }
-        public DbSet <EggChannel> EggChannels { get; set; }
-        public DbSet <EggNickname> EggNicknames { get; set; }
-        public DbSet <EggRole> EggRoles { get; set; }
-        public DbSet <Playlist> Playlists { get; set; }
+
+        //Configurations
+        public DbSet<ButtonRoleConfig> ButtonRoleConfigs { get; set; }
+        public DbSet<CurrencyNameConfig> CurrencyNameConfigs { get; set; }
+        public DbSet<DoubleXPRoleConfig> DoubleXPRoleConfigs { get; set; }
+        public DbSet<NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }
+        public DbSet<WelcomeConfig> WelcomeConfigs { get; set; }
+        public DbSet<LeaveConfig> LeaveConfigs { get; set; }
+
+        //Counters
+        public DbSet<GoodBotBadBot> GoodBotBadBotCounters { get; set; }
+
+        //Games
+        public DbSet<NumberGuess> NumberGuesses { get; set; }
+
+        //Custom Commands
+        public DbSet<CustomCommand> CustomCommands { get; set; }
+
+        //Egg
+        public DbSet<EggChannel> EggChannels { get; set; }
+        public DbSet<EggNickname> EggNicknames { get; set; }
+        public DbSet<EggRole> EggRoles { get; set; }
+
+        //Now Live
+        public DbSet<NowLiveMessage> NowLiveMessages { get; set; }
+        public DbSet<NowLiveStreamer> NowLiveStreamers { get; set; }
+
+        //Profiles
+        public DbSet<Profile> Profiles { get; set; }
+        public DbSet<ToNextXP> ToNextXPs { get; set; }
+
+        //Quotes
+        public DbSet<Quote> Quotes { get; set; }
+        public DbSet<SimpsonsQuote> SimpsonsQuotes { get; set;}
+
+        //Reaction Roles
+        public DbSet<ReactionRole> ReactionRoles { get; set; }
+
+        //Suggestions
+        public DbSet<Suggestion> Suggestions { get; set; }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.ReactionRoles;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.ReactionRoles
 {
@@ -50,7 +48,7 @@ namespace DiscordBot.Core.Services.ReactionRoles
 
             var MessageReactionRoles = ChannelReactionRoles.Where(x => x.MessageId == MessageId);
 
-            return await MessageReactionRoles.FirstOrDefaultAsync(x => x.EmoteId == EmoteId && x.UnicodeEmote == EmoteName).ConfigureAwait(false);              
+            return await MessageReactionRoles.FirstOrDefaultAsync(x => x.EmoteId == EmoteId && x.UnicodeEmote == EmoteName).ConfigureAwait(false);
         }
     }
 }

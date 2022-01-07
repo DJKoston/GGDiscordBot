@@ -7,7 +7,7 @@
         public ulong AddedById { get; set; }
         public ulong DiscordUserQuotedId { get; set; }
         public string QuoteContents { get; set; }
-        public string DateAdded {get; set;}
+        public string DateAdded { get; set; }
         public string ChannelQuotedIn { get; set; }
     }
 }

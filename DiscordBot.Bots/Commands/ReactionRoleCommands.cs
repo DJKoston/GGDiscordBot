@@ -1,13 +1,4 @@
-﻿using DiscordBot.Core.Services.ReactionRoles;
-using DiscordBot.DAL;
-using DiscordBot.DAL.Models.ReactionRoles;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DiscordBot.Bots.Commands
+﻿namespace DiscordBot.Bots.Commands
 {
     [Group("rr")]
     [Aliases("ReactionRole")]
@@ -37,7 +28,7 @@ namespace DiscordBot.Bots.Commands
             await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
         }
 
-            [Command("add")]
+        [Command("add")]
         public async Task AddReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordRole Role, DiscordEmoji Emoji)
         {
             var messageBuilder = new DiscordMessageBuilder
@@ -53,7 +44,7 @@ namespace DiscordBot.Bots.Commands
         [Command("add")]
         public async Task AddReactionRole(CommandContext ctx, DiscordChannel Channel, ulong MessageId, DiscordRole Role, DiscordEmoji Emoji, string RemoveRoleAddRole)
         {
-            if(RemoveRoleAddRole.ToLower() == "remove" || RemoveRoleAddRole.ToLower() == "add") 
+            if (RemoveRoleAddRole.ToLower() == "remove" || RemoveRoleAddRole.ToLower() == "add")
             {
                 DiscordChannel channel = ctx.Guild.GetChannel(Channel.Id);
                 DiscordMessage message = await channel.GetMessageAsync(MessageId);
@@ -126,7 +117,7 @@ namespace DiscordBot.Bots.Commands
                 DiscordChannel channel = ctx.Guild.GetChannel(reactionRole.ChannelId);
                 DiscordRole role = ctx.Guild.GetRole(reactionRole.RoleId);
 
-                if(reactionRole.EmoteId == 0)
+                if (reactionRole.EmoteId == 0)
                 {
                     ReactionRoleList.AddField($"MessageID: {reactionRole.MessageId}", $"Channel: {channel.Name}, Role: {role.Mention}, Emote: {reactionRole.UnicodeEmote}, Add/Remove on React: {reactionRole.RemoveAddRole}");
                 }

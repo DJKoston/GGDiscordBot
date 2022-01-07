@@ -1,8 +1,6 @@
 ﻿using DiscordBot.DAL;
 using DiscordBot.DAL.Models.Profiles;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Core.Services.Profiles
 {
@@ -26,7 +24,7 @@ namespace DiscordBot.Core.Services.Profiles
         {
             using var context = new RPGContext(_options);
 
-            var profile = await context.Profiles.Where(x => x.GuildId == guildId).Include(x => x.Items).Include(x => x.Items).ThenInclude(x => x.Item).FirstOrDefaultAsync(x => x.DiscordId == discordId).ConfigureAwait(false);
+            var profile = await context.Profiles.Where(x => x.GuildId == guildId).FirstOrDefaultAsync(x => x.DiscordId == discordId).ConfigureAwait(false);
 
             if (profile != null) { return profile; }
 
@@ -50,7 +48,7 @@ namespace DiscordBot.Core.Services.Profiles
         {
             using var context = new RPGContext(_options);
 
-            var profile = await context.Profiles.Where(x => x.GuildId == guildId).Include(x => x.Items).Include(x => x.Items).ThenInclude(x => x.Item).FirstOrDefaultAsync(x => x.DiscordId == discordId).ConfigureAwait(false);
+            var profile = await context.Profiles.Where(x => x.GuildId == guildId).FirstOrDefaultAsync(x => x.DiscordId == discordId).ConfigureAwait(false);
 
             context.Remove(profile);
 
@@ -59,13 +57,13 @@ namespace DiscordBot.Core.Services.Profiles
             return profile;
         }
 
-        public async Task<int> GetNextXP (int profileLevel)
+        public async Task<int> GetNextXP(int profileLevel)
         {
             using var context = new RPGContext(_options);
 
             var nextLevel = profileLevel + 1;
 
-            var nextXP = await context.ToNextXP.FirstOrDefaultAsync(x => x.Level == nextLevel);
+            var nextXP = await context.ToNextXPs.FirstOrDefaultAsync(x => x.Level == nextLevel);
 
             return nextXP.XPAmount;
         }

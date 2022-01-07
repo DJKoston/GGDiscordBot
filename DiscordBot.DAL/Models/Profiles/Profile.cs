@@ -1,8 +1,4 @@
-﻿using DiscordBot.DAL.Models.Items;
-using System;
-using System.Collections.Generic;
-
-namespace DiscordBot.DAL.Models.Profiles
+﻿namespace DiscordBot.DAL.Models.Profiles
 {
     public class Profile : Entity
     {
@@ -18,6 +14,5 @@ namespace DiscordBot.DAL.Models.Profiles
                 return (int)((1 + Math.Sqrt(1 + 8 * XP / 100)) / 2);
             }
         }
-        public List<ProfileItem> Items { get; set; } = new List<ProfileItem>();
     }
 }
