@@ -126,12 +126,6 @@
             DiscordCommands.RegisterCommands<SuggestionCommands>();
             Log("Discord Commands Registered.");
 
-            Log("Registering Slash Commands...");
-            DiscordSlashCommands.RegisterCommands<GameSlashCommands>();
-            DiscordSlashCommands.RegisterCommands<MiscSlashCommands>();
-            DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>();
-            Log("Slash Commands Registered.");
-
             Log("Registering Discord Client Interactivity...");
             DiscordClient.UseInteractivity(new InteractivityConfiguration
             {
@@ -147,10 +141,6 @@
             Log("Registering Discord SlashCommand Events...");
             DiscordSlashCommands.SlashCommandExecuted += OnDiscordSlashCommandExecuted;
             Log("Discord SlashCommand Events Registered.");
-
-            Log("Connecting to Discord...", discordColor);
-            DiscordClient.ConnectAsync();
-            Log("Connected to Discord.", discordColor);
 
             //Twitch Livestream Monitor
             Log("Creating Twitch Live Monitor...");
@@ -189,7 +179,17 @@
             else
             {
                 Log("No Channels have been submitted to monitor.", fail);
-            }         
+            }
+
+            Log("Connecting to Discord...", discordColor);
+            DiscordClient.ConnectAsync();
+            Log("Connected to Discord.", discordColor);
+
+            Log("Registering Slash Commands...");
+            DiscordSlashCommands.RegisterCommands<GameSlashCommands>();
+            DiscordSlashCommands.RegisterCommands<MiscSlashCommands>();
+            DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>();
+            Log("Slash Commands Registered.");
         }
 
         public string currencyName;
@@ -647,7 +647,7 @@
                     await _nowLiveMessageService.RemoveMessageStore(storedMessage);
                 }
 
-                Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
+                //Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
 
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
