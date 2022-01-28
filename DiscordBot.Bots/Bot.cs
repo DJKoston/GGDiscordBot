@@ -119,6 +119,7 @@
             DiscordCommands.RegisterCommands<MiscCommands>();
             DiscordCommands.RegisterCommands<ModCommands>();
             DiscordCommands.RegisterCommands<NowLiveCommands>();
+            DiscordCommands.RegisterCommands<PollCommands>();
             DiscordCommands.RegisterCommands<ProfileCommands>();
             DiscordCommands.RegisterCommands<QuoteCommands>();
             DiscordCommands.RegisterCommands<ReactionRoleCommands>();
