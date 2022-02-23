@@ -11,6 +11,7 @@
         public ConsoleColor discordColor;
         public ConsoleColor fail;
         public int statusPosition;
+        public int messageDeletionStatus = 0;
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
@@ -249,7 +250,7 @@
         {
             Log($"{e.Stream.UserName} just went Offline.", twitchColor);
 
-            var configs = _nowLiveStreamerService.GetNowLiveStreamer(e.Stream.Id);
+            var configs = _nowLiveStreamerService.GetNowLiveStreamer(e.Stream.UserId);
 
             foreach (NowLiveStreamer config in configs)
             {
@@ -565,12 +566,12 @@
 
         private async Task DiscordPresenceUpdated(DiscordClient c, PresenceUpdateEventArgs e)
         {
-            if (e.User.IsBot) { return; }
-
             var configs = _nowLiveRoleConfigService.GetAllNowLiveRoles();
 
             foreach (NowLiveRoleConfig config in configs)
             {
+                if (e.User.IsBot) { continue; }
+
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
                 if (guild == null) { continue; }
@@ -612,38 +613,38 @@
         {
             new Thread(async () =>
             {
-                /*var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
+            /*var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
 
-                foreach (string streamerList in lst)
-                {
-                    var storedMessage = await _nowLiveMessageService.GetMessageStore(e.Guild.Id, streamerList);
+            foreach (string streamerList in lst)
+            {
+                var storedMessage = await _nowLiveMessageService.GetMessageStore(e.Guild.Id, streamerList);
 
-                    if (storedMessage == null) { continue; }
+                if (storedMessage == null) { continue; }
 
-                    List<string> userIds = new();
-                    userIds.Add(streamerList);
-                    var user = Twitch.Helix.Users.GetUsersAsync(userIds).Result.Users.FirstOrDefault();
+                List<string> userIds = new();
+                userIds.Add(streamerList);
+                var user = Twitch.Helix.Users.GetUsersAsync(userIds).Result.Users.FirstOrDefault();
 
-                    var isStreaming = await Twitch.V5.Streams.BroadcasterOnlineAsync(user.Id);
+                var isStreaming = await Twitch.V5.Streams.BroadcasterOnlineAsync(user.Id);
 
-                    if (isStreaming == true) { continue; }
-                    Log($"{user.DisplayName} is Offline. Deleting Message and Message Store Data.", twitchColor);
+                if (isStreaming == true) { continue; }
+                Log($"{user.DisplayName} is Offline. Deleting Message and Message Store Data.", twitchColor);
 
-                    var messageId = storedMessage.AnnouncementMessageId;
+                var messageId = storedMessage.AnnouncementMessageId;
 
-                    var channel = e.Guild.GetChannel(storedMessage.AnnouncementChannelId);
+                var channel = e.Guild.GetChannel(storedMessage.AnnouncementChannelId);
 
-                    var message = channel.GetMessageAsync(messageId).Result;
+                var message = channel.GetMessageAsync(messageId).Result;
 
-                    await message.DeleteAsync();
+                await message.DeleteAsync();
 
-                    await _nowLiveMessageService.RemoveMessageStore(storedMessage);
-                }
-                */
+                await _nowLiveMessageService.RemoveMessageStore(storedMessage);
+            }
+            */
 
-                //Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
+            //Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
 
-                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
                 var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
 
@@ -1012,6 +1013,49 @@
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
             Heartbeat($"Ping: {e.Ping}ms");
+
+            if(messageDeletionStatus == 1)
+            {
+                new Thread(async () =>
+                {
+                    Log($"Deleting Now Live Messages", twitchColor);
+
+                    var messages = _nowLiveMessageService.GetAllMessages();
+
+                    foreach (NowLiveMessage message in messages)
+                    {
+                        DiscordGuild guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == message.GuildId);
+
+                        if (guild == null) { continue; }
+
+                        var storedMessage = _nowLiveMessageService.GetMessageStore(message.GuildId, message.StreamerId).Result;
+
+                        if (storedMessage == null) { continue; }
+
+                        else
+                        {
+                            var messageId = storedMessage.AnnouncementMessageId;
+
+                            var channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                            DiscordMessage discordMessage = channel.GetMessageAsync(messageId).Result;
+
+                            if (discordMessage == null) { continue; }
+
+                            await discordMessage.DeleteAsync();
+
+                            await _nowLiveMessageService.RemoveMessageStore(storedMessage);
+                        }
+                    }
+
+                    Log($"Now Live Messages Deleted.", twitchColor);
+
+                    messageDeletionStatus = 2;
+
+                }).Start();
+            }
+
+            if (messageDeletionStatus == 0) { messageDeletionStatus = 1; }
 
             var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
 
