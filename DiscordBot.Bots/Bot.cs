@@ -249,15 +249,7 @@
         {
             Log($"{e.Stream.UserName} just went Offline.", twitchColor);
 
-            var streamUser = Twitch.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
-
-            var streamResults = streamUser.Matches.FirstOrDefault();
-
-            var streamerId = streamResults.Id;
-
-            var getStreamId = Twitch.V5.Channels.GetChannelByIDAsync(streamerId).Result;
-
-            var configs = _nowLiveStreamerService.GetNowLiveStreamer(getStreamId.Id);
+            var configs = _nowLiveStreamerService.GetNowLiveStreamer(e.Stream.Id);
 
             foreach (NowLiveStreamer config in configs)
             {
@@ -265,7 +257,7 @@
 
                 if (guild == null) { continue; }
 
-                var storedMessage = _nowLiveMessageService.GetMessageStore(config.GuildId, getStreamId.Id).Result;
+                var storedMessage = _nowLiveMessageService.GetMessageStore(config.GuildId, e.Stream.UserId).Result;
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
@@ -285,6 +277,10 @@
 
         private void OnTwitchStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            var tUrl1 = e.Stream.ThumbnailUrl;
+            var tUrl2 = tUrl1.Replace("{width}", "1280");
+            var thumbnailUrl = tUrl2.Replace("{height}", "720");
+
             Log($"{e.Stream.UserName} just went Live!", twitchColor);
 
             var configs = _nowLiveStreamerService.GetNowLiveStreamer(e.Stream.UserId);
@@ -300,10 +296,6 @@
                 if (guild == null) { continue; }
 
                 DiscordChannel channel = guild.GetChannel(config.AnnounceChannelId);
-
-                var stream = Twitch.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
-
-                var streamer = Twitch.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
                 if (e.Stream.UserName.Contains('_'))
                 {
@@ -328,15 +320,14 @@
                         Color = color,
                     };
 
-                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
+                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
 
-                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
-                    var twitchImageURL = $"{stream.Stream.Preview.Large}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
+                    var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
 
-                    embed.WithThumbnail(streamer.Logo);
                     embed.WithImageUrl(twitchImageURL);
 
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
@@ -350,7 +341,7 @@
                         AnnouncementChannelId = channel.Id,
                         AnnouncementMessageId = sentMessage.Id,
                         StreamTitle = e.Stream.Title,
-                        StreamGame = stream.Stream.Game,
+                        StreamGame = e.Stream.GameName,
                     };
 
                     _nowLiveMessageService.CreateNewMessageStore(messageStore);
@@ -380,15 +371,14 @@
                         Color = color,
                     };
 
-                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
+                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
 
-                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
-                    var twitchImageURL = $"{stream.Stream.Preview.Large}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
+                    var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
 
-                    embed.WithThumbnail(streamer.Logo);
                     embed.WithImageUrl(twitchImageURL);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
@@ -401,7 +391,7 @@
                         AnnouncementChannelId = channel.Id,
                         AnnouncementMessageId = sentMessage.Id,
                         StreamTitle = e.Stream.Title,
-                        StreamGame = stream.Stream.Game,
+                        StreamGame = e.Stream.GameName,
                     };
 
                     _nowLiveMessageService.CreateNewMessageStore(messageStore);
@@ -622,7 +612,7 @@
         {
             new Thread(async () =>
             {
-                var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
+                /*var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
 
                 foreach (string streamerList in lst)
                 {
@@ -630,7 +620,9 @@
 
                     if (storedMessage == null) { continue; }
 
-                    var user = await Twitch.V5.Users.GetUserByIDAsync(streamerList);
+                    List<string> userIds = new();
+                    userIds.Add(streamerList);
+                    var user = Twitch.Helix.Users.GetUsersAsync(userIds).Result.Users.FirstOrDefault();
 
                     var isStreaming = await Twitch.V5.Streams.BroadcasterOnlineAsync(user.Id);
 
@@ -647,6 +639,7 @@
 
                     await _nowLiveMessageService.RemoveMessageStore(storedMessage);
                 }
+                */
 
                 //Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
 
