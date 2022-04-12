@@ -11,6 +11,7 @@
         public ConsoleColor discordColor;
         public ConsoleColor fail;
         public int statusPosition;
+        public int messageDeletionStatus = 0;
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
@@ -40,6 +41,7 @@
             _profileService = services.GetService<IProfileService>();
             _xpService = services.GetService<IXPService>();
             _reactionRoleService = services.GetService<IReactionRoleService>();
+            _xpToggleService = services.GetService<IXPToggleService>();
             Log("Loaded Core Services.");
 
             //Get Configuration Information from appsettings.json
@@ -119,10 +121,10 @@
             DiscordCommands.RegisterCommands<MiscCommands>();
             DiscordCommands.RegisterCommands<ModCommands>();
             DiscordCommands.RegisterCommands<NowLiveCommands>();
+            DiscordCommands.RegisterCommands<PollCommands>();
             DiscordCommands.RegisterCommands<ProfileCommands>();
             DiscordCommands.RegisterCommands<QuoteCommands>();
             DiscordCommands.RegisterCommands<ReactionRoleCommands>();
-            DiscordCommands.RegisterCommands<StreamerCommands>();
             DiscordCommands.RegisterCommands<SuggestionCommands>();
             Log("Discord Commands Registered.");
 
@@ -207,6 +209,7 @@
         private readonly IProfileService _profileService;
         private readonly IXPService _xpService;
         private readonly IReactionRoleService _reactionRoleService;
+        private readonly IXPToggleService _xpToggleService;
 
         private async Task DiscordComponentInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
         {
@@ -248,15 +251,7 @@
         {
             Log($"{e.Stream.UserName} just went Offline.", twitchColor);
 
-            var streamUser = Twitch.V5.Users.GetUserByNameAsync(e.Stream.UserName).Result;
-
-            var streamResults = streamUser.Matches.FirstOrDefault();
-
-            var streamerId = streamResults.Id;
-
-            var getStreamId = Twitch.V5.Channels.GetChannelByIDAsync(streamerId).Result;
-
-            var configs = _nowLiveStreamerService.GetNowLiveStreamer(getStreamId.Id);
+            var configs = _nowLiveStreamerService.GetNowLiveStreamer(e.Stream.UserId);
 
             foreach (NowLiveStreamer config in configs)
             {
@@ -264,7 +259,7 @@
 
                 if (guild == null) { continue; }
 
-                var storedMessage = _nowLiveMessageService.GetMessageStore(config.GuildId, getStreamId.Id).Result;
+                var storedMessage = _nowLiveMessageService.GetMessageStore(config.GuildId, e.Stream.UserId).Result;
 
                 var messageId = storedMessage.AnnouncementMessageId;
 
@@ -284,6 +279,10 @@
 
         private void OnTwitchStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            var tUrl1 = e.Stream.ThumbnailUrl;
+            var tUrl2 = tUrl1.Replace("{width}", "1280");
+            var thumbnailUrl = tUrl2.Replace("{height}", "720");
+
             Log($"{e.Stream.UserName} just went Live!", twitchColor);
 
             var configs = _nowLiveStreamerService.GetNowLiveStreamer(e.Stream.UserId);
@@ -299,10 +298,6 @@
                 if (guild == null) { continue; }
 
                 DiscordChannel channel = guild.GetChannel(config.AnnounceChannelId);
-
-                var stream = Twitch.V5.Streams.GetStreamByUserAsync(e.Stream.UserId).Result;
-
-                var streamer = Twitch.V5.Users.GetUserByIDAsync(e.Stream.UserId).Result;
 
                 if (e.Stream.UserName.Contains('_'))
                 {
@@ -327,15 +322,14 @@
                         Color = color,
                     };
 
-                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
+                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
 
-                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
-                    var twitchImageURL = $"{stream.Stream.Preview.Large}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
+                    var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
 
-                    embed.WithThumbnail(streamer.Logo);
                     embed.WithImageUrl(twitchImageURL);
 
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
@@ -349,7 +343,7 @@
                         AnnouncementChannelId = channel.Id,
                         AnnouncementMessageId = sentMessage.Id,
                         StreamTitle = e.Stream.Title,
-                        StreamGame = stream.Stream.Game,
+                        StreamGame = e.Stream.GameName,
                     };
 
                     _nowLiveMessageService.CreateNewMessageStore(messageStore);
@@ -379,15 +373,14 @@
                         Color = color,
                     };
 
-                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{streamer.Name})"); }
+                    if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
 
-                    embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
+                    //embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
 
-                    var twitchImageURL = $"{stream.Stream.Preview.Large}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
+                    var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
 
-                    embed.WithThumbnail(streamer.Logo);
                     embed.WithImageUrl(twitchImageURL);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
 
@@ -400,7 +393,7 @@
                         AnnouncementChannelId = channel.Id,
                         AnnouncementMessageId = sentMessage.Id,
                         StreamTitle = e.Stream.Title,
-                        StreamGame = stream.Stream.Game,
+                        StreamGame = e.Stream.GameName,
                     };
 
                     _nowLiveMessageService.CreateNewMessageStore(messageStore);
@@ -574,12 +567,12 @@
 
         private async Task DiscordPresenceUpdated(DiscordClient c, PresenceUpdateEventArgs e)
         {
-            if (e.User.IsBot) { return; }
-
             var configs = _nowLiveRoleConfigService.GetAllNowLiveRoles();
 
             foreach (NowLiveRoleConfig config in configs)
             {
+                if (e.User.IsBot) { continue; }
+
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == config.GuildId);
 
                 if (guild == null) { continue; }
@@ -621,34 +614,6 @@
         {
             new Thread(async () =>
             {
-                var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
-
-                foreach (string streamerList in lst)
-                {
-                    var storedMessage = await _nowLiveMessageService.GetMessageStore(e.Guild.Id, streamerList);
-
-                    if (storedMessage == null) { continue; }
-
-                    var user = await Twitch.V5.Users.GetUserByIDAsync(streamerList);
-
-                    var isStreaming = await Twitch.V5.Streams.BroadcasterOnlineAsync(user.Id);
-
-                    if (isStreaming == true) { continue; }
-                    Log($"{user.DisplayName} is Offline. Deleting Message and Message Store Data.", twitchColor);
-
-                    var messageId = storedMessage.AnnouncementMessageId;
-
-                    var channel = e.Guild.GetChannel(storedMessage.AnnouncementChannelId);
-
-                    var message = channel.GetMessageAsync(messageId).Result;
-
-                    await message.DeleteAsync();
-
-                    await _nowLiveMessageService.RemoveMessageStore(storedMessage);
-                }
-
-                //Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
-
                 DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
                 var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
@@ -891,120 +856,135 @@
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
 
             var NBConfig = _doubleXPRoleConfigService.GetDoubleXPRole(e.Guild.Id).Result;
+            var xpStatus = _xpToggleService.GetGuildConfig(e.Guild.Id).Result;
 
-            if (NBConfig == null)
+            if(xpStatus.Status == "disabled")
             {
-                var member = e.Guild.Members[e.Author.Id];
-
-                var randomNumber = new Random();
-
-                int randXP = randomNumber.Next(50);
-
-                GrantXpViewModel viewModel = await _xpService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
-
-                if (!viewModel.LevelledUp) { return; }
-
-                Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
-
-                int levelUpGold = (profile.Level * 100);
-
-                var CNConfig = await _currencyNameConfigService.GetCurrencyNameConfig(e.Guild.Id);
-
-                var currencyName = "Gold";
-
-                if (CNConfig == null) { currencyName = "Gold"; }
-                else { currencyName = CNConfig.CurrencyName; }
-
-                var leveledUpEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
-                    Color = DiscordColor.Gold,
-                };
-
-                leveledUpEmbed.WithThumbnail(member.AvatarUrl);
-
-                await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
-
-                return;
-            }
-
-            DiscordRole NitroBooster = guild.GetRole(NBConfig.RoleId);
-
-            if (memberCheck.Roles.Contains(NitroBooster))
-            {
-                var member = e.Guild.Members[e.Author.Id];
-
-                var randomNumber = new Random();
-
-                int randXP = randomNumber.Next(50);
-
-                int NitroXP = randXP * 2;
-
-                GrantXpViewModel viewModel = await _xpService.GrantXpAsync(e.Author.Id, e.Guild.Id, NitroXP, e.Author.Username);
-
-                if (!viewModel.LevelledUp) { return; }
-
-                Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
-
-                int levelUpGold = profile.Level * 100;
-
-                var CNConfig = await _currencyNameConfigService.GetCurrencyNameConfig(e.Guild.Id);
-
-                var currencyName = "Gold";
-
-                if (CNConfig == null) { currencyName = "Gold"; }
-                else { currencyName = CNConfig.CurrencyName; }
-
-                var leveledUpEmbed = new DiscordEmbedBuilder
-                {
-                    Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
-                    Color = DiscordColor.Gold,
-                };
-
-                leveledUpEmbed.WithThumbnail(member.AvatarUrl);
-
-                await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
-
                 return;
             }
 
             else
             {
-                var member = e.Guild.Members[e.Author.Id];
-
-                var randomNumber = new Random();
-
-                int randXP = randomNumber.Next(50);
-
-                GrantXpViewModel viewModel = await _xpService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
-
-                if (!viewModel.LevelledUp) { return; }
-
-                Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
-
-                int levelUpGold = (profile.Level * 100);
-
-                var CNConfig = await _currencyNameConfigService.GetCurrencyNameConfig(e.Guild.Id);
-
-                var currencyName = "Gold";
-
-                if (CNConfig == null) { currencyName = "Gold"; }
-                else { currencyName = CNConfig.CurrencyName; }
-
-                var leveledUpEmbed = new DiscordEmbedBuilder
+                if (NBConfig == null)
                 {
-                    Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
-                    Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
-                    Color = DiscordColor.Gold,
-                };
+                    var member = e.Guild.Members[e.Author.Id];
 
-                leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+                    var randomNumber = new Random();
 
-                await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+                    int randXP = randomNumber.Next(50);
 
-                return;
+                    GrantXpViewModel viewModel = await _xpService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
+
+                    if (!viewModel.LevelledUp) { return; }
+
+                    Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
+
+                    int levelUpGold = (profile.Level * 100);
+
+                    var CNConfig = await _currencyNameConfigService.GetCurrencyNameConfig(e.Guild.Id);
+
+                    var currencyName = "Gold";
+
+                    if (CNConfig == null) { currencyName = "Gold"; }
+                    else { currencyName = CNConfig.CurrencyName; }
+
+                    var leveledUpEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
+                        Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
+                        Color = DiscordColor.Gold,
+                    };
+
+                    leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+
+                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+
+                    Console.WriteLine("Granted XP");
+
+                    return;
+                }
+
+                DiscordRole NitroBooster = guild.GetRole(NBConfig.RoleId);
+
+                if (memberCheck.Roles.Contains(NitroBooster))
+                {
+                    var member = e.Guild.Members[e.Author.Id];
+
+                    var randomNumber = new Random();
+
+                    int randXP = randomNumber.Next(50);
+
+                    int NitroXP = randXP * 2;
+
+                    GrantXpViewModel viewModel = await _xpService.GrantXpAsync(e.Author.Id, e.Guild.Id, NitroXP, e.Author.Username);
+
+                    if (!viewModel.LevelledUp) { return; }
+
+                    Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
+
+                    int levelUpGold = profile.Level * 100;
+
+                    var CNConfig = await _currencyNameConfigService.GetCurrencyNameConfig(e.Guild.Id);
+
+                    var currencyName = "Gold";
+
+                    if (CNConfig == null) { currencyName = "Gold"; }
+                    else { currencyName = CNConfig.CurrencyName; }
+
+                    var leveledUpEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
+                        Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
+                        Color = DiscordColor.Gold,
+                    };
+
+                    leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+
+                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+
+                    Console.WriteLine("Granted XP");
+
+                    return;
+                }
+
+                else
+                {
+                    var member = e.Guild.Members[e.Author.Id];
+
+                    var randomNumber = new Random();
+
+                    int randXP = randomNumber.Next(50);
+
+                    GrantXpViewModel viewModel = await _xpService.GrantXpAsync(e.Author.Id, e.Guild.Id, randXP, e.Author.Username);
+
+                    if (!viewModel.LevelledUp) { return; }
+
+                    Profile profile = await _profileService.GetOrCreateProfileAsync(e.Author.Id, e.Guild.Id, e.Author.Username);
+
+                    int levelUpGold = (profile.Level * 100);
+
+                    var CNConfig = await _currencyNameConfigService.GetCurrencyNameConfig(e.Guild.Id);
+
+                    var currencyName = "Gold";
+
+                    if (CNConfig == null) { currencyName = "Gold"; }
+                    else { currencyName = CNConfig.CurrencyName; }
+
+                    var leveledUpEmbed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{member.DisplayName} is now Level {viewModel.Profile.Level:###,###,###,###,###}!",
+                        Description = $"{member.DisplayName} has been given {levelUpGold:###,###,###,###,###} {currencyName} for Levelling Up!",
+                        Color = DiscordColor.Gold,
+                    };
+
+                    leveledUpEmbed.WithThumbnail(member.AvatarUrl);
+
+                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+
+                    Console.WriteLine("Granted XP");
+
+                    return;
+                }
             }
         }
 
@@ -1018,6 +998,49 @@
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
             Heartbeat($"Ping: {e.Ping}ms");
+
+            if(messageDeletionStatus == 1)
+            {
+                new Thread(async () =>
+                {
+                    Log($"Deleting Now Live Messages", twitchColor);
+
+                    var messages = _nowLiveMessageService.GetAllMessages();
+
+                    foreach (NowLiveMessage message in messages)
+                    {
+                        DiscordGuild guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == message.GuildId);
+
+                        if (guild == null) { continue; }
+
+                        var storedMessage = _nowLiveMessageService.GetMessageStore(message.GuildId, message.StreamerId).Result;
+
+                        if (storedMessage == null) { continue; }
+
+                        else
+                        {
+                            var messageId = storedMessage.AnnouncementMessageId;
+
+                            var channel = guild.GetChannel(storedMessage.AnnouncementChannelId);
+
+                            DiscordMessage discordMessage = channel.GetMessageAsync(messageId).Result;
+
+                            if (discordMessage == null) { continue; }
+
+                            await discordMessage.DeleteAsync();
+
+                            await _nowLiveMessageService.RemoveMessageStore(storedMessage);
+                        }
+                    }
+
+                    Log($"Now Live Messages Deleted.", twitchColor);
+
+                    messageDeletionStatus = 2;
+
+                }).Start();
+            }
+
+            if (messageDeletionStatus == 0) { messageDeletionStatus = 1; }
 
             var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
 

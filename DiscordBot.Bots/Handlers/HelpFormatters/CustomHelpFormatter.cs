@@ -39,7 +39,6 @@
             List<string> profileCommands = new();
             List<string> quoteCommands = new();
             List<string> reactionRoleCommands = new();
-            List<string> streamerCommands = new();
             List<string> suggestionCommands = new();
 
 
@@ -143,7 +142,15 @@
 
                         foreach (var childCommand in childCommands)
                         {
-                            nowLiveCommands.Add($"`!{childCommand.QualifiedName}`");
+                            if(childCommand is CommandGroup commandGroup2)
+                            {
+                                var grandChildCommands = commandGroup2.Children;
+
+                                foreach (var grandChildCommand in grandChildCommands)
+                                {
+                                    nowLiveCommands.Add($"`!{grandChildCommand.QualifiedName}`");
+                                }
+                            }
                         }
                     }
 
@@ -180,7 +187,7 @@
 
                     else
                     {
-                        nowLiveCommands.Add($"`!{cmd.QualifiedName}`");
+                        profileCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
@@ -230,24 +237,6 @@
                     else
                     {
                         reactionRoleCommands.Add($"`!{cmd.QualifiedName}`");
-                    }
-                }
-
-                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("StreamerCommands"))
-                {
-                    if (cmd is CommandGroup commandGroup)
-                    {
-                        var childCommands = commandGroup.Children;
-
-                        foreach (var childCommand in childCommands)
-                        {
-                            streamerCommands.Add($"`!{childCommand.QualifiedName}`");
-                        }
-                    }
-
-                    else
-                    {
-                        streamerCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
@@ -313,11 +302,6 @@
             if (reactionRoleCommands.Count != 0)
             {
                 _embed.AddField("Reaction Role Commands:", String.Join(", ", reactionRoleCommands.ToArray()));
-            }
-
-            if (streamerCommands.Count != 0)
-            {
-                _embed.AddField("Streamer Commands:", String.Join(", ", streamerCommands.ToArray()));
             }
 
             if (suggestionCommands.Count != 0)

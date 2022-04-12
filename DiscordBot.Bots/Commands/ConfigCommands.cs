@@ -10,14 +10,16 @@
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
         private readonly INowLiveRoleConfigService _nowLiveRoleConfigService;
         private readonly ICurrencyNameConfigService _currencyNameConfigService;
+        private readonly IXPToggleService _xpToggleService;
 
-        public ConfigCommands(IDoubleXPRoleConfigService doubleXPRoleConfigService, ILeaveMessageConfigService leaveMessageConfigService, IWelcomeMessageConfigService welcomeMessageConfigService, INowLiveRoleConfigService nowLiveRoleConfigService, ICurrencyNameConfigService currencyNameConfigService)
+        public ConfigCommands(IDoubleXPRoleConfigService doubleXPRoleConfigService, ILeaveMessageConfigService leaveMessageConfigService, IWelcomeMessageConfigService welcomeMessageConfigService, INowLiveRoleConfigService nowLiveRoleConfigService, ICurrencyNameConfigService currencyNameConfigService, IXPToggleService xpToggleService)
         {
             _doubleXPRoleConfigService = doubleXPRoleConfigService;
             _leaveMessageConfigService = leaveMessageConfigService;
             _welcomeMessageConfigService = welcomeMessageConfigService;
             _nowLiveRoleConfigService = nowLiveRoleConfigService;
             _currencyNameConfigService = currencyNameConfigService;
+            _xpToggleService = xpToggleService;
         }
 
         [Command("view")]
@@ -459,6 +461,15 @@
 
                 await ctx.RespondAsync(responseBuilder);
             }
+        }
+
+        [Command("togglexp")]
+        [Description("Toggles XP System for this Guild.")]
+        public async Task XPDisable(CommandContext ctx)
+        {
+            var message = await _xpToggleService.ToggleXPForGuild(ctx.Guild.Id);
+
+            await ctx.RespondAsync(message);
         }
     }
 }

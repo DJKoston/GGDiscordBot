@@ -27,6 +27,7 @@ namespace DiscordBot.DAL
         public DbSet<NowLiveRoleConfig> NowLiveRoleConfigs { get; set; }
         public DbSet<WelcomeConfig> WelcomeConfigs { get; set; }
         public DbSet<LeaveConfig> LeaveConfigs { get; set; }
+        public DbSet<XPSystemConfig> XPSystemConfigs { get; set; }
 
         //Counters
         public DbSet<GoodBotBadBot> GoodBotBadBotCounters { get; set; }

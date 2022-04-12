@@ -30,6 +30,7 @@
             services.AddScoped<INowLiveRoleConfigService, NowLiveRoleConfigService>();
             services.AddScoped<ILeaveMessageConfigService, LeaveMessageConfigService>();
             services.AddScoped<IWelcomeMessageConfigService, WelcomeMessageConfigService>();
+            services.AddScoped<IXPToggleService, XPToggleService>();
 
             //Counter Services
             services.AddScoped<IGoodBotBadBotService, GoodBotBadBotService>();

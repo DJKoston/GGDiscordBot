@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
 	<Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2.0.1</Version>
+	<Version>2.1.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
@@ -35,15 +35,15 @@
 	</PropertyGroup>
 	
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01056" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
+    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01111" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01111" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01111" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01111" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.4" />
     <PackageReference Include="TwitchLib" Version="3.3.0" />
   </ItemGroup>
 

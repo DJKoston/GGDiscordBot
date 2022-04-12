@@ -46,9 +46,10 @@
                 api.Settings.ClientId = clientid;
                 api.Settings.AccessToken = accesstoken;
 
-                var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
+                var searchStreamerStep1 = await api.Helix.Search.SearchChannelsAsync(twitchStreamer);
+                var searchStreamer = searchStreamerStep1.Channels.FirstOrDefault(x => x.DisplayName.ToLower() == twitchStreamer.ToLower());
 
-                if (searchStreamer.Total == 0)
+                if (searchStreamer == null)
                 {
                     var messageBuilder1 = new DiscordMessageBuilder
                     {
@@ -62,56 +63,22 @@
                     return;
                 }
 
-                var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
-
-                if (stream.Total == 0)
-                {
-                    var messageBuilder2 = new DiscordMessageBuilder
-                    {
-                        Content = $"There was no channel with the username {twitchStreamer}.",
-                    };
-
-                    messageBuilder2.WithReply(ctx.Message.Id, true);
-
-                    await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
-
-                    return;
-                }
-
-                var streamResults = stream.Matches.FirstOrDefault();
-
-                if (streamResults.DisplayName.ToLower() != twitchStreamer.ToLower())
-                {
-                    var messageBuilder3 = new DiscordMessageBuilder
-                    {
-                        Content = $"There was no channel with the username {twitchStreamer}.",
-                    };
-
-                    messageBuilder3.WithReply(ctx.Message.Id, true);
-
-                    await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
-
-                    return;
-                }
-
-                var streamerId = streamResults.Id;
-
-                var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
+                var streamerId = searchStreamer.Id;
 
                 var config = new NowLiveStreamer
                 {
                     AnnounceChannelId = announceChannel.Id,
                     GuildId = ctx.Guild.Id,
-                    StreamerId = getStreamId.Id,
+                    StreamerId = searchStreamer.Id,
                     AnnouncementMessage = announcementMessage,
-                    StreamerName = getStreamId.DisplayName
+                    StreamerName = searchStreamer.DisplayName
                 };
 
                 await _nowLiveStreamerService.CreateNewNowLiveStreamer(config);
 
                 var messageBuilder = new DiscordMessageBuilder
                 {
-                    Content = $"{getStreamId.DisplayName} will now be announced in {announceChannel.Mention}",
+                    Content = $"{searchStreamer.DisplayName} will now be announced in {announceChannel.Mention}",
                 };
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
@@ -150,7 +117,13 @@
                     {
                         DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+                        List<string> streamerToSearch = new();
+
+                        streamerToSearch.Add(streamer.StreamerId.ToString());
+
+                        var streamSearch = await api.Helix.Users.GetUsersAsync(ids: streamerToSearch);
+
+                        var stream = streamSearch.Users.FirstOrDefault();
 
                         embed1.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
@@ -180,7 +153,13 @@
                     {
                         DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+                        List<string> streamerToSearch = new();
+
+                        streamerToSearch.Add(streamer.StreamerId.ToString());
+
+                        var streamSearch = await api.Helix.Users.GetUsersAsync(ids: streamerToSearch);
+
+                        var stream = streamSearch.Users.FirstOrDefault();
 
                         embed2.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
@@ -210,7 +189,13 @@
                     {
                         DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+                        List<string> streamerToSearch = new();
+
+                        streamerToSearch.Add(streamer.StreamerId.ToString());
+
+                        var streamSearch = await api.Helix.Users.GetUsersAsync(ids: streamerToSearch);
+
+                        var stream = streamSearch.Users.FirstOrDefault();
 
                         embed3.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
@@ -240,7 +225,13 @@
                     {
                         DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+                        List<string> streamerToSearch = new();
+
+                        streamerToSearch.Add(streamer.StreamerId.ToString());
+
+                        var streamSearch = await api.Helix.Users.GetUsersAsync(ids: streamerToSearch);
+
+                        var stream = streamSearch.Users.FirstOrDefault();
 
                         embed4.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
@@ -270,7 +261,13 @@
                     {
                         DiscordChannel channel = ctx.Guild.GetChannel(streamer.AnnounceChannelId);
 
-                        var stream = await api.V5.Users.GetUserByIDAsync(streamer.StreamerId);
+                        List<string> streamerToSearch = new();
+
+                        streamerToSearch.Add(streamer.StreamerId.ToString());
+
+                        var streamSearch = await api.Helix.Users.GetUsersAsync(ids: streamerToSearch);
+
+                        var stream = streamSearch.Users.FirstOrDefault();
 
                         embed5.AddField($"{stream.DisplayName}", $"{channel.Mention}", true);
                     }
@@ -300,9 +297,9 @@
                 api.Settings.ClientId = clientid;
                 api.Settings.AccessToken = accesstoken;
 
-                var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchStreamer);
+                var searchStreamer = await api.Helix.Search.SearchChannelsAsync(twitchStreamer);
 
-                if (searchStreamer.Total == 0)
+                if (searchStreamer == null)
                 {
                     var messageBuilder1 = new DiscordMessageBuilder
                     {
@@ -316,21 +313,13 @@
                     return;
                 }
 
-                var stream = await api.V5.Users.GetUserByNameAsync(twitchStreamer);
-
-                var streamResults = stream.Matches.FirstOrDefault();
-
-                var streamerId = streamResults.Id;
-
-                var getStreamId = await api.V5.Channels.GetChannelByIDAsync(streamerId);
-
-                var config = await _nowLiveStreamerService.GetStreamerToDelete(ctx.Guild.Id, getStreamId.Id);
+                var config = await _nowLiveStreamerService.GetStreamerToDelete(ctx.Guild.Id, searchStreamer.Channels.FirstOrDefault().Id);
 
                 if (config == null)
                 {
                     var messageBuilder2 = new DiscordMessageBuilder
                     {
-                        Content = $"No configuration found for {twitchStreamer}, do `!nl liststreamers` to see the list of streamers you can remove.",
+                        Content = $"No configuration found for {twitchStreamer}, do `!nl twitch list` to see the list of streamers you can remove.",
                     };
 
                     messageBuilder2.WithReply(ctx.Message.Id, true);
@@ -340,13 +329,13 @@
                     return;
                 }
 
-                var messages = await _nowLiveMessageService.GetMessageStore(ctx.Guild.Id, getStreamId.Id);
+                var messages = await _nowLiveMessageService.GetMessageStore(ctx.Guild.Id, searchStreamer.Channels.FirstOrDefault().Id);
 
                 DiscordChannel channel = ctx.Guild.GetChannel(config.AnnounceChannelId);
 
                 var messageBuilder = new DiscordMessageBuilder
                 {
-                    Content = $"{getStreamId.DisplayName} will no longer be announced in {channel.Mention}",
+                    Content = $"{searchStreamer.Channels.FirstOrDefault().DisplayName} will no longer be announced in {channel.Mention}",
                 };
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
