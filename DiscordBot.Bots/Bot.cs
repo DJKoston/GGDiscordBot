@@ -125,7 +125,6 @@
             DiscordCommands.RegisterCommands<ProfileCommands>();
             DiscordCommands.RegisterCommands<QuoteCommands>();
             DiscordCommands.RegisterCommands<ReactionRoleCommands>();
-            DiscordCommands.RegisterCommands<StreamerCommands>();
             DiscordCommands.RegisterCommands<SuggestionCommands>();
             Log("Discord Commands Registered.");
 
@@ -615,38 +614,7 @@
         {
             new Thread(async () =>
             {
-            /*var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
-
-            foreach (string streamerList in lst)
-            {
-                var storedMessage = await _nowLiveMessageService.GetMessageStore(e.Guild.Id, streamerList);
-
-                if (storedMessage == null) { continue; }
-
-                List<string> userIds = new();
-                userIds.Add(streamerList);
-                var user = Twitch.Helix.Users.GetUsersAsync(userIds).Result.Users.FirstOrDefault();
-
-                var isStreaming = await Twitch.V5.Streams.BroadcasterOnlineAsync(user.Id);
-
-                if (isStreaming == true) { continue; }
-                Log($"{user.DisplayName} is Offline. Deleting Message and Message Store Data.", twitchColor);
-
-                var messageId = storedMessage.AnnouncementMessageId;
-
-                var channel = e.Guild.GetChannel(storedMessage.AnnouncementChannelId);
-
-                var message = channel.GetMessageAsync(messageId).Result;
-
-                await message.DeleteAsync();
-
-                await _nowLiveMessageService.RemoveMessageStore(storedMessage);
-            }
-            */
-
-            //Log($"{e.Guild.Name} is now Avaliable", ConsoleColor.Green);
-
-            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
                 var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
 

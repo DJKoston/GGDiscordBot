@@ -100,66 +100,6 @@
             }
         }
 
-        [SlashCommand("twitchchannel", "Let us know your Twitch username for our promotion channel!")]
-        public async Task SlashStreamerTag(InteractionContext ctx,
-            [Option("twitchusername", "Your Twitch username!")] string twitchUserName)
-        {
-            var api = new TwitchAPI();
-
-            var clientid = _configuration["twitch-clientid"];
-            var accesstoken = _configuration["twitch-accesstoken"];
-
-            api.Settings.ClientId = clientid;
-            api.Settings.AccessToken = accesstoken;
-
-            var searchStreamer = await api.V5.Search.SearchChannelsAsync(twitchUserName);
-
-            if (searchStreamer.Total == 0)
-            { 
-                await ctx.CreateResponseAsync($"There was no channel with the username { twitchUserName}.", true);
-
-                return;
-            }
-
-            var streamerChannel = ctx.Guild.Channels.Values.FirstOrDefault(x => x.Name == "streamers-to-approve");
-
-            if (streamerChannel == null)
-            {
-                await ctx.CreateResponseAsync("An Error has occured while trying to log your request. Please contact an Admin and ask them to ensure the streamers-to-approve channel is set up.", true);
-
-                return;
-            }
-
-            var newStreamer = new CommunityStreamer
-            {
-                GuildId = ctx.Guild.Id,
-                RequestorId = ctx.Member.Id,
-                StreamerName = twitchUserName,
-                DealtWith = "NO",
-            };
-
-            await _communityStreamerService.CreateNewStreamer(newStreamer);
-
-            var suggestionEmbed = new DiscordEmbedBuilder
-            {
-                Title = $"New Streamer Request Created by: {ctx.Member.DisplayName}",
-                Description = twitchUserName,
-                Color = DiscordColor.HotPink,
-            };
-
-            suggestionEmbed.AddField("To Approve this streamer:", $"`!streamer approve {newStreamer.Id} #channel-name`");
-            suggestionEmbed.AddField("To Decline this streamer:", $"`!streamer reject {newStreamer.Id}`");
-
-            suggestionEmbed.WithFooter($"Suggestion: {newStreamer.Id}");
-
-            var message = await streamerChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
-
-            newStreamer.RequestMessage = message.Id;
-
-            await _communityStreamerService.EditStreamer(newStreamer);
-
-            await ctx.CreateResponseAsync("Your request has been logged!", true);
-        }
 
         [SlashCommand("botstats", "Get Bot Stats!")]
         public async Task SlashBotStats(InteractionContext ctx)
