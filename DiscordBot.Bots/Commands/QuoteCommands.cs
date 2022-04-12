@@ -11,7 +11,6 @@
             _quoteService = quoteService;
         }
 
-        //Make as Slash Command
         [Command("addquote")]
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task AddQuote(CommandContext ctx)
@@ -356,7 +355,7 @@
             var userQuotes = _context.Quotes.Where(x => x.DiscordUserQuotedId == discordMember.Id && x.GuildId == ctx.Guild.Id);
 
             var rnd = new Random();
-            int rndQuote = rnd.Next(0, userQuotes.Count() + 1);
+            int rndQuote = rnd.Next(0, userQuotes.Count());
 
             var quote = userQuotes.Skip(rndQuote).Take(1).FirstOrDefault();
 
