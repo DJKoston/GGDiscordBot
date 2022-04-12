@@ -143,7 +143,15 @@
 
                         foreach (var childCommand in childCommands)
                         {
-                            nowLiveCommands.Add($"`!{childCommand.QualifiedName}`");
+                            if(childCommand is CommandGroup commandGroup2)
+                            {
+                                var grandChildCommands = commandGroup2.Children;
+
+                                foreach (var grandChildCommand in grandChildCommands)
+                                {
+                                    nowLiveCommands.Add($"`!{grandChildCommand.QualifiedName}`");
+                                }
+                            }
                         }
                     }
 
@@ -180,7 +188,7 @@
 
                     else
                     {
-                        nowLiveCommands.Add($"`!{cmd.QualifiedName}`");
+                        profileCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
