@@ -12,7 +12,7 @@
 
             var warningMessage = await ctx.Channel.SendMessageAsync("To use this command:\n\n`!poll \"This is my poll question\" \"This is my detailed options\" 1h :emoji1: :emoji2:`");
 
-            Thread.Sleep(10000);
+            await Task.Delay(10000);
 
             await warningMessage.DeleteAsync();
         }

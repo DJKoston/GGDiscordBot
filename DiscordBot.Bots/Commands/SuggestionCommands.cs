@@ -23,7 +23,7 @@
 
                 var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 await approveRespnse.DeleteAsync();
 
@@ -36,7 +36,7 @@
 
                 var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been approved!").ConfigureAwait(false);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 await approvedResponse.DeleteAsync();
 
@@ -49,7 +49,7 @@
 
                 var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!").ConfigureAwait(false);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 await approvedResponse.DeleteAsync();
 
@@ -87,7 +87,7 @@
 
             var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been approved!").ConfigureAwait(false);
 
-            Thread.Sleep(5000);
+            await Task.Delay(5000);
 
             await response.DeleteAsync();
         }
@@ -103,7 +103,7 @@
 
                 var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 await approveRespnse.DeleteAsync();
 
@@ -116,7 +116,7 @@
 
                 var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been approved!").ConfigureAwait(false);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 await approvedResponse.DeleteAsync();
 
@@ -129,7 +129,7 @@
 
                 var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!").ConfigureAwait(false);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 await approvedResponse.DeleteAsync();
 
@@ -181,7 +181,7 @@
 
             var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been rejected!").ConfigureAwait(false);
 
-            Thread.Sleep(5000);
+            await Task.Delay(5000);
 
             await response.DeleteAsync();
         }

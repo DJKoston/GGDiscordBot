@@ -35,15 +35,15 @@
 
             var deletedConfirm = await ctx.Channel.SendMessageAsync($"{messagesToDelete.Count()} messages deleted!, This message will self distruct in 3 seconds.");
 
-            Thread.Sleep(1000);
+            await Task.Delay(1000);
 
             await deletedConfirm.ModifyAsync($"{messagesToDelete.Count()} messages deleted!, This message will self distruct in 2 seconds.");
 
-            Thread.Sleep(1000);
+            await Task.Delay(1000);
 
             await deletedConfirm.ModifyAsync($"{messagesToDelete.Count()} messages deleted!, This message will self distruct in 1 second.");
 
-            Thread.Sleep(1000);
+            await Task.Delay(1000);
 
             await deletedConfirm.DeleteAsync();
         }
