@@ -858,12 +858,7 @@
             var NBConfig = _doubleXPRoleConfigService.GetDoubleXPRole(e.Guild.Id).Result;
             var xpStatus = _xpToggleService.GetGuildConfig(e.Guild.Id).Result;
 
-            if(xpStatus.Status == "disabled")
-            {
-                return;
-            }
-
-            else
+            if(xpStatus == null || xpStatus.Status == "enabled")
             {
                 if (NBConfig == null)
                 {
@@ -898,8 +893,6 @@
                     leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
                     await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
-
-                    Console.WriteLine("Granted XP");
 
                     return;
                 }
@@ -942,8 +935,6 @@
 
                     await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
 
-                    Console.WriteLine("Granted XP");
-
                     return;
                 }
 
@@ -981,10 +972,13 @@
 
                     await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
 
-                    Console.WriteLine("Granted XP");
-
                     return;
                 }
+            }
+
+            if(xpStatus.Status == "disabled")
+            {
+                return;
             }
         }
 
