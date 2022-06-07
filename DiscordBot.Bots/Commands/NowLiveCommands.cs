@@ -313,7 +313,7 @@
                     return;
                 }
 
-                var config = await _nowLiveStreamerService.GetStreamerToDelete(ctx.Guild.Id, searchStreamer.Channels.FirstOrDefault().Id);
+                var config = await _nowLiveStreamerService.GetStreamerToDelete(ctx.Guild.Id, searchStreamer.Channels.FirstOrDefault(x => x.BroadcasterLogin == twitchStreamer.ToLower()).Id);
 
                 if (config == null)
                 {
@@ -335,7 +335,7 @@
 
                 var messageBuilder = new DiscordMessageBuilder
                 {
-                    Content = $"{searchStreamer.Channels.FirstOrDefault().DisplayName} will no longer be announced in {channel.Mention}",
+                    Content = $"{searchStreamer.Channels.FirstOrDefault(x => x.BroadcasterLogin == twitchStreamer.ToLower()).DisplayName} will no longer be announced in {channel.Mention}",
                 };
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
