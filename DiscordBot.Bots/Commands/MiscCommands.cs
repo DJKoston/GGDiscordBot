@@ -370,5 +370,32 @@
                 await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
             }
         }
+
+        [Command("affirmation")]
+        [Description("Get a random affirmation of the day!")]
+        public async Task RandomAffirmation(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            HttpClient client = new();
+
+            using (Stream dataStream = await client.GetStreamAsync("https://api.koston.eu/affirmation"))
+            {
+                StreamReader reader = new(dataStream);
+
+                string responseFromServer = reader.ReadToEnd();
+
+                var messageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"Cute and Positive Affirmation: {responseFromServer}",
+                };
+
+                messageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            }
+
+            client.Dispose();
+        }
     }
 }

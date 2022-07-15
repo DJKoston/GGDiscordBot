@@ -332,5 +332,57 @@
             responseBuilder.IsEphemeral = true;
             await ctx.CreateResponseAsync(responseBuilder);
         }
+
+        [SlashCommand("affirmation", "Get a Random Affirmation, Useful for when you're feeling down.")]
+        public async Task SlashAffirmation(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync("I see you want some soothing words, one moment while I have a think.");
+
+            HttpClient client = new();
+
+            using (Stream dataStream = await client.GetStreamAsync("https://api.koston.eu/affirmation"))
+            {
+                StreamReader reader = new(dataStream);
+
+                string responseFromServer = reader.ReadToEnd();
+
+                var messageBuilder = new DiscordWebhookBuilder
+                {
+                    Content = $"Cute and Positive Affirmation: {responseFromServer}",
+                };
+
+                await ctx.EditResponseAsync(messageBuilder);
+            }
+
+            client.Dispose();
+        }
+
+        [SlashCommand("snowball", "Throw a snowball at someone in need of it!")]
+        public async Task SlashSnowball(InteractionContext ctx, [Option("target", "User to target with the snowball")] DiscordUser user)
+        {
+            await ctx.CreateResponseAsync($"{ctx.Member.Mention} attempts to throw a snowball at {user.Mention}");
+
+            HttpClient client = new();
+
+            using (Stream dataStream = await client.GetStreamAsync("https://api.koston.eu/snowball"))
+            {
+                StreamReader reader = new(dataStream);
+
+                string responseFromServer = reader.ReadToEnd();
+
+                string newResponse = responseFromServer.Replace("$thrower", ctx.Member.Mention);
+
+                var messageBuilder = new DiscordFollowupMessageBuilder
+                {
+                    Content = newResponse,
+                };
+
+                await Task.Delay(2000);
+
+                await ctx.FollowUpAsync(messageBuilder);
+            }
+
+            client.Dispose();
+        }
     }
 }
