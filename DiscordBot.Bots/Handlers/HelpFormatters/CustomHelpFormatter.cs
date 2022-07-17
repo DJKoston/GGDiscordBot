@@ -18,7 +18,7 @@
 
             List<CustomCommand> serverCommands = _context.CustomCommands.Where(x => x.GuildId == ctx.Guild.Id).OrderBy(x => x.Trigger).ToList();
 
-            if(serverCommands.Any()) { CustomCommands = serverCommands; }
+            CustomCommands = serverCommands;
         }
 
         public override BaseHelpFormatter WithCommand(Command command)
@@ -30,9 +30,11 @@
 
         public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
         {
+            List<string> buttonRoleCommands = new();
             List<string> configCommands = new();
             List<string> customCommands = new();
             List<string> gameCommands = new();
+            List<string> githubCommands = new();
             List<string> miscCommands = new();
             List<string> modCommands = new();
             List<string> nowLiveCommands = new();
@@ -44,6 +46,24 @@
 
             foreach (var cmd in cmds)
             {
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ButtonRoleCommands"))
+                {
+                    if (cmd is CommandGroup commandGroup)
+                    {
+                        var childCommands = commandGroup.Children;
+
+                        foreach (var childCommand in childCommands)
+                        {
+                            buttonRoleCommands.Add($"`!{childCommand.QualifiedName}`");
+                        }
+                    }
+
+                    else
+                    {
+                        buttonRoleCommands.Add($"`!{cmd.QualifiedName}`");
+                    }
+                }
+
                 if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("ConfigCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
@@ -95,6 +115,24 @@
                     else
                     {
                         gameCommands.Add($"`!{cmd.QualifiedName}`");
+                    }
+                }
+
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("GitHubCommands"))
+                {
+                    if (cmd is CommandGroup commandGroup)
+                    {
+                        var childCommands = commandGroup.Children;
+
+                        foreach (var childCommand in childCommands)
+                        {
+                            githubCommands.Add($"`!{childCommand.QualifiedName}`");
+                        }
+                    }
+
+                    else
+                    {
+                        githubCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
 
@@ -259,6 +297,11 @@
                 }
             }
 
+            if (buttonRoleCommands.Count != 0)
+            {
+                _embed.AddField("Button Role Commands:", String.Join(", ", buttonRoleCommands.ToArray()));
+            }
+
             if (configCommands.Count != 0)
             {
                 _embed.AddField("Configuration Commands:", String.Join(", ", configCommands.ToArray()));
@@ -272,6 +315,11 @@
             if (gameCommands.Count != 0)
             {
                 _embed.AddField("Game Commands:", String.Join(", ", gameCommands.ToArray()));
+            }
+
+            if (githubCommands.Count != 0)
+            {
+                _embed.AddField("GitHub Commands:", String.Join(", ", githubCommands.ToArray()));
             }
 
             if (miscCommands.Count != 0)
@@ -320,7 +368,7 @@
 
                 _embed.WithDescription("Please find a full list of commands that are avaliable to you!");
 
-                if (serverSpecificCommands.Count != 0)
+                if (CustomCommands.Count != 0)
                 {
                     foreach (var ccmd in CustomCommands)
                     {

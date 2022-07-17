@@ -114,10 +114,11 @@
             Log("Discord Client Events Registered.");
 
             Log("Registering Discord Commands...");
+            DiscordCommands.RegisterCommands<ButtonRoleCommands>();
             DiscordCommands.RegisterCommands<ConfigCommands>();
             DiscordCommands.RegisterCommands<CustomCommands>();
-            DiscordCommands.RegisterCommands<ButtonRoleCommands>();
             DiscordCommands.RegisterCommands<GameCommands>();
+            DiscordCommands.RegisterCommands<GitHubCommands>();
             DiscordCommands.RegisterCommands<MiscCommands>();
             DiscordCommands.RegisterCommands<ModCommands>();
             DiscordCommands.RegisterCommands<NowLiveCommands>();
