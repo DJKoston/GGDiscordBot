@@ -21,7 +21,7 @@ namespace DiscordBot.Bots.Commands
             github.Credentials = tokenAuth;
 
             var repoOwner = "DJKoston";
-            var repoName = "DiscordIssueTesting";
+            var repoName = "GGDiscordBot";
 
             var createIssue = new NewIssue($"New Issue from Discord User: {ctx.User.Username}");
             createIssue.Body = $"## Issue Details:\n### Issue Creator:\nUsername: {ctx.User.Username}\nServer: {ctx.Guild.Name}\n\nIssue: {issue}";
