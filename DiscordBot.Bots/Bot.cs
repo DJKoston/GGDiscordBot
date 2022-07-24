@@ -280,9 +280,21 @@
 
         private void OnTwitchStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            List<string> id = new List<string>();
+            id.Add(e.Channel);
+
+            var followers = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result.TotalFollows.ToString("###,###,###,###,###,###");
+            var userLogo = Twitch.Helix.Users.GetUsersAsync(id).Result.Users.FirstOrDefault(x => x.DisplayName.ToLower() == e.Stream.UserName.ToLower()).ProfileImageUrl;
+            var twitchLogo = "https://www.freepnglogos.com/uploads/purple-twitch-logo-png-18.png";
+
+            TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+            int secondsSinceEpoch = (int)t.TotalSeconds;
+
             var tUrl1 = e.Stream.ThumbnailUrl;
             var tUrl2 = tUrl1.Replace("{width}", "1280");
             var thumbnailUrl = tUrl2.Replace("{height}", "720");
+
+            var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
 
             Log($"{e.Stream.UserName} just went Live!", twitchColor);
 
@@ -325,15 +337,11 @@
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    //embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
-
-                    //embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
-
-                    var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
-
+                    embed.AddField("Followers:", followers, true);
+                    embed.AddField("Live Since:", $"<t:{secondsSinceEpoch}:R>", true);
                     embed.WithImageUrl(twitchImageURL);
-
-                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+                    embed.WithThumbnail(userLogo);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", twitchLogo);
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
@@ -376,14 +384,11 @@
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    //embed.AddField("Followers:", stream.Stream.Channel.Followers.ToString("###,###,###,###,###,###"), true);
-
-                    //embed.AddField("Total Viewers:", stream.Stream.Channel.Views.ToString("###,###,###,###,###,###"), true);
-
-                    var twitchImageURL = $"{thumbnailUrl}?={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}";
-
+                    embed.AddField("Followers:", followers, true);
+                    embed.AddField("Live Since:", $"<t:{secondsSinceEpoch}:R>", true);
                     embed.WithImageUrl(twitchImageURL);
-                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", "https://www.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png");
+                    embed.WithThumbnail(userLogo);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", twitchLogo);
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
@@ -1209,17 +1214,11 @@
 
         public static void Log(string logItem, ConsoleColor color = ConsoleColor.White)
         {
-            // env
-            var applicationName = "";
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").ToLower();
-
-            if (environment == "development") { applicationName = "GGBotTest"; }
-            else if (environment == "live") { applicationName = "GGBot"; }
-
-            var directory = $"\\Logs\\{applicationName}\\{DateTime.Now.Year}\\{DateTime.Now.Month}\\";
+            var directory = $"/home/container/Logs/{DateTime.Now.Year}/{DateTime.Now.Month}";
 
             // logging strings
             var date = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}] ";
+            var dateFileName = $"{DateTime.Now:dd MMMM yyyy}";
             var header = $"[Log ] ";
             var log = $"{logItem}\n";
 
@@ -1235,7 +1234,7 @@
             }
 
             // log to file
-            using StreamWriter w = File.AppendText($"{directory}{DateTime.Today.ToLongDateString()}.txt");
+            using StreamWriter w = File.AppendText($"{directory}/{dateFileName}.txt");
             w.WriteLine($"{date}: {logItem}");
 
             w.Close();

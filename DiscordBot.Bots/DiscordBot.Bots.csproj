@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
 	<Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2.2.0</Version>
+	<Version>2.3.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
@@ -61,5 +61,9 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if $(ConfigurationName) == Live_Build C:\SSHUpload\GGDiscord\SSHUpload.exe" />
+  </Target>
 
 </Project>
