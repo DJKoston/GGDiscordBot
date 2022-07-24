@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /DiscordBot.Bots/GlobalSuppressions.cs
 /appsettings.json
 /appsettings.Live.json
+/DiscordBot.Bots/appsettings.Production.json
