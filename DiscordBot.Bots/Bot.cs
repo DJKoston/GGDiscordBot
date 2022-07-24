@@ -287,7 +287,7 @@
             var userLogo = Twitch.Helix.Users.GetUsersAsync(id).Result.Users.FirstOrDefault(x => x.DisplayName.ToLower() == e.Stream.UserName.ToLower()).ProfileImageUrl;
             var twitchLogo = "https://www.freepnglogos.com/uploads/purple-twitch-logo-png-18.png";
 
-            TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+            TimeSpan t = e.Stream.StartedAt - new DateTime(1970, 1, 1);
             int secondsSinceEpoch = (int)t.TotalSeconds;
 
             var tUrl1 = e.Stream.ThumbnailUrl;
@@ -338,10 +338,10 @@
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
                     embed.AddField("Followers:", followers, true);
-                    embed.AddField("Live Since:", $"<t:{secondsSinceEpoch}:R>", true);
+                    embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
                     embed.WithImageUrl(twitchImageURL);
                     embed.WithThumbnail(userLogo);
-                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", twitchLogo);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
@@ -385,10 +385,10 @@
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
                     embed.AddField("Followers:", followers, true);
-                    embed.AddField("Live Since:", $"<t:{secondsSinceEpoch}:R>", true);
+                    embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
                     embed.WithImageUrl(twitchImageURL);
                     embed.WithThumbnail(userLogo);
-                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt}", twitchLogo);
+                    embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
 
                     DiscordMessage sentMessage = channel.SendMessageAsync(announcementMessage, embed: embed).Result;
 
