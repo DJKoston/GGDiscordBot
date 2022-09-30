@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
 	<Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2.3.1</Version>
+	<Version>2.3.2</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
@@ -15,6 +15,7 @@
 	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	<StartupObject>DiscordBot.Bots.Program</StartupObject>
 	<AssemblyName>DiscordBot</AssemblyName>
+	<PackageProjectUrl>https://github.com/DJKoston/GGDiscordBot</PackageProjectUrl>
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Build|AnyCPU'">
@@ -35,17 +36,17 @@
 	</PropertyGroup>
 	
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01152" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01152" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.3.0-nightly-01152" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01152" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
+    <PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01173" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01173" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.3.0-nightly-01173" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01173" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.7" />
-    <PackageReference Include="Octokit" Version="1.0.0" />
-    <PackageReference Include="TwitchLib" Version="3.3.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+    <PackageReference Include="Octokit" Version="3.0.0" />
+    <PackageReference Include="TwitchLib" Version="3.4.1" />
   </ItemGroup>
 
   <ItemGroup>

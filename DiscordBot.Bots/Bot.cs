@@ -212,7 +212,7 @@
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
 
-        private async Task DiscordComponentInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+        private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
         {
             var button = await _buttonRoleService.GetButtonRole(e.Guild.Id, e.Id);
 
@@ -333,13 +333,13 @@
                     {
                         Title = $"{e.Stream.UserName} has gone live!",
                         Color = color,
+                        ImageUrl = twitchImageURL,
                     };
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
                     embed.AddField("Followers:", followers, true);
                     embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
-                    embed.WithImageUrl(twitchImageURL);
                     embed.WithThumbnail(userLogo);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
 
@@ -380,13 +380,13 @@
                     {
                         Title = $"{e.Stream.UserName} has gone live!",
                         Color = color,
+                        ImageUrl = twitchImageURL
                     };
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
                     embed.AddField("Followers:", followers, true);
                     embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
-                    embed.WithImageUrl(twitchImageURL);
                     embed.WithThumbnail(userLogo);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
 
