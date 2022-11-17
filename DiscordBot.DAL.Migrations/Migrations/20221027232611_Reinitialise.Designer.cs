@@ -11,14 +11,23 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
+<<<<<<<< HEAD:DiscordBot.DAL.Migrations/Migrations/20221027232611_Reinitialise.Designer.cs
     [Migration("20221027232611_Reinitialise")]
     partial class Reinitialise
+========
+    [Migration("20220731021400_NewDatabase")]
+    partial class NewDatabase
+>>>>>>>> aee47e1737e13f73944cb22123bf92a71afc0eb6:DiscordBot.DAL.Migrations/Migrations/20220731021400_NewDatabase.Designer.cs
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+<<<<<<<< HEAD:DiscordBot.DAL.Migrations/Migrations/20221027232611_Reinitialise.Designer.cs
                 .HasAnnotation("ProductVersion", "6.0.10")
+========
+                .HasAnnotation("ProductVersion", "6.0.7")
+>>>>>>>> aee47e1737e13f73944cb22123bf92a71afc0eb6:DiscordBot.DAL.Migrations/Migrations/20220731021400_NewDatabase.Designer.cs
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);

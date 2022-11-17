@@ -4,7 +4,11 @@
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
+<<<<<<<< HEAD:DiscordBot.DAL.Migrations/Migrations/20221027232611_Reinitialise.cs
     public partial class Reinitialise : Migration
+========
+    public partial class NewDatabase : Migration
+>>>>>>>> aee47e1737e13f73944cb22123bf92a71afc0eb6:DiscordBot.DAL.Migrations/Migrations/20220731021400_NewDatabase.cs
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
