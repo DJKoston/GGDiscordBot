@@ -90,7 +90,7 @@
 
                 suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
 
-                var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
+                var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed);
 
                 newSuggestion.SuggestionEmbedMessage = message.Id;
 

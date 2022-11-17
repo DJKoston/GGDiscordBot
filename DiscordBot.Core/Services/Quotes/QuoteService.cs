@@ -25,9 +25,9 @@ namespace DiscordBot.Core.Services.Quotes
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(quote).ConfigureAwait(false);
+            await context.AddAsync(quote);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteQuoteAsync(Quote quote)
@@ -36,7 +36,7 @@ namespace DiscordBot.Core.Services.Quotes
 
             context.Remove(quote);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<Quote> GetQuoteAsync(int quoteId, ulong discordId)
@@ -45,7 +45,7 @@ namespace DiscordBot.Core.Services.Quotes
 
             var serverQuotes = context.Quotes.Where(x => x.GuildId == discordId);
 
-            return await serverQuotes.FirstOrDefaultAsync(x => x.QuoteId == quoteId).ConfigureAwait(false);
+            return await serverQuotes.FirstOrDefaultAsync(x => x.QuoteId == quoteId);
         }
 
         public List<Quote> GetGuildQuotes(ulong guildId)

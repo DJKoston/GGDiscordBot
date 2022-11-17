@@ -4,10 +4,26 @@
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Reinitialise : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ButtonRoleConfigs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    GuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    RoleId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    ButtonId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GiveRemove = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ButtonRoleConfigs", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "CommunityStreamers",
                 columns: table => new
@@ -129,6 +145,22 @@ namespace DiscordBot.DAL.Migrations.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LeaveConfigs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    GuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    ChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    LeaveMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LeaveImage = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeaveConfigs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NowLiveMessages",
                 columns: table => new
                 {
@@ -175,6 +207,20 @@ namespace DiscordBot.DAL.Migrations.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NowLiveStreamers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NumberGuesses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    GuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NumberGuesses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,7 +325,7 @@ namespace DiscordBot.DAL.Migrations.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WelcomeMessageConfigs",
+                name: "WelcomeConfigs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -287,18 +333,33 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     GuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     ChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     WelcomeMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    WelcomeImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LeaveMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LeaveImage = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    WelcomeImage = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WelcomeMessageConfigs", x => x.Id);
+                    table.PrimaryKey("PK_WelcomeConfigs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "XPSystemConfigs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    GuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_XPSystemConfigs", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ButtonRoleConfigs");
+
             migrationBuilder.DropTable(
                 name: "CommunityStreamers");
 
@@ -324,6 +385,9 @@ namespace DiscordBot.DAL.Migrations.Migrations
                 name: "GoodBotBadBotCounters");
 
             migrationBuilder.DropTable(
+                name: "LeaveConfigs");
+
+            migrationBuilder.DropTable(
                 name: "NowLiveMessages");
 
             migrationBuilder.DropTable(
@@ -331,6 +395,9 @@ namespace DiscordBot.DAL.Migrations.Migrations
 
             migrationBuilder.DropTable(
                 name: "NowLiveStreamers");
+
+            migrationBuilder.DropTable(
+                name: "NumberGuesses");
 
             migrationBuilder.DropTable(
                 name: "Profiles");
@@ -351,7 +418,10 @@ namespace DiscordBot.DAL.Migrations.Migrations
                 name: "ToNextXPs");
 
             migrationBuilder.DropTable(
-                name: "WelcomeMessageConfigs");
+                name: "WelcomeConfigs");
+
+            migrationBuilder.DropTable(
+                name: "XPSystemConfigs");
         }
     }
 }

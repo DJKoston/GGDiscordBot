@@ -22,7 +22,7 @@
                 GuildId = ctx.Guild.Id
             };
 
-            await _customCommandService.CreateNewCommandAsync(command).ConfigureAwait(false);
+            await _customCommandService.CreateNewCommandAsync(command);
 
             var commandAddedEmbed = new DiscordEmbedBuilder
             {
@@ -31,14 +31,14 @@
                 Color = DiscordColor.Purple,
             };
 
-            await ctx.Channel.SendMessageAsync(embed: commandAddedEmbed).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(embed: commandAddedEmbed);
         }
 
         [Command("deletecommand")]
         [RequirePermissions(DSharpPlus.Permissions.ManageMessages)]
         public async Task DeleteCommand(CommandContext ctx, string customCommand)
         {
-            var command = await _customCommandService.GetCommandAsync(customCommand, ctx.Guild.Id).ConfigureAwait(false);
+            var command = await _customCommandService.GetCommandAsync(customCommand, ctx.Guild.Id);
 
             if (command == null)
             {
@@ -56,7 +56,7 @@
 
                 messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder1);
 
                 return;
             }
@@ -70,7 +70,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
     }
 }

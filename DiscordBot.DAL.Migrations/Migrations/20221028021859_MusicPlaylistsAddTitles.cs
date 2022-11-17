@@ -4,13 +4,13 @@
 
 namespace DiscordBot.DAL.Migrations.Migrations
 {
-    public partial class ButtonRole2 : Migration
+    public partial class MusicPlaylistsAddTitles : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "GiveRemove",
-                table: "ButtonRoleConfigs",
+                name: "SongTitle",
+                table: "MusicPlaylists",
                 type: "nvarchar(max)",
                 nullable: true);
         }
@@ -18,8 +18,8 @@ namespace DiscordBot.DAL.Migrations.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "GiveRemove",
-                table: "ButtonRoleConfigs");
+                name: "SongTitle",
+                table: "MusicPlaylists");
         }
     }
 }

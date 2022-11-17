@@ -1,12 +1,29 @@
-﻿namespace DiscordBot.Bots
+﻿using DiscordBot.Core.Services.Music;
+using DSharpPlus.Lavalink;
+using DSharpPlus.Net;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.Extensions.Configuration;
+using System.Net.Sockets;
+using System.Net;
+
+namespace DiscordBot.Bots
 {
     public class Bot
     {
         public DiscordClient DiscordClient { get; private set; }
         public CommandsNextExtension DiscordCommands { get; private set; }
         public SlashCommandsExtension DiscordSlashCommands { get; private set; }
+
+        public LavalinkExtension LavaLink { get; private set; }
+        public ConnectionEndpoint LavaLinkEndpoint;
+        public LavalinkConfiguration LavalinkConfiguration;
+        public LavalinkNodeConnection nodeConnection;
+
+        private readonly IConfiguration _configuration;
+
         public LiveStreamMonitorService Monitor;
         public TwitchAPI Twitch;
+
         public ConsoleColor twitchColor;
         public ConsoleColor discordColor;
         public ConsoleColor fail;
@@ -15,6 +32,8 @@
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
+            _configuration = configuration;
+
             twitchColor = ConsoleColor.DarkMagenta;
             discordColor = ConsoleColor.DarkCyan;
             fail = ConsoleColor.Red;
@@ -36,6 +55,7 @@
             _welcomeMessageConfigService = services.GetService<IWelcomeMessageConfigService>();
             _goodBotBadBotService = services.GetService<IGoodBotBadBotService>();
             _customCommandService = services.GetService<ICustomCommandService>();
+            _musicService = services.GetService<IMusicService>();
             _nowLiveMessageService = services.GetService<INowLiveMessageService>();
             _nowLiveStreamerService =  services.GetService<INowLiveStreamerService>();
             _profileService = services.GetService<IProfileService>();
@@ -50,6 +70,7 @@
             var discordPrefix = configuration["discord-prefix"];
             var twitchClientId = configuration["twitch-clientid"];
             var twitchAccessToken = configuration["twitch-accesstoken"];
+            var lavalinkPassword = configuration["lavalink-password"];
             Log("Configuration Info Retreived.");
 
             //Twitch Connection
@@ -79,7 +100,6 @@
                 EnableDms = true,
                 EnableMentionPrefix = true,
                 Services = services,
-                
             };
             Log("CommandsNext Config Created.");
 
@@ -184,6 +204,21 @@
                 Log("No Channels have been submitted to monitor.", fail);
             }
 
+            Log("Creating Lavalink Endpoints...");
+            LavaLinkEndpoint = new ConnectionEndpoint
+            {
+                Hostname = "pterodactyl.koston.eu",
+                Port = 2333,
+            };
+
+            LavalinkConfiguration = new LavalinkConfiguration
+            {
+                Password = _configuration["lavalink-password"],
+                RestEndpoint = LavaLinkEndpoint,
+                SocketEndpoint = LavaLinkEndpoint,
+            };
+            Log("Lavalink Endpoints Created.");
+
             Log("Connecting to Discord...", discordColor);
             DiscordClient.ConnectAsync();
             Log("Connected to Discord.", discordColor);
@@ -192,6 +227,7 @@
             DiscordSlashCommands.RegisterCommands<GameSlashCommands>();
             DiscordSlashCommands.RegisterCommands<MiscSlashCommands>();
             DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>();
+            DiscordSlashCommands.RegisterCommands<MusicSlashCommands>();
             Log("Slash Commands Registered.");
         }
 
@@ -205,14 +241,74 @@
         private readonly IWelcomeMessageConfigService _welcomeMessageConfigService;
         private readonly IGoodBotBadBotService _goodBotBadBotService;
         private readonly ICustomCommandService _customCommandService;
+        private readonly IMusicService _musicService;
         private readonly INowLiveMessageService _nowLiveMessageService;
         private readonly INowLiveStreamerService _nowLiveStreamerService;
         private readonly IProfileService _profileService;
         private readonly IXPService _xpService;
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
+        
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        private async Task NodeConnection_TrackException(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackExceptionEventArgs e)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        {
+            return;
+        }
 
-        private async Task DiscordComponentInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        private async Task NodeConnection_TrackStuck(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackStuckEventArgs e)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        {
+            return;
+        }
+
+        private async Task NodeConnection_PlaybackFinished(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackFinishEventArgs e)
+        {
+            var nextSong = await _musicService.GetNextSongAsync(sender.Guild.Id);
+
+            if (nextSong == null)
+            {
+                await sender.DisconnectAsync();
+
+                return;
+            }
+
+            LavalinkLoadResult loadResult = null;
+
+            if (nextSong.SongURI.StartsWith("https://") || nextSong.SongURI.StartsWith("http://"))
+            {
+                var songUri = new Uri(nextSong.SongURI);
+
+                loadResult = await nodeConnection.Rest.GetTracksAsync(songUri);
+            }
+
+            else
+            {
+                loadResult = await nodeConnection.Rest.GetTracksAsync(nextSong.SongURI);
+            }
+
+            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+            {
+                await _musicService.RemoveNextSongAsync(sender.Guild.Id);
+
+                await NodeConnection_PlaybackFinished(sender, e);
+                return;
+            }
+
+            var track = loadResult.Tracks.First();
+
+            await sender.PlayAsync(track);
+            await _musicService.RemoveNextSongAsync(sender.Guild.Id);
+        }
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        private async Task NodeConnection_PlaybackStarted(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackStartEventArgs e)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        {
+            return;
+        }
+        private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
         {
             var button = await _buttonRoleService.GetButtonRole(e.Guild.Id, e.Id);
 
@@ -227,7 +323,7 @@
 
                 var responseBuilder = new DiscordInteractionResponseBuilder
                 {
-                    Content = $"You now no longer have the {role.Mention} Role!",
+                    Content = $"You no longer have the {role.Mention} Role!",
                     IsEphemeral = true,
                 };
 
@@ -282,7 +378,7 @@
         {
             List<string> id = new List<string>();
             id.Add(e.Channel);
-
+            var test = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result;
             var followers = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result.TotalFollows.ToString("###,###,###,###,###,###");
             var userLogo = Twitch.Helix.Users.GetUsersAsync(id).Result.Users.FirstOrDefault(x => x.DisplayName.ToLower() == e.Stream.UserName.ToLower()).ProfileImageUrl;
             var twitchLogo = "https://www.freepnglogos.com/uploads/purple-twitch-logo-png-18.png";
@@ -333,13 +429,13 @@
                     {
                         Title = $"{e.Stream.UserName} has gone live!",
                         Color = color,
+                        ImageUrl = twitchImageURL,
                     };
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
                     embed.AddField("Followers:", followers, true);
                     embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
-                    embed.WithImageUrl(twitchImageURL);
                     embed.WithThumbnail(userLogo);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
 
@@ -380,13 +476,13 @@
                     {
                         Title = $"{e.Stream.UserName} has gone live!",
                         Color = color,
+                        ImageUrl = twitchImageURL
                     };
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
                     embed.AddField("Followers:", followers, true);
                     embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
-                    embed.WithImageUrl(twitchImageURL);
                     embed.WithThumbnail(userLogo);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
 
@@ -426,7 +522,7 @@
         {
             if (e.Exception.Message is "Specified command was not found.")
             {
-                var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id).ConfigureAwait(false);
+                var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id);
 
                 if (command == null)
                 {
@@ -453,7 +549,7 @@
                 {
                     if (e.Exception is CommandNotFoundException)
                     {
-                        var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id).ConfigureAwait(false);
+                        var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id);
 
                         if (command == null)
                         {
@@ -554,7 +650,7 @@
         {
             Log($"GG-Bot has been added to the {e.Guild.Name} Discord Server.");
 
-            var members = await e.Guild.GetAllMembersAsync().ConfigureAwait(false);
+            var members = await e.Guild.GetAllMembersAsync();
             var profiles = members.Where(x => x.IsBot == false);
 
             foreach (DiscordMember profile in profiles)
@@ -856,7 +952,7 @@
 
             if (e.Author.IsBot) { return; }
 
-            if (e.Message.Content.Contains('!')) { return; }
+            if (e.Message.Content.StartsWith('!')) { return; }
 
             DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
             DiscordMember memberCheck = await guild.GetMemberAsync(e.Author.Id);
@@ -898,7 +994,7 @@
 
                     leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
-                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed);
 
                     return;
                 }
@@ -939,7 +1035,7 @@
 
                     leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
-                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed);
 
                     return;
                 }
@@ -976,7 +1072,7 @@
 
                     leveledUpEmbed.WithThumbnail(member.AvatarUrl);
 
-                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed).ConfigureAwait(false);
+                    await e.Channel.SendMessageAsync(embed: leveledUpEmbed);
 
                     return;
                 }
@@ -988,18 +1084,35 @@
             }
         }
 
-        private Task DiscordClientReady(DiscordClient c, ReadyEventArgs e)
+        private async Task DiscordClientReady(DiscordClient c, ReadyEventArgs e)
         {
             Log($"{c.CurrentUser.Username} is Ready.", ConsoleColor.Green);
 
-            return Task.CompletedTask;
+            await _musicService.RemoveAllSongsAsync();
+
+            Log("Connecting to Lavalink...");
+            LavaLink = DiscordClient.UseLavalink();
+            await LavaLink.ConnectAsync(LavalinkConfiguration);
+            nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
+
+            nodeConnection.PlaybackStarted += NodeConnection_PlaybackStarted;
+            nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
+            nodeConnection.TrackStuck += NodeConnection_TrackStuck;
+            nodeConnection.TrackException += NodeConnection_TrackException;
+            Log("Connected to Lavalink.");
         }
 
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
             Heartbeat($"Ping: {e.Ping}ms");
+            var gateway = await DiscordClient.GetGatewayInfoAsync();
+            Heartbeat($"Connected to Gateway: {gateway.Url}");
+            Heartbeat($"We recommend Sharding to {gateway.ShardCount} Shards");
+            Heartbeat($"Session Bucket Total: {gateway.SessionBucket.Total}");
+            Heartbeat($"Session Bucket Max: {gateway.SessionBucket.MaxConcurrency}");
+            Heartbeat($"Session Bucket Remaining: {gateway.SessionBucket.Remaining}");
 
-            if(messageDeletionStatus == 1)
+            if (messageDeletionStatus == 1)
             {
                 new Thread(async () =>
                 {
@@ -1066,10 +1179,9 @@
             {
                 await DiscordClient.UpdateStatusAsync(new DiscordActivity
                 {
-                    ActivityType = ActivityType.Streaming,
-                    Name = "Start Up Files...",
-                    StreamUrl = "https://twitch.tv/djkoston"
-                });
+                    ActivityType = ActivityType.Watching,
+                    Name = "myself start up.",
+                }, UserStatus.DoNotDisturb);
                 
                 statusPosition++;
 
@@ -1214,7 +1326,7 @@
 
         public static void Log(string logItem, ConsoleColor color = ConsoleColor.White)
         {
-            var directory = $"/home/container/Logs/{DateTime.Now.Year}/{DateTime.Now.Month}";
+            var directory = $"/home/container/Logs/{DateTime.Now.Year}/{DateTime.Now.Month:d2}";
 
             // logging strings
             var date = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}] ";

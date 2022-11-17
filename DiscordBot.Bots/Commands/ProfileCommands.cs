@@ -90,7 +90,7 @@
             XPAddedEmbed.AddField("XP", viewModel.Profile.XP.ToString("###,###,###,###,###"));
             XPAddedEmbed.AddField("Level", viewModel.Profile.Level.ToString("###,###,###,###,###"));
 
-            await ctx.Channel.SendMessageAsync(embed: XPAddedEmbed).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(embed: XPAddedEmbed);
 
             if (!viewModel.LevelledUp) { return; }
 
@@ -109,7 +109,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("givecurrency")]
@@ -165,7 +165,7 @@
 
                 messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder1);
 
                 return;
             }
@@ -177,7 +177,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("pay")]
@@ -228,7 +228,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("hourly")]
@@ -271,7 +271,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -299,7 +299,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -345,7 +345,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -373,7 +373,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -395,7 +395,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("top10")]
@@ -462,7 +462,7 @@
 
                 messageBuilder3.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder3);
 
                 return;
             }
@@ -522,7 +522,7 @@
 
                 messageBuilder4.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder4).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder4);
 
                 return;
             }
@@ -534,7 +534,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
 
             return;
         }

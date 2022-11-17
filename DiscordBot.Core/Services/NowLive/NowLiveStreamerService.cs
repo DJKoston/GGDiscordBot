@@ -28,9 +28,9 @@ namespace DiscordBot.Core.Services.NowLive
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(config).ConfigureAwait(false);
+            await context.AddAsync(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task RemoveNowLiveStreamer(NowLiveStreamer config)
@@ -39,7 +39,7 @@ namespace DiscordBot.Core.Services.NowLive
 
             context.Remove(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public List<string> GetNowLiveStreamerList()
@@ -105,7 +105,7 @@ namespace DiscordBot.Core.Services.NowLive
 
             context.Update(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
     }
 }

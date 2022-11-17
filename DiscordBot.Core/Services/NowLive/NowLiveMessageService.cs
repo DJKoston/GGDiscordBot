@@ -24,9 +24,9 @@ namespace DiscordBot.Core.Services.NowLive
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(config).ConfigureAwait(false);
+            await context.AddAsync(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task RemoveMessageStore(NowLiveMessage config)
@@ -35,7 +35,7 @@ namespace DiscordBot.Core.Services.NowLive
 
             context.Remove(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<NowLiveMessage> GetMessageStore(ulong GuildId, string streamerId)

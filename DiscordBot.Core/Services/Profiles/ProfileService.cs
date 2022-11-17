@@ -24,7 +24,7 @@ namespace DiscordBot.Core.Services.Profiles
         {
             using var context = new RPGContext(_options);
 
-            var profile = await context.Profiles.Where(x => x.GuildId == guildId).FirstOrDefaultAsync(x => x.DiscordId == discordId).ConfigureAwait(false);
+            var profile = await context.Profiles.Where(x => x.GuildId == guildId).FirstOrDefaultAsync(x => x.DiscordId == discordId);
 
             if (profile != null) { return profile; }
 
@@ -39,7 +39,7 @@ namespace DiscordBot.Core.Services.Profiles
 
             context.Add(profile);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
 
             return profile;
         }
@@ -48,11 +48,11 @@ namespace DiscordBot.Core.Services.Profiles
         {
             using var context = new RPGContext(_options);
 
-            var profile = await context.Profiles.Where(x => x.GuildId == guildId).FirstOrDefaultAsync(x => x.DiscordId == discordId).ConfigureAwait(false);
+            var profile = await context.Profiles.Where(x => x.GuildId == guildId).FirstOrDefaultAsync(x => x.DiscordId == discordId);
 
             context.Remove(profile);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
 
             return profile;
         }

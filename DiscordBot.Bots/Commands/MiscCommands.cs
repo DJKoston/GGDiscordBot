@@ -25,7 +25,7 @@
         {
             var rnd = new Random();
 
-            await ctx.RespondAsync($"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 13)}").ConfigureAwait(false);
+            await ctx.RespondAsync($"🎲 The D12 has been rolled and the result is: {rnd.Next(1, 13)}");
         }
 
         [Command("dadjoke")]
@@ -49,7 +49,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
             }
 
             client.Dispose();
@@ -70,7 +70,7 @@
 
                 messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder1);
 
                 return;
             }
@@ -99,7 +99,7 @@
 
                 suggestionEmbed.WithFooter($"Suggestion: {newSuggestion.Id}");
 
-                var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed).ConfigureAwait(false);
+                var message = await suggestionChannel.SendMessageAsync(embed: suggestionEmbed);
 
                 newSuggestion.SuggestionEmbedMessage = message.Id;
 
@@ -112,7 +112,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
             }
         }
 
@@ -173,7 +173,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("uptime")]
@@ -197,7 +197,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("advice")]
@@ -233,7 +233,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("serverstats")]
@@ -271,7 +271,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("swquote")]
@@ -309,7 +309,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("simpsons")]
@@ -332,7 +332,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("bestgirl")]
@@ -355,7 +355,7 @@
 
                 messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder1);
             }
 
             else
@@ -367,7 +367,7 @@
 
                 messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder1);
             }
         }
 
@@ -392,7 +392,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
             }
 
             client.Dispose();

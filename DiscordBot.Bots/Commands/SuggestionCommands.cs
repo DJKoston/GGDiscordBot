@@ -21,7 +21,7 @@
             {
                 await ctx.Message.DeleteAsync();
 
-                var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false);
+                var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.");
 
                 await Task.Delay(5000);
 
@@ -34,7 +34,7 @@
             {
                 await ctx.Message.DeleteAsync();
 
-                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been approved!").ConfigureAwait(false);
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been approved!");
 
                 await Task.Delay(5000);
 
@@ -47,7 +47,7 @@
             {
                 await ctx.Message.DeleteAsync();
 
-                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!").ConfigureAwait(false);
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!");
 
                 await Task.Delay(5000);
 
@@ -81,11 +81,11 @@
 
             DiscordEmbed newEmbed = suggestionEmbed;
 
-            await message.ModifyAsync(embed: newEmbed).ConfigureAwait(false);
+            await message.ModifyAsync(embed: newEmbed);
 
             await ctx.Message.DeleteAsync();
 
-            var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been approved!").ConfigureAwait(false);
+            var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been approved!");
 
             await Task.Delay(5000);
 
@@ -101,7 +101,7 @@
             {
                 await ctx.Message.DeleteAsync();
 
-                var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.").ConfigureAwait(false);
+                var approveRespnse = await ctx.Channel.SendMessageAsync("This ID does not exist. Please try again.");
 
                 await Task.Delay(5000);
 
@@ -114,7 +114,7 @@
             {
                 await ctx.Message.DeleteAsync();
 
-                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been approved!").ConfigureAwait(false);
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been approved!");
 
                 await Task.Delay(5000);
 
@@ -127,7 +127,7 @@
             {
                 await ctx.Message.DeleteAsync();
 
-                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!").ConfigureAwait(false);
+                var approvedResponse = await ctx.Channel.SendMessageAsync("This suggestion has already been rejected!");
 
                 await Task.Delay(5000);
 
@@ -175,11 +175,11 @@
 
             DiscordEmbed newEmbed = suggestionEmbed;
 
-            await message.ModifyAsync(embed: newEmbed).ConfigureAwait(false);
+            await message.ModifyAsync(embed: newEmbed);
 
             await ctx.Message.DeleteAsync();
 
-            var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been rejected!").ConfigureAwait(false);
+            var response = await ctx.Channel.SendMessageAsync($"Suggestion {suggestion.Id} has been rejected!");
 
             await Task.Delay(5000);
 

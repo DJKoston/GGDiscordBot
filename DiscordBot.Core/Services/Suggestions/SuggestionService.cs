@@ -27,7 +27,7 @@ namespace DiscordBot.Core.Services.Suggestions
 
             await context.AddAsync(suggestion);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task EditSuggestion(Suggestion suggestion)
@@ -36,7 +36,7 @@ namespace DiscordBot.Core.Services.Suggestions
 
             context.Update(suggestion);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteSuggestion(Suggestion suggestion)
@@ -45,7 +45,7 @@ namespace DiscordBot.Core.Services.Suggestions
 
             context.Remove(suggestion);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<Suggestion> GetSuggestion(ulong GuildId, int Id)
@@ -54,7 +54,7 @@ namespace DiscordBot.Core.Services.Suggestions
 
             var guildContext = context.Suggestions.Where(x => x.GuildId == GuildId);
 
-            return await guildContext.FirstOrDefaultAsync(x => x.Id == Id).ConfigureAwait(false);
+            return await guildContext.FirstOrDefaultAsync(x => x.Id == Id);
         }
     }
 }

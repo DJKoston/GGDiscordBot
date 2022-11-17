@@ -1,4 +1,6 @@
-﻿namespace DiscordBot.Bots.Commands
+﻿using DSharpPlus.Entities;
+
+namespace DiscordBot.Bots.Commands
 {
     [Group("buttonrole")]
     [RequirePermissions(Permissions.Administrator)]
@@ -257,6 +259,84 @@
             };
 
             await _buttonRoleService.CreateButtonRole(buttonRole5);
+
+            await channel.SendMessageAsync(messageBuilder);
+        }
+
+        [Command("enbygames")]
+        public async Task AddEnbyGamesButton(CommandContext ctx, DiscordChannel channel)
+        {
+            DiscordRole role1 = ctx.Guild.GetRole(1028278198091395112); //Overwatch
+            DiscordRole role2 = ctx.Guild.GetRole(986048836176846849); //Fortnite
+            DiscordRole role3 = ctx.Guild.GetRole(986048856674402354); //Genshin
+            DiscordRole role4 = ctx.Guild.GetRole(986048871895531592); //PCG
+
+            string title1 = "Overwatch";
+            string title2 = "Fortnite";
+            string title3 = "Genshin";
+            string title4 = "Pokemon Community Game";
+
+            DiscordEmoji guildOverwatchEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028281250953306162);
+            DiscordEmoji guildGenshinEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028282371138658405);
+            DiscordEmoji guildFortniteEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028281791406161941);
+            DiscordEmoji guildPCGEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028281966027620412);
+
+            DiscordComponentEmoji OverwatchEmoji = new() { Id = guildOverwatchEmoji.Id, Name = guildOverwatchEmoji.Name };
+            DiscordComponentEmoji GenshinEmoji = new() { Id = guildGenshinEmoji.Id, Name = guildGenshinEmoji.Name };
+            DiscordComponentEmoji FortniteEmoji = new() { Id = guildFortniteEmoji.Id, Name = guildFortniteEmoji.Name };
+            DiscordComponentEmoji PCGEmoji = new() { Id = guildPCGEmoji.Id, Name = guildPCGEmoji.Name };
+
+            DiscordMessageBuilder messageBuilder = new();
+
+            messageBuilder.Content = "Play any of these games and want a ping when someone wants to play? Click below to get the role!";
+
+            messageBuilder.AddComponents(new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title1}", $"{title1}", false, OverwatchEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title2}", $"{title2}", false, FortniteEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title3}", $"{title3}", false, GenshinEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title4}", $"{title4}", false, PCGEmoji)
+            });
+
+            var buttonRole1 = new ButtonRoleConfig
+            {
+                GuildId = ctx.Guild.Id,
+                ButtonId = $"{ctx.Guild.Id}{title1}",
+                RoleId = role1.Id,
+                GiveRemove = "give",
+            };
+
+            await _buttonRoleService.CreateButtonRole(buttonRole1);
+
+            var buttonRole2 = new ButtonRoleConfig
+            {
+                GuildId = ctx.Guild.Id,
+                ButtonId = $"{ctx.Guild.Id}{title2}",
+                RoleId = role2.Id,
+                GiveRemove = "give",
+            };
+
+            await _buttonRoleService.CreateButtonRole(buttonRole2);
+
+            var buttonRole3 = new ButtonRoleConfig
+            {
+                GuildId = ctx.Guild.Id,
+                ButtonId = $"{ctx.Guild.Id}{title3}",
+                RoleId = role3.Id,
+                GiveRemove = "give",
+            };
+
+            await _buttonRoleService.CreateButtonRole(buttonRole3);
+
+            var buttonRole4 = new ButtonRoleConfig
+            {
+                GuildId = ctx.Guild.Id,
+                ButtonId = $"{ctx.Guild.Id}{title4}",
+                RoleId = role4.Id,
+                GiveRemove = "give",
+            };
+
+            await _buttonRoleService.CreateButtonRole(buttonRole4);
 
             await channel.SendMessageAsync(messageBuilder);
         }

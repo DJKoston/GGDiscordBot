@@ -16,7 +16,7 @@
                     Color = DiscordColor.Red,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: errorMessage).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(embed: errorMessage);
 
                 return;
             }
@@ -29,7 +29,7 @@
 
             if (!messagesToDelete.Any()) { await ctx.Channel.SendMessageAsync("I'm sorry, I can only purge messages that are within 2 weeks of today's date."); return; }
 
-            await ctx.Channel.DeleteMessagesAsync(messagesToDelete).ConfigureAwait(false);
+            await ctx.Channel.DeleteMessagesAsync(messagesToDelete);
 
             await ctx.Message.DeleteAsync();
 

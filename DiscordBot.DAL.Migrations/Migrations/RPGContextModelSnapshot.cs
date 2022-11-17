@@ -16,7 +16,7 @@ namespace DiscordBot.DAL.Migrations.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -308,6 +308,28 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EggRoles");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.Games.MusicPlaylist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<string>("SongTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SongURI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MusicPlaylists");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Games.NumberGuess", b =>

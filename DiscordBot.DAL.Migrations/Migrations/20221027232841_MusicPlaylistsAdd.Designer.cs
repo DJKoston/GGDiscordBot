@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiscordBot.DAL.Migrations.Migrations
 {
     [DbContext(typeof(RPGContext))]
-    [Migration("20220105034707_NumberGuessAdd")]
-    partial class NumberGuessAdd
+    [Migration("20221027232841_MusicPlaylistsAdd")]
+    partial class MusicPlaylistsAdd
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.1")
+                .HasAnnotation("ProductVersion", "6.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -49,6 +49,31 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CommunityStreamers");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.ButtonRoleConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ButtonId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GiveRemove")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ButtonRoleConfigs");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.CurrencyNameConfig", b =>
@@ -156,6 +181,25 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WelcomeConfigs");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.Configurations.XPSystemConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("XPSystemConfigs");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Counters.GoodBotBadBot", b =>
@@ -266,6 +310,25 @@ namespace DiscordBot.DAL.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EggRoles");
+                });
+
+            modelBuilder.Entity("DiscordBot.DAL.Models.Games.MusicPlaylist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<string>("SongURI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MusicPlaylists");
                 });
 
             modelBuilder.Entity("DiscordBot.DAL.Models.Games.NumberGuess", b =>

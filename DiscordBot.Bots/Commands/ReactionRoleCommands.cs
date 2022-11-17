@@ -25,7 +25,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("add")]
@@ -38,7 +38,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("add")]
@@ -82,7 +82,7 @@
             }
             else
             {
-                await ctx.Channel.SendMessageAsync("You need to specify `add` or `remove` in your final argument.").ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync("You need to specify `add` or `remove` in your final argument.");
             }
         }
 
@@ -146,7 +146,7 @@
 
             HelpEmbed.AddField("To get your Message ID", "Right click the message and click 'Copy ID'");
 
-            await ctx.Channel.SendMessageAsync(embed: HelpEmbed).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(embed: HelpEmbed);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace DiscordBot.Core.Services.ReactionRoles
 
             await context.AddAsync(reactionRole);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteReactionRole(ReactionRole reactionRole)
@@ -35,7 +35,7 @@ namespace DiscordBot.Core.Services.ReactionRoles
 
             context.Remove(reactionRole);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<ReactionRole> GetReactionRole(ulong GuildId, ulong ChannelId, ulong MessageId, ulong EmoteId, string EmoteName)
@@ -48,7 +48,7 @@ namespace DiscordBot.Core.Services.ReactionRoles
 
             var MessageReactionRoles = ChannelReactionRoles.Where(x => x.MessageId == MessageId);
 
-            return await MessageReactionRoles.FirstOrDefaultAsync(x => x.EmoteId == EmoteId && x.UnicodeEmote == EmoteName).ConfigureAwait(false);
+            return await MessageReactionRoles.FirstOrDefaultAsync(x => x.EmoteId == EmoteId && x.UnicodeEmote == EmoteName);
         }
     }
 }

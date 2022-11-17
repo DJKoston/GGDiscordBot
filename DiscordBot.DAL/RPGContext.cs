@@ -43,6 +43,9 @@ namespace DiscordBot.DAL
         public DbSet<EggNickname> EggNicknames { get; set; }
         public DbSet<EggRole> EggRoles { get; set; }
 
+        //Music
+        public DbSet<MusicPlaylist> MusicPlaylists { get; set; }
+
         //Now Live
         public DbSet<NowLiveMessage> NowLiveMessages { get; set; }
         public DbSet<NowLiveStreamer> NowLiveStreamers { get; set; }

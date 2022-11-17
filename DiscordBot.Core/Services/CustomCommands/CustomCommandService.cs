@@ -23,9 +23,9 @@ namespace DiscordBot.Core.Services.CustomCommands
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(customCommand).ConfigureAwait(false);
+            await context.AddAsync(customCommand);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteCommandAsync(CustomCommand customCommand)
@@ -34,7 +34,7 @@ namespace DiscordBot.Core.Services.CustomCommands
 
             context.Remove(customCommand);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<CustomCommand> GetCommandAsync(string command, ulong GuildId)

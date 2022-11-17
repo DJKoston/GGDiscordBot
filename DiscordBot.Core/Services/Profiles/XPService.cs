@@ -27,7 +27,7 @@ namespace DiscordBot.Core.Services.Profiles
         {
             using var context = new RPGContext(_options);
 
-            Profile profile = await _profileService.GetOrCreateProfileAsync(discordId, guildId, discordName).ConfigureAwait(false);
+            Profile profile = await _profileService.GetOrCreateProfileAsync(discordId, guildId, discordName);
 
             int levelBefore = profile.Level;
 
@@ -35,7 +35,7 @@ namespace DiscordBot.Core.Services.Profiles
 
             context.Profiles.Update(profile);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
 
             int levelAfter = profile.Level;
 

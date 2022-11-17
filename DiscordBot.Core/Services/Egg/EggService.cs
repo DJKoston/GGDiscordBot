@@ -30,27 +30,27 @@ namespace DiscordBot.Core.Services.Egg
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(channel).ConfigureAwait(false);
+            await context.AddAsync(channel);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task RoleAddStore(EggRole role)
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(role).ConfigureAwait(false);
+            await context.AddAsync(role);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task NicknameAddStore(EggNickname nickname)
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(nickname).ConfigureAwait(false);
+            await context.AddAsync(nickname);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<EggChannel> ChannelFind(ulong guildId, ulong channelId)
@@ -80,7 +80,7 @@ namespace DiscordBot.Core.Services.Egg
 
             context.Remove(channel);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task RoleDelete(EggRole role)
@@ -89,7 +89,7 @@ namespace DiscordBot.Core.Services.Egg
 
             context.Remove(role);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task NicknameDelete(EggNickname nickname)
@@ -98,7 +98,7 @@ namespace DiscordBot.Core.Services.Egg
 
             context.Remove(nickname);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
     }
 }

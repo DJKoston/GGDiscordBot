@@ -1,4 +1,6 @@
-﻿namespace DiscordBot.Bots
+﻿using DiscordBot.Core.Services.Music;
+
+namespace DiscordBot.Bots
 {
     public class Startup
     {
@@ -43,6 +45,9 @@
 
             //Game Services
             services.AddScoped<INumberGuessService, NumberGuessService>();
+
+            //Music Services
+            services.AddScoped<IMusicService, MusicService>();
 
             //Now Live Services
             services.AddScoped<INowLiveMessageService, NowLiveMessageService>();

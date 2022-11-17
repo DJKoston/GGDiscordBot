@@ -24,40 +24,40 @@ namespace DiscordBot.Core.Services.Counters
         {
             using var context = new RPGContext(_options);
 
-            var goodBotBadBot = await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
+            var goodBotBadBot = await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot");
 
             goodBotBadBot.GoodBot += 1;
 
             context.Update(goodBotBadBot);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task AddBadBot()
         {
             using var context = new RPGContext(_options);
 
-            var goodBotBadBot = await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
+            var goodBotBadBot = await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot");
 
             goodBotBadBot.BadBot += 1;
 
             context.Update(goodBotBadBot);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<GoodBotBadBot> GetGoodBot()
         {
             using var context = new RPGContext(_options);
 
-            return await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
+            return await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot");
         }
 
         public async Task<GoodBotBadBot> GetBadBot()
         {
             using var context = new RPGContext(_options);
 
-            return await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot").ConfigureAwait(false);
+            return await context.GoodBotBadBotCounters.FirstOrDefaultAsync(x => x.BotName == "GGBot");
         }
     }
 }

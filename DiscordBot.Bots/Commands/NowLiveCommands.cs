@@ -58,7 +58,7 @@
 
                     messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                    await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync(messageBuilder1);
 
                     return;
                 }
@@ -83,7 +83,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
             }
 
             [Command("list")]
@@ -137,7 +137,7 @@
 
                         messageBuilder.WithReply(ctx.Message.Id, true);
 
-                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync(messageBuilder);
                     }
                 }
 
@@ -173,7 +173,7 @@
 
                         messageBuilder.WithReply(ctx.Message.Id, true);
 
-                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync(messageBuilder);
                     }
                 }
 
@@ -209,7 +209,7 @@
 
                         messageBuilder.WithReply(ctx.Message.Id, true);
 
-                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync(messageBuilder);
                     }
                 }
 
@@ -245,7 +245,7 @@
 
                         messageBuilder.WithReply(ctx.Message.Id, true);
 
-                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync(messageBuilder);
                     }
                 }
 
@@ -281,7 +281,7 @@
 
                         messageBuilder.WithReply(ctx.Message.Id, true);
 
-                        await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync(messageBuilder);
                     }
                 }
             }
@@ -308,7 +308,7 @@
 
                     messageBuilder1.WithReply(ctx.Message.Id, true);
 
-                    await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync(messageBuilder1);
 
                     return;
                 }
@@ -324,7 +324,7 @@
 
                     messageBuilder2.WithReply(ctx.Message.Id, true);
 
-                    await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync(messageBuilder2);
 
                     return;
                 }
@@ -340,7 +340,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 await _nowLiveStreamerService.RemoveNowLiveStreamer(config);
 

@@ -22,7 +22,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("addquote")]
@@ -48,7 +48,7 @@
                     ChannelQuotedIn = ctx.Channel.Name,
                 };
 
-                await _quoteService.CreateNewQuoteAsync(quoteDb).ConfigureAwait(false);
+                await _quoteService.CreateNewQuoteAsync(quoteDb);
 
                 var quoteAddEmbed = new DiscordEmbedBuilder
                 {
@@ -69,7 +69,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -89,7 +89,7 @@
                     ChannelQuotedIn = ctx.Channel.Name,
                 };
 
-                await _quoteService.CreateNewQuoteAsync(quoteDb).ConfigureAwait(false);
+                await _quoteService.CreateNewQuoteAsync(quoteDb);
 
                 var quoteAddEmbed = new DiscordEmbedBuilder
                 {
@@ -110,7 +110,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -139,7 +139,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -159,7 +159,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -179,7 +179,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -209,7 +209,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -239,7 +239,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         //Make as Slash Command
@@ -259,7 +259,7 @@
 
                 messageBuilder3.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder3).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder3);
 
                 return;
             }
@@ -291,7 +291,7 @@
 
             messageBuilder.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder);
         }
 
         [Command("quote")]
@@ -322,7 +322,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -346,7 +346,7 @@
 
             messageBuilder1.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder1).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder1);
         }
 
         [Command("quote")]
@@ -368,7 +368,7 @@
 
                 messageBuilder.WithReply(ctx.Message.Id, true);
 
-                await ctx.Channel.SendMessageAsync(messageBuilder).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(messageBuilder);
 
                 return;
             }
@@ -395,7 +395,7 @@
 
             messageBuilder2.WithReply(ctx.Message.Id, true);
 
-            await ctx.Channel.SendMessageAsync(messageBuilder2).ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync(messageBuilder2);
         }
     }
 }

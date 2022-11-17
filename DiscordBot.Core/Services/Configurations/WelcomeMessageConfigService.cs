@@ -24,9 +24,9 @@ namespace DiscordBot.Core.Services.Configurations
         {
             using var context = new RPGContext(_options);
 
-            await context.AddAsync(config).ConfigureAwait(false);
+            await context.AddAsync(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task EditWelcomeMessage(WelcomeConfig config)
@@ -44,7 +44,7 @@ namespace DiscordBot.Core.Services.Configurations
 
             context.Remove(config);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<WelcomeConfig> GetWelcomeMessage(ulong GuildId)

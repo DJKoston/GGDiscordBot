@@ -1,0 +1,39 @@
+﻿@page
+@using DiscordBot.Bots
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager uriHelper;
+@model IndexModel
+@{
+    ViewData["Title"] = "GG-Bot";
+}
+
+<div class="text-center">
+    <h1>The GG Discord Bot is Online!</h1>
+    <p>If you have any questions, please <a href="mailto:contact@koston.eu">Email</a> the Developer.</p>
+</div>
+<div class="row">
+    <div class="text-center" style="float: left; width: 33.33%;">
+        <h2>Uptime:</h2>
+        <h4>@uptime</h4>
+    </div>
+    <div class="text-center" style="float: left; width: 33.33%;">
+        <h2>Started:</h2>
+        <h4>@startTimeTime</h4>
+        <h4>@startTimeDate</h4>
+    </div>
+    <div class="text-center" style="float: left; width: 33.33%;">
+        <h2>Version:</h2>
+        <h4>@version</h4>
+    </div>
+</div>
+
+@functions
+{
+    private string version = typeof(Bot).Assembly.GetName().Version.ToString();
+    private string startTimeDate = Process.GetCurrentProcess().StartTime.ToLongDateString();
+    private string startTimeTime = Process.GetCurrentProcess().StartTime.ToShortTimeString();
+    private string uptime = (DateTime.Now - Process.GetCurrentProcess().StartTime).Days.ToString()+ "d " +
+    (DateTime.Now - Process.GetCurrentProcess().StartTime).Hours.ToString()+"h "+
+    (DateTime.Now - Process.GetCurrentProcess().StartTime).Minutes.ToString()+"m "+
+    (DateTime.Now - Process.GetCurrentProcess().StartTime).Seconds.ToString()+"s";
+}

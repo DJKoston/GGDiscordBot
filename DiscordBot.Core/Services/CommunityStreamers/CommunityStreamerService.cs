@@ -27,7 +27,7 @@ namespace DiscordBot.Core.Services.CommunityStreamers
 
             await context.AddAsync(streamer);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task EditStreamer(CommunityStreamer streamer)
@@ -36,7 +36,7 @@ namespace DiscordBot.Core.Services.CommunityStreamers
 
             context.Update(streamer);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteStreamer(CommunityStreamer streamer)
@@ -45,7 +45,7 @@ namespace DiscordBot.Core.Services.CommunityStreamers
 
             context.Remove(streamer);
 
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
 
         public async Task<CommunityStreamer> GetStreamer(ulong GuildId, int Id)
@@ -54,7 +54,7 @@ namespace DiscordBot.Core.Services.CommunityStreamers
 
             var guildContext = context.CommunityStreamers.Where(x => x.GuildId == GuildId);
 
-            return await guildContext.FirstOrDefaultAsync(x => x.Id == Id).ConfigureAwait(false);
+            return await guildContext.FirstOrDefaultAsync(x => x.Id == Id);
         }
     }
 }
