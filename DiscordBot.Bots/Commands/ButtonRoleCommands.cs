@@ -270,21 +270,25 @@ namespace DiscordBot.Bots.Commands
             DiscordRole role2 = ctx.Guild.GetRole(986048836176846849); //Fortnite
             DiscordRole role3 = ctx.Guild.GetRole(986048856674402354); //Genshin
             DiscordRole role4 = ctx.Guild.GetRole(986048871895531592); //PCG
+            DiscordRole role5 = ctx.Guild.GetRole(1045437857176752279);//Pokemon
 
             string title1 = "Overwatch";
             string title2 = "Fortnite";
             string title3 = "Genshin";
             string title4 = "Pokemon Community Game";
+            string title5 = "Pokemon (Scarlet/Violet)";
 
             DiscordEmoji guildOverwatchEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028281250953306162);
             DiscordEmoji guildGenshinEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028282371138658405);
             DiscordEmoji guildFortniteEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028281791406161941);
             DiscordEmoji guildPCGEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1028281966027620412);
+            DiscordEmoji guildPokemonEmoji = DiscordEmoji.FromGuildEmote(ctx.Client, 1045441274938916916);
 
             DiscordComponentEmoji OverwatchEmoji = new() { Id = guildOverwatchEmoji.Id, Name = guildOverwatchEmoji.Name };
             DiscordComponentEmoji GenshinEmoji = new() { Id = guildGenshinEmoji.Id, Name = guildGenshinEmoji.Name };
             DiscordComponentEmoji FortniteEmoji = new() { Id = guildFortniteEmoji.Id, Name = guildFortniteEmoji.Name };
             DiscordComponentEmoji PCGEmoji = new() { Id = guildPCGEmoji.Id, Name = guildPCGEmoji.Name };
+            DiscordComponentEmoji PokemonEmoji = new() { Id = guildPokemonEmoji.Id, Name = guildPokemonEmoji.Name };
 
             DiscordMessageBuilder messageBuilder = new();
 
@@ -292,10 +296,11 @@ namespace DiscordBot.Bots.Commands
 
             messageBuilder.AddComponents(new DiscordComponent[]
             {
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title1}", $"{title1}", false, OverwatchEmoji),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title2}", $"{title2}", false, FortniteEmoji),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title3}", $"{title3}", false, GenshinEmoji),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title4}", $"{title4}", false, PCGEmoji)
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title1}", title1, false, OverwatchEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title2}", title2, false, FortniteEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title3}", title3, false, GenshinEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title4}", title4, false, PCGEmoji),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.Guild.Id}{title5}", title5, false, PokemonEmoji),
             });
 
             var buttonRole1 = new ButtonRoleConfig
@@ -337,6 +342,16 @@ namespace DiscordBot.Bots.Commands
             };
 
             await _buttonRoleService.CreateButtonRole(buttonRole4);
+
+            var buttonRole5 = new ButtonRoleConfig
+            {
+                GuildId = ctx.Guild.Id,
+                ButtonId = $"{ctx.Guild.Id}{title5}",
+                RoleId = role5.Id,
+                GiveRemove = "give",
+            };
+
+            await _buttonRoleService.CreateButtonRole(buttonRole5);
 
             await channel.SendMessageAsync(messageBuilder);
         }

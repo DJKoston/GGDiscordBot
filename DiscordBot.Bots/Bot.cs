@@ -207,7 +207,7 @@ namespace DiscordBot.Bots
             Log("Creating Lavalink Endpoints...");
             LavaLinkEndpoint = new ConnectionEndpoint
             {
-                Hostname = "pterodactyl.koston.eu",
+                Hostname = _configuration["lavalink-server"],
                 Port = 2333,
             };
 
@@ -249,16 +249,12 @@ namespace DiscordBot.Bots
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
         
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task NodeConnection_TrackException(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackExceptionEventArgs e)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return;
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task NodeConnection_TrackStuck(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackStuckEventArgs e)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return;
         }
@@ -302,12 +298,11 @@ namespace DiscordBot.Bots
             await _musicService.RemoveNextSongAsync(sender.Guild.Id);
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task NodeConnection_PlaybackStarted(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackStartEventArgs e)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return;
         }
+
         private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
         {
             var button = await _buttonRoleService.GetButtonRole(e.Guild.Id, e.Id);
@@ -1087,31 +1082,23 @@ namespace DiscordBot.Bots
         private async Task DiscordClientReady(DiscordClient c, ReadyEventArgs e)
         {
             Log($"{c.CurrentUser.Username} is Ready.", ConsoleColor.Green);
-
-            await _musicService.RemoveAllSongsAsync();
-
+            
             Log("Connecting to Lavalink...");
             LavaLink = DiscordClient.UseLavalink();
             await LavaLink.ConnectAsync(LavalinkConfiguration);
             nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
-
             nodeConnection.PlaybackStarted += NodeConnection_PlaybackStarted;
             nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
             nodeConnection.TrackStuck += NodeConnection_TrackStuck;
             nodeConnection.TrackException += NodeConnection_TrackException;
+            await _musicService.RemoveAllSongsAsync();
             Log("Connected to Lavalink.");
         }
 
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
         {
             Heartbeat($"Ping: {e.Ping}ms");
-            var gateway = await DiscordClient.GetGatewayInfoAsync();
-            Heartbeat($"Connected to Gateway: {gateway.Url}");
-            Heartbeat($"We recommend Sharding to {gateway.ShardCount} Shards");
-            Heartbeat($"Session Bucket Total: {gateway.SessionBucket.Total}");
-            Heartbeat($"Session Bucket Max: {gateway.SessionBucket.MaxConcurrency}");
-            Heartbeat($"Session Bucket Remaining: {gateway.SessionBucket.Remaining}");
-
+            
             if (messageDeletionStatus == 1)
             {
                 new Thread(async () =>
@@ -1154,7 +1141,7 @@ namespace DiscordBot.Bots
             }
 
             if (messageDeletionStatus == 0) { messageDeletionStatus = 1; }
-
+            
             var lst = _nowLiveStreamerService.GetNowLiveStreamerList();
 
             if(lst.Count != 0)
