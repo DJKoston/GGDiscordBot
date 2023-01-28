@@ -248,16 +248,6 @@ namespace DiscordBot.Bots
         private readonly IXPService _xpService;
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
-        
-        private async Task NodeConnection_TrackException(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackExceptionEventArgs e)
-        {
-            return;
-        }
-
-        private async Task NodeConnection_TrackStuck(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackStuckEventArgs e)
-        {
-            return;
-        }
 
         private async Task NodeConnection_PlaybackFinished(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackFinishEventArgs e)
         {
@@ -296,11 +286,6 @@ namespace DiscordBot.Bots
 
             await sender.PlayAsync(track);
             await _musicService.RemoveNextSongAsync(sender.Guild.Id);
-        }
-
-        private async Task NodeConnection_PlaybackStarted(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackStartEventArgs e)
-        {
-            return;
         }
 
         private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
@@ -1087,10 +1072,7 @@ namespace DiscordBot.Bots
             LavaLink = DiscordClient.UseLavalink();
             await LavaLink.ConnectAsync(LavalinkConfiguration);
             nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
-            nodeConnection.PlaybackStarted += NodeConnection_PlaybackStarted;
             nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
-            nodeConnection.TrackStuck += NodeConnection_TrackStuck;
-            nodeConnection.TrackException += NodeConnection_TrackException;
             await _musicService.RemoveAllSongsAsync();
             Log("Connected to Lavalink.");
         }
