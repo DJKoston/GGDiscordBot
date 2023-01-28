@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-	<Configurations>Debug;Dev_Build;Test_Build;Live_Build</Configurations>
+	<Configurations>Debug;Release</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
 	<Version>2.4.0</Version>
     <Authors>DJKoston</Authors>
@@ -16,24 +16,9 @@
 	<StartupObject>DiscordBot.Bots.Program</StartupObject>
 	<AssemblyName>DiscordBot</AssemblyName>
 	<PackageProjectUrl>https://github.com/DJKoston/GGDiscordBot</PackageProjectUrl>
+	<UserSecretsId>b57eafb5-2029-4b9a-acd0-a96d968f5630</UserSecretsId>
+	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev_Build|AnyCPU'">
-		<OutputPath>V:\DiscordBot_Dev\DiscordBot.Build\</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test_Build|AnyCPU'">
-		<OutputPath>V:\DiscordBot_Test\DiscordBot.Build\</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Live_Build|AnyCPU'">
-		<OutputPath>V:\DiscordBot_Live\DiscordBot.Build\</OutputPath>
-		<Optimize>true</Optimize>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>C:\LocalDebug\</OutputPath>
-	</PropertyGroup>
 	
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="4.3.0" />
@@ -47,6 +32,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.12" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="Octokit" Version="4.0.3" />
     <PackageReference Include="TwitchLib" Version="3.5.3" />
   </ItemGroup>
@@ -64,9 +50,4 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if $(ConfigurationName) == Live_Build C:\SSHUpload\SSHUpload.exe ggdiscord" />
-  </Target>
-
 </Project>
