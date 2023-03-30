@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.Configuration;
 using System.Net.Sockets;
 using System.Net;
+using DSharpPlus.Lavalink.EventArgs;
+using System.IO.Pipelines;
 
 namespace DiscordBot.Bots
 {
@@ -287,6 +289,22 @@ namespace DiscordBot.Bots
             await sender.PlayAsync(track);
             await _musicService.RemoveNextSongAsync(sender.Guild.Id);
         }
+
+        private async Task NodeConnection_TrackStuck(LavalinkGuildConnection sender, TrackStuckEventArgs e)
+        {
+            if(e.Track.Title == "Your #1 Simulation Station")
+            {
+                var songUri = new Uri("http://stream.simulatorradio.com/stream.mp3");
+
+                var loadResult = await nodeConnection.Rest.GetTracksAsync(songUri);
+
+                var track = loadResult.Tracks.First();
+
+                await sender.SetVolumeAsync(10);
+                await sender.PlayAsync(track);
+            }
+        }
+
 
         private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
         {
@@ -1073,6 +1091,7 @@ namespace DiscordBot.Bots
             await LavaLink.ConnectAsync(LavalinkConfiguration);
             nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
             nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
+            nodeConnection.TrackStuck += NodeConnection_TrackStuck;
             await _musicService.RemoveAllSongsAsync();
             Log("Connected to Lavalink.");
         }

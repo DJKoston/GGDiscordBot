@@ -1,5 +1,6 @@
 ﻿using DiscordBot.Core.Services.Music;
 using DSharpPlus.Lavalink;
+using System.IO.Pipelines;
 using TwitchLib.Api.Helix;
 using TwitchLib.PubSub.Models.Responses.Messages.AutomodCaughtMessage;
 
@@ -12,6 +13,52 @@ namespace DiscordBot.Bots.SlashCommands
         public MusicSlashCommands(IMusicService musicService)
         {
             _musicService = musicService;
+        }
+
+        [SlashCommand("simradio", "Want to play Simulator Radio? Then you're in the right place!")]
+        public async Task PlaySimulatorRadio(InteractionContext ctx)
+        {
+            var songUri = new Uri("http://stream.simulatorradio.com/stream.mp3");
+
+            var lava = ctx.Client.GetLavalink();
+            var node = lava.ConnectedNodes.Values.First();
+
+            if (!lava.ConnectedNodes.Any())
+            {
+                await ctx.CreateResponseAsync("The Lavalink connection is not established", true);
+                return;
+            }
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.CreateResponseAsync("You are not in a voice channel.", false);
+                return;
+            }
+
+            await node.ConnectAsync(ctx.Member.VoiceState.Channel);
+
+            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
+
+            if (conn == null)
+            {
+                await ctx.CreateResponseAsync("Lavalink is not connected.");
+                return;
+            }
+
+            var loadResult = await node.Rest.GetTracksAsync(songUri);
+
+            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+            {
+                await ctx.CreateResponseAsync($"I cannot play Simulator Radio at this time. Please Try Again.");
+                return;
+            }
+
+            var track = loadResult.Tracks.First();
+
+            await conn.SetVolumeAsync(10);
+            await conn.PlayAsync(track);
+
+            await ctx.CreateResponseAsync($"Now playing Simulator Radio!");
         }
 
         [SlashCommand("play", "play a song")]
