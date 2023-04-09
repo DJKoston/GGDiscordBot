@@ -647,16 +647,13 @@ namespace DiscordBot.Bots
 
             foreach (DiscordMember profile in profiles)
             {
-                if (profile.IsBot)
+                if (!profile.IsBot)
                 {
-                    continue;
+                    await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
+
+                    Log($"New Profile created for '{profile.DisplayName}' in '{e.Guild.Name}'");
                 }
-
-                await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
-
-                Log($"New Profile created for '{profile.DisplayName}' in '{e.Guild.Name}'");
             }
-            return;
         }
 
         private async Task DiscordPresenceUpdated(DiscordClient c, PresenceUpdateEventArgs e)
