@@ -123,7 +123,7 @@ namespace DiscordBot.Bots
             DiscordClient.GuildMemberRemoved += DiscordGuildMemberRemoved;
             DiscordClient.MessageReactionAdded += DiscordMessageReactionAdded;
             DiscordClient.MessageReactionRemoved += DiscordMessageReactionRemoved;
-            DiscordClient.GuildAvailable += DiscordGuildAvaliable;
+            DiscordClient.GuildAvailable += DiscordGuildAvailable;
             DiscordClient.PresenceUpdated += DiscordPresenceUpdated;
             DiscordClient.GuildCreated += DiscordGuildCreated;
             DiscordClient.GuildUnavailable += DiscordGuildUnavaliable;
@@ -704,16 +704,15 @@ namespace DiscordBot.Bots
             return;
         }
 
-        private Task DiscordGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
+        private async Task DiscordGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
-            new Thread(async () =>
+            Log($"Guild: {e.Guild.Name} is now Available");
+            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+
+            var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
+
+            if (config != null)
             {
-                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
-
-                var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
-
-                if (config == null) { return; }
-
                 var allMembers = await guild.GetAllMembersAsync();
 
                 DiscordRole NowLive = guild.GetRole(config.RoleId);
@@ -754,9 +753,7 @@ namespace DiscordBot.Bots
                         continue;
                     }
                 }
-
-            }).Start();
-            return Task.CompletedTask;
+            }
         }
 
         private async Task DiscordMessageReactionRemoved(DiscordClient c, MessageReactionRemoveEventArgs e)
