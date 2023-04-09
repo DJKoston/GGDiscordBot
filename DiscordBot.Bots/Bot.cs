@@ -530,15 +530,14 @@ namespace DiscordBot.Bots
 
                 await e.Context.Channel.SendMessageAsync(command.Action);
                 Log($"{e.Context.Member.DisplayName} ran Command !{command.Trigger} in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
-
-                return;
             }
 
-            if (e.Exception is ChecksFailedException exception)
+            else if (e.Exception is ChecksFailedException exception)
             {
-
                 if (e.Exception is ChecksFailedException)
                 {
+                    var properError = exception;
+
                     if (e.Exception is CommandNotFoundException)
                     {
                         var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id);
@@ -551,13 +550,9 @@ namespace DiscordBot.Bots
 
                         await e.Context.Channel.SendMessageAsync(command.Action);
                         Log($"{e.Context.Member.DisplayName} ran Command {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
-
-                        return;
                     }
 
-                    var properError = exception;
-
-                    if (properError.FailedChecks[0] is RequireRolesAttribute)
+                    else if (properError.FailedChecks[0] is RequireRolesAttribute)
                     {
                         var permissionEmbed = new DiscordEmbedBuilder
                         {
@@ -568,11 +563,9 @@ namespace DiscordBot.Bots
 
                         await e.Context.Channel.SendMessageAsync(embed: permissionEmbed);
                         Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: User has no permission.");
-
-                        return;
                     }
 
-                    if (properError.FailedChecks[0] is CooldownAttribute attribute)
+                    else if (properError.FailedChecks[0] is CooldownAttribute attribute)
                     {
                         var remainingCooldown = attribute.GetRemainingCooldown(e.Context);
 
@@ -591,11 +584,9 @@ namespace DiscordBot.Bots
 
                             await e.Context.Channel.SendMessageAsync(embed: cooldownEmbed);
                             Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: Command on Cooldown");
-
-                            return;
                         }
 
-                        if (!cooldownMins.Equals(0))
+                        else if (!cooldownMins.Equals(0))
                         {
                             var cooldownEmbed = new DiscordEmbedBuilder
                             {
@@ -606,11 +597,9 @@ namespace DiscordBot.Bots
 
                             await e.Context.Channel.SendMessageAsync(embed: cooldownEmbed);
                             Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: Command on Cooldown");
-
-                            return;
                         }
 
-                        if (cooldownMins.Equals(0) && cooldownHours.Equals(0))
+                        else if (cooldownMins.Equals(0) && cooldownHours.Equals(0))
                         {
                             var cooldownEmbed = new DiscordEmbedBuilder
                             {
@@ -622,13 +611,10 @@ namespace DiscordBot.Bots
                             await e.Context.Channel.SendMessageAsync(embed: cooldownEmbed);
                             Log($"{e.Context.Member.DisplayName} attempted to run !{e.Command.Name} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: Command on Cooldown");
 
-                            return;
                         }
-                        return;
                     }
                 }
             }
-            return;
         }
 
         private Task DiscordGuildUnavaliable(DiscordClient c, GuildDeleteEventArgs e)
