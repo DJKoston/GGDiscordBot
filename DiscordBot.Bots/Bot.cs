@@ -640,7 +640,7 @@ namespace DiscordBot.Bots
 
         private async Task DiscordGuildCreated(DiscordClient c, GuildCreateEventArgs e)
         {
-            Log($"GG-Bot has been added to the {e.Guild.Name} Discord Server.");
+            Log($"GG-Bot has been added to the '{e.Guild.Name}' Discord Server.");
 
             var members = await e.Guild.GetAllMembersAsync();
             var profiles = members.Where(x => x.IsBot == false);
@@ -654,7 +654,7 @@ namespace DiscordBot.Bots
 
                 await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
 
-                Log($"New Profile created for {profile.DisplayName} in {e.Guild.Name}");
+                Log($"New Profile created for '{profile.DisplayName}' in '{e.Guild.Name}'");
             }
             return;
         }
@@ -703,7 +703,7 @@ namespace DiscordBot.Bots
 
         private async Task DiscordGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
-            Log($"Guild: {e.Guild.Name} is now Available");
+            Log($"'{e.Guild.Name}' is now Available");
             DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
 
             var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
