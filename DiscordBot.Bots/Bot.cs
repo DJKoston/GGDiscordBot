@@ -871,51 +871,30 @@ namespace DiscordBot.Bots
 
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessage(e.Guild.Id).Result;
 
-            if (WMConfig == null) { return; }
-
-            else
+            if (WMConfig != null)
             {
                 DiscordChannel welcome = e.Guild.GetChannel(WMConfig.ChannelId);
 
-                if (e.Member.IsBot)
-                {
-                    var joinEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Welcome to the Server {e.Member.DisplayName}",
-                        Description = $"{WMConfig.WelcomeMessage}",
-                        ImageUrl = $"{WMConfig.WelcomeImage}",
-                        Color = DiscordColor.Purple,
-                    };
-
-                    var totalMembers = e.Guild.MemberCount;
-                    var otherMembers = totalMembers - 1;
-
-                    joinEmbed.WithThumbnail(e.Member.AvatarUrl);
-                    joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
-
-                    await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
-                }
-
-                else
+                if (!e.Member.IsBot)
                 {
                     await _profileService.GetOrCreateProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
-
-                    var joinEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Welcome to the Server {e.Member.DisplayName}",
-                        Description = $"{WMConfig.WelcomeMessage}",
-                        ImageUrl = $"{WMConfig.WelcomeImage}",
-                        Color = DiscordColor.Purple,
-                    };
-
-                    var totalMembers = e.Guild.MemberCount;
-                    var otherMembers = totalMembers - 1;
-
-                    joinEmbed.WithThumbnail(e.Member.AvatarUrl);
-                    joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
-
-                    await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
                 }
+
+                var joinEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"Welcome to the Server {e.Member.DisplayName}",
+                    Description = $"{WMConfig.WelcomeMessage}",
+                    ImageUrl = $"{WMConfig.WelcomeImage}",
+                    Color = DiscordColor.Purple,
+                };
+
+                var totalMembers = e.Guild.MemberCount;
+                var otherMembers = totalMembers - 1;
+
+                joinEmbed.WithThumbnail(e.Member.AvatarUrl);
+                joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
+
+                await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
             }
         }
 
