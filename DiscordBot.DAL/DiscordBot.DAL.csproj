@@ -5,6 +5,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<Configurations>Debug;Release;</Configurations>
     <Nullable>disable</Nullable>
+    <IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
+    <Version>2023.4.9.1855</Version>
+    <Title>GG-Bot Database Layer</Title>
+    <Authors>DJKoston</Authors>
+    <Company>Koston Media Group</Company>
+    <Product>GG Discord Bot</Product>
+    <Copyright>DJKoston - 2023</Copyright>
+    <PackageProjectUrl>https://github.com/DJKoston/GGDiscordBot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
+    <Description>GG-Bot Database Layer</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -36,7 +36,6 @@ namespace DiscordBot.Bots
             twitchColor = ConsoleColor.DarkMagenta;
             discordColor = ConsoleColor.DarkCyan;
             fail = ConsoleColor.Red;
-
             statusPosition = 0;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
