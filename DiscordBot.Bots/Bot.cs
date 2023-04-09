@@ -761,32 +761,28 @@ namespace DiscordBot.Bots
 
         private async Task DiscordMessageReactionRemoved(DiscordClient c, MessageReactionRemoveEventArgs e)
         {
-            if (e.User.IsBot)
+            if (!e.User.IsBot)
             {
-                return;
+                var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
+
+                if (reactionRole == null) { return; }
+
+                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
+                DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+                DiscordRole role = guild.GetRole(reactionRole.RoleId);
+
+                if (reactionRole.RemoveAddRole == "add")
+                {
+                    await member.RevokeRoleAsync(role);
+                    Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name} through Reaction Role.");
+                }
+
+                else if (reactionRole.RemoveAddRole == "remove")
+                {
+                    await member.GrantRoleAsync(role);
+                    Log($"Granted {role.Name} Role to {member.Username} in {guild.Name} through Reaction Role.");
+                }
             }
-
-            var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
-
-            if (reactionRole == null) { return; }
-
-            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
-            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-            DiscordRole role = guild.GetRole(reactionRole.RoleId);
-
-            if (reactionRole.RemoveAddRole == "add")
-            {
-                await member.RevokeRoleAsync(role);
-                Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name} through Reaction Role.");
-            }
-
-            else if (reactionRole.RemoveAddRole == "remove")
-            {
-                await member.GrantRoleAsync(role);
-                Log($"Granted {role.Name} Role to {member.Username} in {guild.Name} through Reaction Role.");
-            }
-
-            return;
         }
 
         private async Task DiscordMessageReactionAdded(DiscordClient c, MessageReactionAddEventArgs e)
