@@ -17,6 +17,7 @@ namespace DiscordBot.Bots
         public LavalinkNodeConnection nodeConnection;
 
         private readonly IConfiguration _configuration;
+        public string environmentName = null;
 
         public LiveStreamMonitorService Monitor;
         public TwitchAPI Twitch;
@@ -30,6 +31,7 @@ namespace DiscordBot.Bots
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
             _configuration = configuration;
+            environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             twitchColor = ConsoleColor.DarkMagenta;
             discordColor = ConsoleColor.DarkCyan;
@@ -1010,14 +1012,17 @@ namespace DiscordBot.Bots
         {
             Log($"{c.CurrentUser.Username} is Ready.", ConsoleColor.Green);
             
-            Log("Connecting to Lavalink...");
-            LavaLink = DiscordClient.UseLavalink();
-            await LavaLink.ConnectAsync(LavalinkConfiguration);
-            nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
-            nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
-            nodeConnection.TrackStuck += NodeConnection_TrackStuck;
-            await _musicService.RemoveAllSongsAsync();
-            Log("Connected to Lavalink.");
+            if(environmentName != "Development")
+            {
+                Log("Connecting to Lavalink...");
+                LavaLink = DiscordClient.UseLavalink();
+                await LavaLink.ConnectAsync(LavalinkConfiguration);
+                nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
+                nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
+                nodeConnection.TrackStuck += NodeConnection_TrackStuck;
+                await _musicService.RemoveAllSongsAsync();
+                Log("Connected to Lavalink.");
+            }
         }
 
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
