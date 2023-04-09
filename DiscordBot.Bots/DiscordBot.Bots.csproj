@@ -5,19 +5,20 @@
     <TargetFramework>net6.0</TargetFramework>
 	<Configurations>Debug;Release</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2.5.0</Version>
+	<Version>2023.4.9.1531</Version>
     <Authors>DJKoston</Authors>
 	<Company>Generation Gamers</Company>
 	<Product>GG Discord Bot</Product>
 	<NeutralLanguage>en-GB</NeutralLanguage>
 	<RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
-	<Copyright>DJKoston 2022</Copyright>
+	<Copyright>DJKoston 2023</Copyright>
 	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	<StartupObject>DiscordBot.Bots.Program</StartupObject>
 	<AssemblyName>DiscordBot</AssemblyName>
 	<PackageProjectUrl>https://github.com/DJKoston/GGDiscordBot</PackageProjectUrl>
 	<UserSecretsId>b57eafb5-2029-4b9a-acd0-a96d968f5630</UserSecretsId>
 	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
   </PropertyGroup>
 	
   <ItemGroup>
