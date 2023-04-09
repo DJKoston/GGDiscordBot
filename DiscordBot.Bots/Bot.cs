@@ -1,12 +1,7 @@
 ﻿using DiscordBot.Core.Services.Music;
 using DSharpPlus.Lavalink;
-using DSharpPlus.Net;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.Extensions.Configuration;
-using System.Net.Sockets;
-using System.Net;
 using DSharpPlus.Lavalink.EventArgs;
-using System.IO.Pipelines;
+using DSharpPlus.Net;
 
 namespace DiscordBot.Bots
 {
@@ -304,7 +299,6 @@ namespace DiscordBot.Bots
                 await sender.PlayAsync(track);
             }
         }
-
 
         private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
         {
@@ -927,7 +921,7 @@ namespace DiscordBot.Bots
 
         private Task DiscordClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
-            Log(e.Exception.Message);
+            Log(e.Exception.Message, fail);
 
             return Task.CompletedTask;
         }
@@ -1133,11 +1127,9 @@ namespace DiscordBot.Bots
                             await _nowLiveMessageService.RemoveMessageStore(storedMessage);
                         }
                     }
-
-                    Log($"Now Live Messages Deleted.", twitchColor);
-
                     messageDeletionStatus = 2;
 
+                    Log($"Now Live Messages Deleted.", twitchColor);
                 }).Start();
             }
 
