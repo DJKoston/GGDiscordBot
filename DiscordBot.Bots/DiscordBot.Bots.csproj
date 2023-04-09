@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
 	<Configurations>Debug;Release</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2023.4.9.1855</Version>
+	<Version>2023.4.9.1858</Version>
     <Authors>DJKoston</Authors>
 	<Company>Koston Media Group</Company>
 	<Product>GG Discord Bot</Product>
