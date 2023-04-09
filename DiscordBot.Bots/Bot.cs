@@ -257,7 +257,7 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            LavalinkLoadResult loadResult = null;
+            LavalinkLoadResult loadResult;
 
             if (nextSong.SongURI.StartsWith("https://") || nextSong.SongURI.StartsWith("http://"))
             {
@@ -368,9 +368,11 @@ namespace DiscordBot.Bots
 
         private void OnTwitchStreamOnline(object sender, OnStreamOnlineArgs e)
         {
-            List<string> id = new List<string>();
-            id.Add(e.Channel);
-            var test = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result;
+            List<string> id = new()
+            {
+                e.Channel
+            };
+            
             var followers = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result.TotalFollows.ToString("###,###,###,###,###,###");
             var userLogo = Twitch.Helix.Users.GetUsersAsync(id).Result.Users.FirstOrDefault(x => x.DisplayName.ToLower() == e.Stream.UserName.ToLower()).ProfileImageUrl;
             var twitchLogo = "https://www.freepnglogos.com/uploads/purple-twitch-logo-png-18.png";
