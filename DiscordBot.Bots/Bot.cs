@@ -679,14 +679,11 @@ namespace DiscordBot.Bots
                 {
                     DiscordRole NowLive = guild.GetRole(config.RoleId);
 
-                    if (member.Roles.Contains(NowLive)) { continue; }
-
-                    else
+                    if (!member.Roles.Contains(NowLive)) 
                     {
                         await member.GrantRoleAsync(NowLive);
                         Log($"Granted {NowLive.Name} Role to {member.Username} in {guild.Name} through Now Live Role.");
                     }
-
                 }
 
                 else
