@@ -827,41 +827,21 @@ namespace DiscordBot.Bots
 
             var WMConfig = _leaveMessageConfigService.GetLeaveMessageConfig(e.Guild.Id).Result;
 
-            if (WMConfig == null) { return; }
-
-            else
+            if (WMConfig != null)
             {
                 DiscordChannel welcome = e.Guild.GetChannel(WMConfig.ChannelId);
 
-                if (e.Member.IsBot)
+                var leaveEmbed = new DiscordEmbedBuilder
                 {
-                    var leaveEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                        Description = $"{WMConfig.LeaveMessage}",
-                        ImageUrl = $"{WMConfig.LeaveImage}",
-                        Color = DiscordColor.Yellow,
-                    };
+                    Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
+                    Description = $"{WMConfig.LeaveMessage}",
+                    ImageUrl = $"{WMConfig.LeaveImage}",
+                    Color = DiscordColor.Yellow,
+                };
 
-                    leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
+                leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
 
-                    await welcome.SendMessageAsync(embed: leaveEmbed);
-                }
-
-                else
-                {
-                    var leaveEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                        Description = $"{WMConfig.LeaveMessage}",
-                        ImageUrl = $"{WMConfig.LeaveImage}",
-                        Color = DiscordColor.Yellow,
-                    };
-
-                    leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
-
-                    await welcome.SendMessageAsync(embed: leaveEmbed);
-                }
+                await welcome.SendMessageAsync(embed: leaveEmbed);
             }
         }
 
