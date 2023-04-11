@@ -17,11 +17,11 @@ namespace DiscordBot.Bots.Commands
         [Command("add")]
         public async Task AddTwitter(CommandContext ctx, string twitterUserName, DiscordChannel channel)
         {
-            await _twitterService.AddNewMonitorAsync(ctx.Guild.Id, channel.Id, twitterUserName);
+            await _twitterService.AddNewMonitorAsync(ctx.Guild.Id, channel.Id, twitterUserName.ToLower());
 
             var messageBuilder = new DiscordMessageBuilder
             {
-                Content = $"{twitterUserName} will now be have their tweets announced in {channel.Mention}",
+                Content = $"{twitterUserName.ToLower()} will now be have their tweets announced in {channel.Mention}",
             };
 
             messageBuilder.WithReply(ctx.Message.Id, true);
@@ -32,7 +32,7 @@ namespace DiscordBot.Bots.Commands
         [Command("remove")]
         public async Task RemoveTwitter(CommandContext ctx, string twitterUserName)
         {
-            await _twitterService.RemoveMonitorAsync(ctx.Guild.Id, twitterUserName);
+            await _twitterService.RemoveMonitorAsync(ctx.Guild.Id, twitterUserName.ToLower());
 
             var messageBuilder = new DiscordMessageBuilder
             {

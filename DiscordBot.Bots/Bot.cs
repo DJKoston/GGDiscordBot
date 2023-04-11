@@ -282,6 +282,8 @@ namespace DiscordBot.Bots
                     var tweetSearch = await TwitterClient.Search.SearchTweetsAsync($"from:{user} -is:retweet -filter:replies");
                     var firstTweet = tweetSearch.FirstOrDefault();
 
+                    if (firstTweet == null) { continue; }
+
                     long firstTweetId = Int64.Parse(firstTweet.Id.ToString());
                     long monitorId = 0;
 
