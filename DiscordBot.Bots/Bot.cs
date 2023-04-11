@@ -165,6 +165,7 @@ namespace DiscordBot.Bots
             DiscordCommands.RegisterCommands<QuoteCommands>();
             DiscordCommands.RegisterCommands<ReactionRoleCommands>();
             DiscordCommands.RegisterCommands<SuggestionCommands>();
+            DiscordCommands.RegisterCommands<TwitterCommands>();
             Log("Discord Commands Registered.");
 
             Log("Registering Discord Client Interactivity...");
