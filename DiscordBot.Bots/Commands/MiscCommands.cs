@@ -8,8 +8,9 @@
         private readonly INowLiveStreamerService _nowLiveStreamerService;
         private readonly IConfiguration _configuration;
         private readonly ISimpsonsQuoteService _simpsonsQuoteService;
+        private readonly ITwitterService _twitterService;
 
-        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, INowLiveStreamerService nowLiveStreamerService, IConfiguration configuration, ISimpsonsQuoteService simpsonsQuoteService)
+        public MiscCommands(RPGContext context, ISuggestionService suggestionService, ICommunityStreamerService communityStreamerService, INowLiveStreamerService nowLiveStreamerService, IConfiguration configuration, ISimpsonsQuoteService simpsonsQuoteService, ITwitterService twitterService)
         {
             _context = context;
             _suggestionService = suggestionService;
@@ -17,6 +18,7 @@
             _nowLiveStreamerService = nowLiveStreamerService;
             _configuration = configuration;
             _simpsonsQuoteService = simpsonsQuoteService;
+            _twitterService = twitterService;
         }
 
         [Command("d12")]
@@ -155,16 +157,21 @@
 
             var botUptime = DateTime.Now - botStartTime;
 
+            var tweetsMonitored = _twitterService.GetAllMonitoredAccounts().Count;
+
             embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
 
             embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
             embed.AddField("Discord Guilds:", guildCount.ToString("###,###,###,###"), false);
-            embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false);
+            embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), true);
             embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false);
-            embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false);
-            embed.AddField("Bot Version:", botVersion);
+            if (nowLiveChannelCount > 0) { embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false); }
+            if (nowLiveChannelCount == 0) { embed.AddField("Twitch Channels:", "0", false); }
+            if (tweetsMonitored > 0) { embed.AddField("Twitter Accounts:", $"{tweetsMonitored.ToString("###,###,###,###")}", true); }
+            if (tweetsMonitored > 0) { embed.AddField("Twitter Accounts:", "0", true); }
+            embed.AddField("Bot Version:", botVersion, false);
+            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes:00}m", true);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
-            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes:00}m");
 
             var messageBuilder1 = new DiscordMessageBuilder
             {
@@ -253,15 +260,17 @@
 
             var nowLiveChannelCount = _context.NowLiveStreamers.Where(x => x.GuildId == ctx.Guild.Id).Count();
 
-            embed.WithThumbnail(guild.IconUrl);
+            var tweetsMonitored = _twitterService.GetGuildMonitors(ctx.Guild.Id).Count;
+
+            embed.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl);
 
             embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
-            if (memberCount > 0) { embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false); }
-            if (memberCount == 0) { embed.AddField("Discord Members:", "0", false); }
-            if (channelCount > 0) { embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false); }
-            if (channelCount == 0) { embed.AddField("Discord Channels:", "0", false); }
+            embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false);
+            embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false);
             if (nowLiveChannelCount > 0) { embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false); }
             if (nowLiveChannelCount == 0) { embed.AddField("Twitch Channels:", "0", false); }
+            if (tweetsMonitored > 0) { embed.AddField("Twitter Accounts:", $"{tweetsMonitored.ToString("###,###,###,###")}", false); }
+            if (tweetsMonitored == 0) { embed.AddField("Twitter Accounts:", "0", false); }
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
 
             var messageBuilder1 = new DiscordMessageBuilder

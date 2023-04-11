@@ -23,6 +23,8 @@ global using DiscordBot.DAL.Models.Profiles;
 global using DiscordBot.DAL.Models.Quotes;
 global using DiscordBot.DAL.Models.ReactionRoles;
 global using DiscordBot.DAL.Models.Suggestions;
+global using DiscordBot.Core.Services.Music;
+global using DiscordBot.Core.Services.Twitter;
 global using DSharpPlus;
 global using DSharpPlus.CommandsNext;
 global using DSharpPlus.CommandsNext.Attributes;

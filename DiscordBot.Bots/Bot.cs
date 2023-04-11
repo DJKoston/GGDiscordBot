@@ -2,6 +2,10 @@
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
 using DSharpPlus.Net;
+using Microsoft.AspNetCore.Identity;
+using Tweetinvi;
+using TwitchLib.Communication.Interfaces;
+
 
 namespace DiscordBot.Bots
 {
@@ -16,27 +20,26 @@ namespace DiscordBot.Bots
         public LavalinkConfiguration LavalinkConfiguration;
         public LavalinkNodeConnection nodeConnection;
 
+        public System.Timers.Timer TwitterTimer = new();
+
+        public TwitterClient TwitterClient { get; private set; }
+
         private readonly IConfiguration _configuration;
-        public string environmentName = null;
+        public string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
         public LiveStreamMonitorService Monitor;
         public TwitchAPI Twitch;
 
-        public ConsoleColor twitchColor;
-        public ConsoleColor discordColor;
-        public ConsoleColor fail;
-        public int statusPosition;
+        public ConsoleColor twitchColor = ConsoleColor.DarkMagenta;
+        public ConsoleColor discordColor = ConsoleColor.DarkCyan;
+        public ConsoleColor twitterColor = ConsoleColor.Cyan;
+        public ConsoleColor fail = ConsoleColor.Red;
+        public int statusPosition = 0;
         public int messageDeletionStatus = 0;
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
             _configuration = configuration;
-            environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-            twitchColor = ConsoleColor.DarkMagenta;
-            discordColor = ConsoleColor.DarkCyan;
-            fail = ConsoleColor.Red;
-            statusPosition = 0;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
             Log("-----------------------------");
@@ -60,6 +63,7 @@ namespace DiscordBot.Bots
             _xpService = services.GetService<IXPService>();
             _reactionRoleService = services.GetService<IReactionRoleService>();
             _xpToggleService = services.GetService<IXPToggleService>();
+            _twitterService = services.GetService<ITwitterService>();
             Log("Loaded Core Services.");
 
             //Get Configuration Information from appsettings.json
@@ -69,6 +73,11 @@ namespace DiscordBot.Bots
             var twitchClientId = configuration["twitch-clientid"];
             var twitchAccessToken = configuration["twitch-accesstoken"];
             var lavalinkPassword = configuration["lavalink-password"];
+            var twitterBearerToken = configuration["twitter-bearer"];
+            var twitterAPIKey = configuration["twitter-apikey"];
+            var twitterAPIToken = configuration["twitter-apitoken"];
+            var twitterAccessToken = configuration["twitter-accesstoken"];
+            var twitterAccessTokenSecret = configuration["twitter-accesssecret"];
             Log("Configuration Info Retreived.");
 
             //Twitch Connection
@@ -78,6 +87,17 @@ namespace DiscordBot.Bots
             Twitch.Settings.ClientId = twitchClientId;
             Twitch.Settings.AccessToken = twitchAccessToken;
             Log("Twitch API Access Created.");
+
+            Log("Creating Twitter API Access...", twitterColor);
+            TwitterClient = new TwitterClient(twitterAPIKey, twitterAPIToken, twitterBearerToken);
+            Log("Created Twitter API Access.", twitterColor);
+
+            Log("Creating Twitter Timer...");
+            TwitterTimer.Interval = 10000;
+            TwitterTimer.AutoReset = true;
+            TwitterTimer.Elapsed += TwitterTimer_Elapsed;
+            TwitterTimer.Start();
+            Log("Twitter Timer Started.");
 
             //Discord Connection
             Log("Creating Discord Bot Configuration...");
@@ -246,6 +266,47 @@ namespace DiscordBot.Bots
         private readonly IXPService _xpService;
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
+        private readonly ITwitterService _twitterService;
+
+        private async void TwitterTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            var users = _twitterService.GetAllMonitoredAccounts();
+
+            foreach (var user in users)
+            {
+                var monitors = _twitterService.GetMonitorGuildInfo(user);
+
+                foreach(var monitor in monitors)
+                {
+                    var tweetSearch = await TwitterClient.Search.SearchTweetsAsync($"from:{user} -is:retweet -filter:replies");
+                    var firstTweet = tweetSearch.FirstOrDefault();
+
+                    long firstTweetId = Int64.Parse(firstTweet.Id.ToString());
+                    long monitorId = 0;
+
+                    if (monitor.LastTweetLink == null) { monitorId = 0; }
+                    else
+                    {
+                        monitorId = Int64.Parse(monitor.LastTweetLink);
+                    }
+
+                    if (monitorId >= firstTweetId) { continue; }
+
+                    var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == monitor.GuildID);
+
+                    if (guild == null) { continue; }
+
+                    var channel = guild.GetChannel(monitor.ChannelID);
+
+                    if (channel == null) { continue; }
+
+                    await channel.SendMessageAsync(firstTweet.Url);
+                    Log($"New Tweet from: {user}. Posted to: {guild.Name}", twitterColor);
+
+                    await _twitterService.UpdateTweetLinkAsync(monitor, firstTweet.Id.ToString());
+                }
+            }
+        }
 
         private async Task NodeConnection_PlaybackFinished(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackFinishEventArgs e)
         {
