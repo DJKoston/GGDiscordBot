@@ -6,7 +6,7 @@
 	<Configurations>Debug;Release;</Configurations>
     <Nullable>disable</Nullable>
     <IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
-    <Version>2023.4.11.1903</Version>
+    <Version>2023.4.11.1934</Version>
     <Title>GG-Bot Database Layer</Title>
     <Authors>DJKoston</Authors>
     <Company>Koston Media Group</Company>

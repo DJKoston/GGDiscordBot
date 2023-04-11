@@ -21,7 +21,7 @@ namespace DiscordBot.Bots.Commands
 
             var messageBuilder = new DiscordMessageBuilder
             {
-                Content = $"{twitterUserName.ToLower()} will now be have their tweets announced in {channel.Mention}",
+                Content = $"{twitterUserName.ToLower()} will now have their tweets announced in {channel.Mention}",
             };
 
             messageBuilder.WithReply(ctx.Message.Id, true);
@@ -36,7 +36,7 @@ namespace DiscordBot.Bots.Commands
 
             var messageBuilder = new DiscordMessageBuilder
             {
-                Content = $"{twitterUserName} will now no longer be announced in this server.",
+                Content = $"{twitterUserName} will no longer be announced in this server.",
             };
 
             messageBuilder.WithReply(ctx.Message.Id, true);
