@@ -4,6 +4,8 @@ using DSharpPlus.Lavalink.EventArgs;
 using DSharpPlus.Net;
 using Microsoft.AspNetCore.Identity;
 using Tweetinvi;
+using Tweetinvi.Core.Parameters;
+using Tweetinvi.Parameters.V2;
 using TwitchLib.Communication.Interfaces;
 
 
@@ -93,7 +95,7 @@ namespace DiscordBot.Bots
             Log("Created Twitter API Access.", twitterColor);
 
             Log("Creating Twitter Timer...");
-            TwitterTimer.Interval = 10000;
+            TwitterTimer.Interval = 60000;
             TwitterTimer.AutoReset = true;
             TwitterTimer.Elapsed += TwitterTimer_Elapsed;
             TwitterTimer.Start();
@@ -276,24 +278,39 @@ namespace DiscordBot.Bots
             foreach (var user in users)
             {
                 var monitors = _twitterService.GetMonitorGuildInfo(user);
+                SearchTweetsV2Parameters searchParams;
 
-                foreach(var monitor in monitors)
+                var lastDateTime = DateTime.Parse(monitors.FirstOrDefault().LastTweetDateTime);
+                var maxDateTime = DateTime.UtcNow.AddDays(-7).AddMinutes(1);
+
+                if(lastDateTime < maxDateTime)
                 {
-                    var tweetSearch = await TwitterClient.Search.SearchTweetsAsync($"from:{user} -is:retweet -filter:replies");
-                    var firstTweet = tweetSearch.FirstOrDefault();
-
-                    if (firstTweet == null) { continue; }
-
-                    long firstTweetId = Int64.Parse(firstTweet.Id.ToString());
-                    long monitorId = 0;
-
-                    if (monitor.LastTweetLink == null) { monitorId = 0; }
-                    else
+                    searchParams = new SearchTweetsV2Parameters($"(from:{user}) -is:retweet -is:reply")
                     {
-                        monitorId = Int64.Parse(monitor.LastTweetLink);
-                    }
+                        PageSize = 10,
+                    };
+                }
+                else
+                {
+                    searchParams = new SearchTweetsV2Parameters($"(from:{user}) -is:retweet -is:reply")
+                    {
+                        SinceId = monitors.FirstOrDefault().LastTweetLink,
+                    };
+                }
 
-                    if (monitorId >= firstTweetId) { continue; }
+                var tweetSearch = await TwitterClient.SearchV2.SearchTweetsAsync(searchParams);
+                var firstTweet = tweetSearch.Tweets.FirstOrDefault();
+
+                if(firstTweet == null) { continue; }
+
+                var tweetUrl = $"https://twitter.com/{tweetSearch.Includes.Users.FirstOrDefault().Username}/status/{firstTweet.Id}";
+
+                foreach (var monitor in monitors)
+                {
+                    var monitorId = Int64.Parse(monitor.LastTweetLink);
+                    var tweetId = Int64.Parse(firstTweet.Id);
+
+                    if (monitorId >= tweetId){ continue; }
 
                     var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == monitor.GuildID);
 
@@ -303,10 +320,10 @@ namespace DiscordBot.Bots
 
                     if (channel == null) { continue; }
 
-                    await channel.SendMessageAsync(firstTweet.Url);
+                    await channel.SendMessageAsync(tweetUrl);
                     Log($"New Tweet from: {user}. Posted to: {guild.Name}", twitterColor);
 
-                    await _twitterService.UpdateTweetLinkAsync(monitor, firstTweet.Id.ToString());
+                    await _twitterService.UpdateTweetLinkAsync(monitor, firstTweet.Id.ToString(), firstTweet.CreatedAt.ToString());
                 }
             }
         }

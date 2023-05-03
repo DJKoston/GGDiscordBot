@@ -6,9 +6,9 @@ namespace DiscordBot.Core.Services.Twitter
 {
     public interface ITwitterService
     {
-        Task AddNewMonitorAsync(ulong guildId, ulong channelId, string twitterUserName);
+        Task AddNewMonitorAsync(ulong guildId, ulong channelId, string twitterUserName, string lastTweetId, string dateTime);
         Task RemoveMonitorAsync(ulong guildId, string twitterUserName);
-        Task UpdateTweetLinkAsync(Tweet monitor, string newTweetLink);
+        Task UpdateTweetLinkAsync(Tweet monitor, string newTweetLink, string dateTime);
         List<Tweet> GetMonitorGuildInfo(string twitterUserName);
         List<string> GetAllMonitoredAccounts();
         List<Tweet> GetGuildMonitors(ulong guildId);
@@ -23,7 +23,7 @@ namespace DiscordBot.Core.Services.Twitter
             _options = options;
         }
 
-        public async Task AddNewMonitorAsync(ulong guildId, ulong channelId, string twitterUserName)
+        public async Task AddNewMonitorAsync(ulong guildId, ulong channelId, string twitterUserName, string lastTweetId, string dateTime)
         {
             using var context = new RPGContext(_options);
 
@@ -31,7 +31,9 @@ namespace DiscordBot.Core.Services.Twitter
             {
                 GuildID = guildId,
                 ChannelID = channelId,
-                TwitterUser = twitterUserName
+                TwitterUser = twitterUserName,
+                LastTweetLink = lastTweetId,
+                LastTweetDateTime = dateTime
             };
 
             await context.AddAsync(newMonitor);
@@ -43,17 +45,18 @@ namespace DiscordBot.Core.Services.Twitter
         {
             using var context = new RPGContext(_options);
 
-            var monitorToRemove = context.Tweets.FirstOrDefaultAsync(x => x.GuildID == guildId && x.TwitterUser == twitterUserName);
+            var monitorToRemove = await context.Tweets.FirstOrDefaultAsync(x => x.GuildID == guildId && x.TwitterUser == twitterUserName);
 
             context.Remove(monitorToRemove);
             await context.SaveChangesAsync();
         }
 
-        public async Task UpdateTweetLinkAsync(Tweet monitor, string newTweetLink)
+        public async Task UpdateTweetLinkAsync(Tweet monitor, string newTweetLink, string dateTime)
         {
             using var context = new RPGContext(_options);
 
             monitor.LastTweetLink = newTweetLink;
+            monitor.LastTweetDateTime = dateTime;
 
             context.Update(monitor);
             await context.SaveChangesAsync();

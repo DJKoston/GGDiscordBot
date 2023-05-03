@@ -1,4 +1,7 @@
 ﻿using DiscordBot.DAL.Models.Twitter;
+using System.Threading;
+using Tweetinvi;
+using Tweetinvi.Parameters.V2;
 using TwitchLib.Api.Helix;
 
 namespace DiscordBot.Bots.Commands
@@ -8,16 +11,57 @@ namespace DiscordBot.Bots.Commands
     public class TwitterCommands : BaseCommandModule
     {
         private readonly ITwitterService _twitterService;
+        private readonly IConfiguration _configuration;
 
-        public TwitterCommands(ITwitterService twitterService)
+        public TwitterCommands(ITwitterService twitterService, IConfiguration configuration)
         {
             _twitterService = twitterService;
+            _configuration = configuration;
         }
 
         [Command("add")]
         public async Task AddTwitter(CommandContext ctx, string twitterUserName, DiscordChannel channel)
         {
-            await _twitterService.AddNewMonitorAsync(ctx.Guild.Id, channel.Id, twitterUserName.ToLower());
+            var isInDatabase = _twitterService.GetGuildMonitors(ctx.Guild.Id).FirstOrDefault(x => x.TwitterUser == twitterUserName);
+
+            if (isInDatabase != null) 
+            {
+                var failedMessageBuilder = new DiscordMessageBuilder
+                {
+                    Content = $"{twitterUserName.ToLower()} is already being announce in this server. Please use `!twitter remove *username*` to remove them before trying again.",
+                };
+
+                failedMessageBuilder.WithReply(ctx.Message.Id, true);
+
+                await ctx.Channel.SendMessageAsync(failedMessageBuilder);
+
+                return;
+            }
+
+            var twitterBearerToken = _configuration["twitter-bearer"];
+            var twitterAPIKey = _configuration["twitter-apikey"];
+            var twitterAPIToken = _configuration["twitter-apitoken"];
+
+            var twitterClient = new TwitterClient(twitterAPIKey, twitterAPIToken, twitterBearerToken);
+
+            var searchParams = new SearchTweetsV2Parameters($"(from:{twitterUserName.ToLower()}) -is:retweet -is:reply")
+            {
+                PageSize = 10
+            };
+            var tweetSearch = await twitterClient.SearchV2.SearchTweetsAsync(searchParams);
+
+            var latestTweet = tweetSearch.Tweets.FirstOrDefault();
+
+            if(latestTweet != null)
+            {
+                await _twitterService.AddNewMonitorAsync(ctx.Guild.Id, channel.Id, twitterUserName.ToLower(), latestTweet.Id, latestTweet.CreatedAt.ToString());
+            }
+            else
+            {
+                var fakeDateTimeInjection = DateTime.UtcNow.AddDays(-8);
+
+                await _twitterService.AddNewMonitorAsync(ctx.Guild.Id, channel.Id, twitterUserName.ToLower(), "000000000000", fakeDateTimeInjection.ToString());
+            }
 
             var messageBuilder = new DiscordMessageBuilder
             {
@@ -69,6 +113,19 @@ namespace DiscordBot.Bots.Commands
 
                     embed1.AddField($"{monitor.TwitterUser}", $"{channel.Mention}", true);
                 }
+
+
+                if (embed1.Fields.Count != 0)
+                {
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = embed1,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder);
+                }
             }
 
             if (page2 != null)
@@ -84,6 +141,18 @@ namespace DiscordBot.Bots.Commands
                     DiscordChannel channel = ctx.Guild.GetChannel(monitor.ChannelID);
 
                     embed1.AddField($"{monitor.TwitterUser}", $"{channel.Mention}", true);
+                }
+
+                if (embed1.Fields.Count != 0)
+                {
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = embed1,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder);
                 }
             }
 
@@ -101,6 +170,18 @@ namespace DiscordBot.Bots.Commands
 
                     embed1.AddField($"{monitor.TwitterUser}", $"{channel.Mention}", true);
                 }
+
+                if (embed1.Fields.Count != 0)
+                {
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = embed1,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder);
+                }
             }
 
             if (page4 != null)
@@ -117,6 +198,18 @@ namespace DiscordBot.Bots.Commands
 
                     embed1.AddField($"{monitor.TwitterUser}", $"{channel.Mention}", true);
                 }
+
+                if (embed1.Fields.Count != 0)
+                {
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = embed1,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder);
+                }
             }
 
             if (page5 != null)
@@ -132,6 +225,18 @@ namespace DiscordBot.Bots.Commands
                     DiscordChannel channel = ctx.Guild.GetChannel(monitor.ChannelID);
 
                     embed1.AddField($"{monitor.TwitterUser}", $"{channel.Mention}", true);
+                }
+
+                if (embed1.Fields.Count != 0)
+                {
+                    var messageBuilder = new DiscordMessageBuilder
+                    {
+                        Embed = embed1,
+                    };
+
+                    messageBuilder.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder);
                 }
             }
         }
