@@ -1,12 +1,13 @@
 ﻿using DiscordBot.Core.Services.Music;
 using DSharpPlus.Lavalink;
-using DSharpPlus.Net;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.Extensions.Configuration;
-using System.Net.Sockets;
-using System.Net;
 using DSharpPlus.Lavalink.EventArgs;
-using System.IO.Pipelines;
+using DSharpPlus.Net;
+using Microsoft.AspNetCore.Identity;
+using Tweetinvi;
+using Tweetinvi.Core.Parameters;
+using Tweetinvi.Parameters.V2;
+using TwitchLib.Communication.Interfaces;
+
 
 namespace DiscordBot.Bots
 {
@@ -21,26 +22,26 @@ namespace DiscordBot.Bots
         public LavalinkConfiguration LavalinkConfiguration;
         public LavalinkNodeConnection nodeConnection;
 
+        public System.Timers.Timer TwitterTimer = new();
+
+        public TwitterClient TwitterClient { get; private set; }
+
         private readonly IConfiguration _configuration;
+        public string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
         public LiveStreamMonitorService Monitor;
         public TwitchAPI Twitch;
 
-        public ConsoleColor twitchColor;
-        public ConsoleColor discordColor;
-        public ConsoleColor fail;
-        public int statusPosition;
+        public ConsoleColor twitchColor = ConsoleColor.DarkMagenta;
+        public ConsoleColor discordColor = ConsoleColor.DarkCyan;
+        public ConsoleColor twitterColor = ConsoleColor.Cyan;
+        public ConsoleColor fail = ConsoleColor.Red;
+        public int statusPosition = 0;
         public int messageDeletionStatus = 0;
 
         public Bot(IServiceProvider services, IConfiguration configuration)
         {
             _configuration = configuration;
-
-            twitchColor = ConsoleColor.DarkMagenta;
-            discordColor = ConsoleColor.DarkCyan;
-            fail = ConsoleColor.Red;
-
-            statusPosition = 0;
 
             var botVersion = typeof(Bot).Assembly.GetName().Version.ToString();
             Log("-----------------------------");
@@ -64,6 +65,7 @@ namespace DiscordBot.Bots
             _xpService = services.GetService<IXPService>();
             _reactionRoleService = services.GetService<IReactionRoleService>();
             _xpToggleService = services.GetService<IXPToggleService>();
+            _twitterService = services.GetService<ITwitterService>();
             Log("Loaded Core Services.");
 
             //Get Configuration Information from appsettings.json
@@ -73,6 +75,11 @@ namespace DiscordBot.Bots
             var twitchClientId = configuration["twitch-clientid"];
             var twitchAccessToken = configuration["twitch-accesstoken"];
             var lavalinkPassword = configuration["lavalink-password"];
+            var twitterBearerToken = configuration["twitter-bearer"];
+            var twitterAPIKey = configuration["twitter-apikey"];
+            var twitterAPIToken = configuration["twitter-apitoken"];
+            var twitterAccessToken = configuration["twitter-accesstoken"];
+            var twitterAccessTokenSecret = configuration["twitter-accesssecret"];
             Log("Configuration Info Retreived.");
 
             //Twitch Connection
@@ -82,6 +89,17 @@ namespace DiscordBot.Bots
             Twitch.Settings.ClientId = twitchClientId;
             Twitch.Settings.AccessToken = twitchAccessToken;
             Log("Twitch API Access Created.");
+
+            Log("Creating Twitter API Access...", twitterColor);
+            TwitterClient = new TwitterClient(twitterAPIKey, twitterAPIToken, twitterBearerToken);
+            Log("Created Twitter API Access.", twitterColor);
+
+            Log("Creating Twitter Timer...");
+            TwitterTimer.Interval = 60000;
+            TwitterTimer.AutoReset = true;
+            TwitterTimer.Elapsed += TwitterTimer_Elapsed;
+            TwitterTimer.Start();
+            Log("Twitter Timer Started.");
 
             //Discord Connection
             Log("Creating Discord Bot Configuration...");
@@ -128,7 +146,7 @@ namespace DiscordBot.Bots
             DiscordClient.GuildMemberRemoved += DiscordGuildMemberRemoved;
             DiscordClient.MessageReactionAdded += DiscordMessageReactionAdded;
             DiscordClient.MessageReactionRemoved += DiscordMessageReactionRemoved;
-            DiscordClient.GuildAvailable += DiscordGuildAvaliable;
+            DiscordClient.GuildAvailable += DiscordGuildAvailable;
             DiscordClient.PresenceUpdated += DiscordPresenceUpdated;
             DiscordClient.GuildCreated += DiscordGuildCreated;
             DiscordClient.GuildUnavailable += DiscordGuildUnavaliable;
@@ -149,6 +167,7 @@ namespace DiscordBot.Bots
             DiscordCommands.RegisterCommands<QuoteCommands>();
             DiscordCommands.RegisterCommands<ReactionRoleCommands>();
             DiscordCommands.RegisterCommands<SuggestionCommands>();
+            DiscordCommands.RegisterCommands<TwitterCommands>();
             Log("Discord Commands Registered.");
 
             Log("Registering Discord Client Interactivity...");
@@ -250,6 +269,64 @@ namespace DiscordBot.Bots
         private readonly IXPService _xpService;
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
+        private readonly ITwitterService _twitterService;
+
+        private async void TwitterTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            var users = _twitterService.GetAllMonitoredAccounts();
+
+            foreach (var user in users)
+            {
+                var monitors = _twitterService.GetMonitorGuildInfo(user);
+                SearchTweetsV2Parameters searchParams;
+
+                var lastDateTime = DateTime.Parse(monitors.FirstOrDefault().LastTweetDateTime);
+                var maxDateTime = DateTime.UtcNow.AddDays(-7).AddMinutes(1);
+
+                if(lastDateTime < maxDateTime)
+                {
+                    searchParams = new SearchTweetsV2Parameters($"(from:{user}) -is:retweet -is:reply")
+                    {
+                        PageSize = 10,
+                    };
+                }
+                else
+                {
+                    searchParams = new SearchTweetsV2Parameters($"(from:{user}) -is:retweet -is:reply")
+                    {
+                        SinceId = monitors.FirstOrDefault().LastTweetLink,
+                    };
+                }
+
+                var tweetSearch = await TwitterClient.SearchV2.SearchTweetsAsync(searchParams);
+                var firstTweet = tweetSearch.Tweets.FirstOrDefault();
+
+                if(firstTweet == null) { continue; }
+
+                var tweetUrl = $"https://twitter.com/{tweetSearch.Includes.Users.FirstOrDefault().Username}/status/{firstTweet.Id}";
+
+                foreach (var monitor in monitors)
+                {
+                    var monitorId = Int64.Parse(monitor.LastTweetLink);
+                    var tweetId = Int64.Parse(firstTweet.Id);
+
+                    if (monitorId >= tweetId){ continue; }
+
+                    var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == monitor.GuildID);
+
+                    if (guild == null) { continue; }
+
+                    var channel = guild.GetChannel(monitor.ChannelID);
+
+                    if (channel == null) { continue; }
+
+                    await channel.SendMessageAsync(tweetUrl);
+                    Log($"New Tweet from: {user}. Posted to: {guild.Name}", twitterColor);
+
+                    await _twitterService.UpdateTweetLinkAsync(monitor, firstTweet.Id.ToString(), firstTweet.CreatedAt.ToString());
+                }
+            }
+        }
 
         private async Task NodeConnection_PlaybackFinished(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackFinishEventArgs e)
         {
@@ -262,7 +339,7 @@ namespace DiscordBot.Bots
                 return;
             }
 
-            LavalinkLoadResult loadResult = null;
+            LavalinkLoadResult loadResult;
 
             if (nextSong.SongURI.StartsWith("https://") || nextSong.SongURI.StartsWith("http://"))
             {
@@ -304,7 +381,6 @@ namespace DiscordBot.Bots
                 await sender.PlayAsync(track);
             }
         }
-
 
         private async Task DiscordComponentInteraction(DiscordClient c, ComponentInteractionCreateEventArgs e)
         {
@@ -374,9 +450,11 @@ namespace DiscordBot.Bots
 
         private void OnTwitchStreamOnline(object sender, OnStreamOnlineArgs e)
         {
-            List<string> id = new List<string>();
-            id.Add(e.Channel);
-            var test = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result;
+            List<string> id = new()
+            {
+                e.Channel
+            };
+            
             var followers = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result.TotalFollows.ToString("###,###,###,###,###,###");
             var userLogo = Twitch.Helix.Users.GetUsersAsync(id).Result.Users.FirstOrDefault(x => x.DisplayName.ToLower() == e.Stream.UserName.ToLower()).ProfileImageUrl;
             var twitchLogo = "https://www.freepnglogos.com/uploads/purple-twitch-logo-png-18.png";
@@ -536,15 +614,14 @@ namespace DiscordBot.Bots
 
                 await e.Context.Channel.SendMessageAsync(command.Action);
                 Log($"{e.Context.Member.DisplayName} ran Command !{command.Trigger} in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
-
-                return;
             }
 
-            if (e.Exception is ChecksFailedException exception)
+            else if (e.Exception is ChecksFailedException exception)
             {
-
                 if (e.Exception is ChecksFailedException)
                 {
+                    var properError = exception;
+
                     if (e.Exception is CommandNotFoundException)
                     {
                         var command = await _customCommandService.GetCommandAsync(e.Context.Message.Content.ToString(), e.Context.Guild.Id);
@@ -557,13 +634,9 @@ namespace DiscordBot.Bots
 
                         await e.Context.Channel.SendMessageAsync(command.Action);
                         Log($"{e.Context.Member.DisplayName} ran Command {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name}");
-
-                        return;
                     }
 
-                    var properError = exception;
-
-                    if (properError.FailedChecks[0] is RequireRolesAttribute)
+                    else if (properError.FailedChecks[0] is RequireRolesAttribute)
                     {
                         var permissionEmbed = new DiscordEmbedBuilder
                         {
@@ -574,11 +647,9 @@ namespace DiscordBot.Bots
 
                         await e.Context.Channel.SendMessageAsync(embed: permissionEmbed);
                         Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: User has no permission.");
-
-                        return;
                     }
 
-                    if (properError.FailedChecks[0] is CooldownAttribute attribute)
+                    else if (properError.FailedChecks[0] is CooldownAttribute attribute)
                     {
                         var remainingCooldown = attribute.GetRemainingCooldown(e.Context);
 
@@ -597,11 +668,9 @@ namespace DiscordBot.Bots
 
                             await e.Context.Channel.SendMessageAsync(embed: cooldownEmbed);
                             Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: Command on Cooldown");
-
-                            return;
                         }
 
-                        if (!cooldownMins.Equals(0))
+                        else if (!cooldownMins.Equals(0))
                         {
                             var cooldownEmbed = new DiscordEmbedBuilder
                             {
@@ -612,11 +681,9 @@ namespace DiscordBot.Bots
 
                             await e.Context.Channel.SendMessageAsync(embed: cooldownEmbed);
                             Log($"{e.Context.Member.DisplayName} attempted to run {e.Context.Message.Content} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: Command on Cooldown");
-
-                            return;
                         }
 
-                        if (cooldownMins.Equals(0) && cooldownHours.Equals(0))
+                        else if (cooldownMins.Equals(0) && cooldownHours.Equals(0))
                         {
                             var cooldownEmbed = new DiscordEmbedBuilder
                             {
@@ -628,13 +695,10 @@ namespace DiscordBot.Bots
                             await e.Context.Channel.SendMessageAsync(embed: cooldownEmbed);
                             Log($"{e.Context.Member.DisplayName} attempted to run !{e.Command.Name} in {e.Context.Guild.Name} #{e.Context.Channel.Name} - Exception: Command on Cooldown");
 
-                            return;
                         }
-                        return;
                     }
                 }
             }
-            return;
         }
 
         private Task DiscordGuildUnavaliable(DiscordClient c, GuildDeleteEventArgs e)
@@ -646,23 +710,20 @@ namespace DiscordBot.Bots
 
         private async Task DiscordGuildCreated(DiscordClient c, GuildCreateEventArgs e)
         {
-            Log($"GG-Bot has been added to the {e.Guild.Name} Discord Server.");
+            Log($"GG-Bot has been added to the '{e.Guild.Name}' Discord Server.");
 
             var members = await e.Guild.GetAllMembersAsync();
             var profiles = members.Where(x => x.IsBot == false);
 
             foreach (DiscordMember profile in profiles)
             {
-                if (profile.IsBot)
+                if (!profile.IsBot)
                 {
-                    continue;
+                    await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
+
+                    Log($"New Profile created for '{profile.DisplayName}' in '{e.Guild.Name}'");
                 }
-
-                await _profileService.GetOrCreateProfileAsync(profile.Id, e.Guild.Id, profile.Username);
-
-                Log($"New Profile created for {profile.DisplayName} in {e.Guild.Name}");
             }
-            return;
         }
 
         private async Task DiscordPresenceUpdated(DiscordClient c, PresenceUpdateEventArgs e)
@@ -685,14 +746,11 @@ namespace DiscordBot.Bots
                 {
                     DiscordRole NowLive = guild.GetRole(config.RoleId);
 
-                    if (member.Roles.Contains(NowLive)) { continue; }
-
-                    else
+                    if (!member.Roles.Contains(NowLive)) 
                     {
                         await member.GrantRoleAsync(NowLive);
                         Log($"Granted {NowLive.Name} Role to {member.Username} in {guild.Name} through Now Live Role.");
                     }
-
                 }
 
                 else
@@ -710,16 +768,15 @@ namespace DiscordBot.Bots
             return;
         }
 
-        private Task DiscordGuildAvaliable(DiscordClient c, GuildCreateEventArgs e)
+        private async Task DiscordGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
-            new Thread(async () =>
+            Log($"'{e.Guild.Name}' is now Available");
+            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
+
+            var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
+
+            if (config != null)
             {
-                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == e.Guild.Id);
-
-                var config = await _nowLiveRoleConfigService.GetNowLiveRole(e.Guild.Id);
-
-                if (config == null) { return; }
-
                 var allMembers = await guild.GetAllMembersAsync();
 
                 DiscordRole NowLive = guild.GetRole(config.RoleId);
@@ -760,71 +817,61 @@ namespace DiscordBot.Bots
                         continue;
                     }
                 }
-
-            }).Start();
-            return Task.CompletedTask;
+            }
         }
 
         private async Task DiscordMessageReactionRemoved(DiscordClient c, MessageReactionRemoveEventArgs e)
         {
-            if (e.User.IsBot)
+            if (!e.User.IsBot)
             {
-                return;
+                var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
+
+                if (reactionRole == null) { return; }
+
+                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
+                DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+                DiscordRole role = guild.GetRole(reactionRole.RoleId);
+
+                if (reactionRole.RemoveAddRole == "add")
+                {
+                    await member.RevokeRoleAsync(role);
+                    Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name} through Reaction Role.");
+                }
+
+                else if (reactionRole.RemoveAddRole == "remove")
+                {
+                    await member.GrantRoleAsync(role);
+                    Log($"Granted {role.Name} Role to {member.Username} in {guild.Name} through Reaction Role.");
+                }
             }
-
-            var reactionRole = _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name).Result;
-
-            if (reactionRole == null) { return; }
-
-            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
-            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-            DiscordRole role = guild.GetRole(reactionRole.RoleId);
-
-            if (reactionRole.RemoveAddRole == "add")
-            {
-                await member.RevokeRoleAsync(role);
-                Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name} through Reaction Role.");
-            }
-
-            else if (reactionRole.RemoveAddRole == "remove")
-            {
-                await member.GrantRoleAsync(role);
-                Log($"Granted {role.Name} Role to {member.Username} in {guild.Name} through Reaction Role.");
-            }
-
-            return;
         }
 
         private async Task DiscordMessageReactionAdded(DiscordClient c, MessageReactionAddEventArgs e)
         {
-            if (e.User.IsBot)
+            if (!e.User.IsBot)
             {
-                return;
+                DiscordEmoji emoji = e.Emoji;
+
+                var reactionRole = await _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name);
+
+                if (reactionRole == null) { return; }
+
+                DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
+                DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
+                DiscordRole role = guild.GetRole(reactionRole.RoleId);
+
+                if (reactionRole.RemoveAddRole == "add")
+                {
+                    await member.GrantRoleAsync(role);
+                    Log($"Granted {role.Name} Role to {member.Username} in {guild.Name} through Reaction Role.");
+                }
+
+                else if (reactionRole.RemoveAddRole == "remove")
+                {
+                    await member.RevokeRoleAsync(role);
+                    Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name} through Reaction Role.");
+                }
             }
-
-            DiscordEmoji emoji = e.Emoji;
-
-            var reactionRole = await _reactionRoleService.GetReactionRole(e.Guild.Id, e.Channel.Id, e.Message.Id, e.Emoji.Id, e.Emoji.Name);
-
-            if (reactionRole == null) { return; }
-
-            DiscordGuild guild = c.Guilds.Values.FirstOrDefault(x => x.Id == reactionRole.GuildId);
-            DiscordMember member = guild.Members.Values.FirstOrDefault(x => x.Id == e.User.Id);
-            DiscordRole role = guild.GetRole(reactionRole.RoleId);
-
-            if (reactionRole.RemoveAddRole == "add")
-            {
-                await member.GrantRoleAsync(role);
-                Log($"Granted {role.Name} Role to {member.Username} in {guild.Name} through Reaction Role.");
-            }
-
-            else if (reactionRole.RemoveAddRole == "remove")
-            {
-                await member.RevokeRoleAsync(role);
-                Log($"Revoked {role.Name} Role from {member.Username} in {guild.Name} through Reaction Role.");
-            }
-
-            return;
         }
 
         private async Task DiscordGuildMemberRemoved(DiscordClient c, GuildMemberRemoveEventArgs e)
@@ -833,41 +880,21 @@ namespace DiscordBot.Bots
 
             var WMConfig = _leaveMessageConfigService.GetLeaveMessageConfig(e.Guild.Id).Result;
 
-            if (WMConfig == null) { return; }
-
-            else
+            if (WMConfig != null)
             {
                 DiscordChannel welcome = e.Guild.GetChannel(WMConfig.ChannelId);
 
-                if (e.Member.IsBot)
+                var leaveEmbed = new DiscordEmbedBuilder
                 {
-                    var leaveEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                        Description = $"{WMConfig.LeaveMessage}",
-                        ImageUrl = $"{WMConfig.LeaveImage}",
-                        Color = DiscordColor.Yellow,
-                    };
+                    Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
+                    Description = $"{WMConfig.LeaveMessage}",
+                    ImageUrl = $"{WMConfig.LeaveImage}",
+                    Color = DiscordColor.Yellow,
+                };
 
-                    leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
+                leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
 
-                    await welcome.SendMessageAsync(embed: leaveEmbed);
-                }
-
-                else
-                {
-                    var leaveEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Big Oof! {e.Member.DisplayName} has just left the server!",
-                        Description = $"{WMConfig.LeaveMessage}",
-                        ImageUrl = $"{WMConfig.LeaveImage}",
-                        Color = DiscordColor.Yellow,
-                    };
-
-                    leaveEmbed.WithThumbnail(e.Member.AvatarUrl);
-
-                    await welcome.SendMessageAsync(embed: leaveEmbed);
-                }
+                await welcome.SendMessageAsync(embed: leaveEmbed);
             }
         }
 
@@ -877,57 +904,36 @@ namespace DiscordBot.Bots
 
             var WMConfig = _welcomeMessageConfigService.GetWelcomeMessage(e.Guild.Id).Result;
 
-            if (WMConfig == null) { return; }
-
-            else
+            if (WMConfig != null)
             {
                 DiscordChannel welcome = e.Guild.GetChannel(WMConfig.ChannelId);
 
-                if (e.Member.IsBot)
-                {
-                    var joinEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Welcome to the Server {e.Member.DisplayName}",
-                        Description = $"{WMConfig.WelcomeMessage}",
-                        ImageUrl = $"{WMConfig.WelcomeImage}",
-                        Color = DiscordColor.Purple,
-                    };
-
-                    var totalMembers = e.Guild.MemberCount;
-                    var otherMembers = totalMembers - 1;
-
-                    joinEmbed.WithThumbnail(e.Member.AvatarUrl);
-                    joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
-
-                    await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
-                }
-
-                else
+                if (!e.Member.IsBot)
                 {
                     await _profileService.GetOrCreateProfileAsync(e.Member.Id, e.Guild.Id, e.Member.Username);
-
-                    var joinEmbed = new DiscordEmbedBuilder
-                    {
-                        Title = $"Welcome to the Server {e.Member.DisplayName}",
-                        Description = $"{WMConfig.WelcomeMessage}",
-                        ImageUrl = $"{WMConfig.WelcomeImage}",
-                        Color = DiscordColor.Purple,
-                    };
-
-                    var totalMembers = e.Guild.MemberCount;
-                    var otherMembers = totalMembers - 1;
-
-                    joinEmbed.WithThumbnail(e.Member.AvatarUrl);
-                    joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
-
-                    await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
                 }
+
+                var joinEmbed = new DiscordEmbedBuilder
+                {
+                    Title = $"Welcome to the Server {e.Member.DisplayName}",
+                    Description = $"{WMConfig.WelcomeMessage}",
+                    ImageUrl = $"{WMConfig.WelcomeImage}",
+                    Color = DiscordColor.Purple,
+                };
+
+                var totalMembers = e.Guild.MemberCount;
+                var otherMembers = totalMembers - 1;
+
+                joinEmbed.WithThumbnail(e.Member.AvatarUrl);
+                joinEmbed.AddField($"Once again welcome to the server!", $"Thanks for joining the other {otherMembers:###,###,###,###,###} of us!");
+
+                await welcome.SendMessageAsync(e.Member.Mention, embed: joinEmbed);
             }
         }
 
         private Task DiscordClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
-            Log(e.Exception.Message);
+            Log(e.Exception.Message, fail);
 
             return Task.CompletedTask;
         }
@@ -1086,14 +1092,17 @@ namespace DiscordBot.Bots
         {
             Log($"{c.CurrentUser.Username} is Ready.", ConsoleColor.Green);
             
-            Log("Connecting to Lavalink...");
-            LavaLink = DiscordClient.UseLavalink();
-            await LavaLink.ConnectAsync(LavalinkConfiguration);
-            nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
-            nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
-            nodeConnection.TrackStuck += NodeConnection_TrackStuck;
-            await _musicService.RemoveAllSongsAsync();
-            Log("Connected to Lavalink.");
+            if(environmentName != "Development")
+            {
+                Log("Connecting to Lavalink...");
+                LavaLink = DiscordClient.UseLavalink();
+                await LavaLink.ConnectAsync(LavalinkConfiguration);
+                nodeConnection = LavaLink.GetNodeConnection(LavaLinkEndpoint);
+                nodeConnection.PlaybackFinished += NodeConnection_PlaybackFinished;
+                nodeConnection.TrackStuck += NodeConnection_TrackStuck;
+                await _musicService.RemoveAllSongsAsync();
+                Log("Connected to Lavalink.");
+            }
         }
 
         private async Task DiscordHeartbeat(DiscordClient c, HeartbeatEventArgs e)
@@ -1133,11 +1142,9 @@ namespace DiscordBot.Bots
                             await _nowLiveMessageService.RemoveMessageStore(storedMessage);
                         }
                     }
-
-                    Log($"Now Live Messages Deleted.", twitchColor);
-
                     messageDeletionStatus = 2;
 
+                    Log($"Now Live Messages Deleted.", twitchColor);
                 }).Start();
             }
 

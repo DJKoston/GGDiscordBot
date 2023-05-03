@@ -1,6 +1,4 @@
-﻿using DiscordBot.Core.Services.Music;
-
-namespace DiscordBot.Bots
+﻿namespace DiscordBot.Bots
 {
     public class Startup
     {
@@ -67,6 +65,9 @@ namespace DiscordBot.Bots
 
             //Suggestion Services
             services.AddScoped<ISuggestionService, SuggestionService>();
+
+            //Social Services
+            services.AddScoped<ITwitterService, TwitterService>();
 
             services.AddRazorPages();
 

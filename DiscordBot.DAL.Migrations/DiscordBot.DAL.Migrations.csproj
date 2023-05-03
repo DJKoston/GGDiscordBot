@@ -4,11 +4,21 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
+    <Version>2023.5.3.2002</Version>
+    <Title>GG-Bot Database Migration Layer</Title>
+    <Authors>DJKoston</Authors>
+    <Company>Koston Media Group</Company>
+    <Product>GG Discord Bot</Product>
+    <Copyright>DJKoston - 2023</Copyright>
+    <PackageProjectUrl>https://github.com/DJKoston/GGDiscordBot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DJKoston/GGDiscordBot</RepositoryUrl>
+    <Description>GG-Bot Database Migration Layer</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.15" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.16" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.16" />
   </ItemGroup>
 
   <ItemGroup>

@@ -98,7 +98,7 @@ namespace DiscordBot.Core.Services.Music
             
             string queueListAsString = string.Empty;
 
-            if (allSongs.Count() > 0)
+            if (allSongs.Any())
             {
                 foreach (var song in allSongs)
                 {

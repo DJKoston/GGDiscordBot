@@ -3,7 +3,6 @@
     [Group("nl")]
     [Aliases("NowLive")]
     [RequirePermissions(DSharpPlus.Permissions.Administrator)]
-
     public class NowLiveCommands : BaseCommandModule
     {
         [Group("twitch")]

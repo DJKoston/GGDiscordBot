@@ -9,6 +9,7 @@ using DiscordBot.DAL.Models.Profiles;
 using DiscordBot.DAL.Models.Quotes;
 using DiscordBot.DAL.Models.ReactionRoles;
 using DiscordBot.DAL.Models.Suggestions;
+using DiscordBot.DAL.Models.Twitter;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.DAL
@@ -63,5 +64,8 @@ namespace DiscordBot.DAL
 
         //Suggestions
         public DbSet<Suggestion> Suggestions { get; set; }
+
+        //Twitter
+        public DbSet<Tweet> Tweets { get; set; }
     }
 }

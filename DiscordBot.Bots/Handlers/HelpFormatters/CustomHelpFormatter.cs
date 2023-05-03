@@ -42,6 +42,7 @@
             List<string> quoteCommands = new();
             List<string> reactionRoleCommands = new();
             List<string> suggestionCommands = new();
+            List<string> twitterCommands = new();
 
 
             foreach (var cmd in cmds)
@@ -295,6 +296,24 @@
                         suggestionCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
+
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("TwitterCommands"))
+                {
+                    if (cmd is CommandGroup commandGroup)
+                    {
+                        var childCommands = commandGroup.Children;
+
+                        foreach (var childCommand in childCommands)
+                        {
+                            twitterCommands.Add($"`!{childCommand.QualifiedName}`");
+                        }
+                    }
+
+                    else
+                    {
+                        twitterCommands.Add($"`!{cmd.QualifiedName}`");
+                    }
+                }
             }
 
             if (buttonRoleCommands.Count != 0)
@@ -355,6 +374,11 @@
             if (suggestionCommands.Count != 0)
             {
                 _embed.AddField("Suggestion Commands:", String.Join(", ", suggestionCommands.ToArray()));
+            }
+
+            if(twitterCommands.Count != 0)
+            {
+                _embed.AddField("Twitter Commands:", String.Join(", ", twitterCommands.ToArray()));
             }
 
             return this;
