@@ -29,7 +29,7 @@ namespace DiscordBot.Core.Services.Games
             numberGuess.GuildId = guildId;
 
             Random rnd = new();
-            numberGuess.Number = rnd.Next(0, 11);
+            numberGuess.Number = rnd.Next(1, 11);
 
             await context.AddAsync(numberGuess);
 
@@ -43,7 +43,7 @@ namespace DiscordBot.Core.Services.Games
             NumberGuess numberGuess = await context.NumberGuesses.FirstOrDefaultAsync(x => x.GuildId == guildId);
 
             Random rnd = new();
-            numberGuess.Number = rnd.Next(0, 11);
+            numberGuess.Number = rnd.Next(1, 11);
 
             context.Update(numberGuess);
 
