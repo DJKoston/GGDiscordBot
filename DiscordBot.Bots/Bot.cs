@@ -22,7 +22,7 @@ namespace DiscordBot.Bots
         public LavalinkConfiguration LavalinkConfiguration;
         public LavalinkNodeConnection nodeConnection;
 
-        public System.Timers.Timer TwitterTimer = new();
+        //public System.Timers.Timer TwitterTimer = new();
 
         public TwitterClient TwitterClient { get; private set; }
 
@@ -95,10 +95,10 @@ namespace DiscordBot.Bots
             Log("Created Twitter API Access.", twitterColor);
 
             Log("Creating Twitter Timer...");
-            TwitterTimer.Interval = 60000;
-            TwitterTimer.AutoReset = true;
-            TwitterTimer.Elapsed += TwitterTimer_Elapsed;
-            TwitterTimer.Start();
+            //TwitterTimer.Interval = 60000;
+            //TwitterTimer.AutoReset = true;
+            //TwitterTimer.Elapsed += TwitterTimer_Elapsed;
+            //TwitterTimer.Start();
             Log("Twitter Timer Started.");
 
             //Discord Connection
