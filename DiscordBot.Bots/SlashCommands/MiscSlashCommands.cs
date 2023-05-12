@@ -23,6 +23,25 @@
             _twitterService = twitterService;
         }
 
+        [SlashCommand("e621", "Grab an e621 post!")]
+        public async Task SlashFurry(InteractionContext ctx,
+            [Option("PostID", "Specific post ID")] string postID)
+        {
+            var messageBuilder = new DiscordInteractionResponseBuilder();
+
+            if (postID == null)
+            {
+                messageBuilder.Content = "Please provide an ID";
+            }
+            else
+            {
+                messageBuilder.Content = $"https://www.e621.net/posts/{postID}";
+            }
+
+            messageBuilder.AsEphemeral(true);
+            await ctx.CreateResponseAsync(messageBuilder);
+        }
+
         [SlashCommand("d12", "Roll a D12 Dice")]
         public async Task SlashRollTwelveDie(InteractionContext ctx)
         {

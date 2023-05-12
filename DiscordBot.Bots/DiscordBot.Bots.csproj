@@ -18,7 +18,7 @@
 	<PackageProjectUrl>https://github.com/DJKoston/GGDiscordBot</PackageProjectUrl>
 	<UserSecretsId>b57eafb5-2029-4b9a-acd0-a96d968f5630</UserSecretsId>
 	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	<IncrementVersionOnBuild>yyyy.MM.dd</IncrementVersionOnBuild>
+	<IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
 	<Title>GG-Bot</Title>
 	<Description>GG-Bot</Description>
   </PropertyGroup>
