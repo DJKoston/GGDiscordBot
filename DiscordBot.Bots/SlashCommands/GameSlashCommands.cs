@@ -16,6 +16,25 @@
             _numberGuessService = numberGuessService;
         }
 
+        [SlashCommand("e621", "Grab an e621 post!")]
+        public async Task SlashFurry(InteractionContext ctx,
+            [Option("PostID", "Specific post ID")] string postID)
+        {
+            var messageBuilder = new DiscordInteractionResponseBuilder();
+
+            if (postID == null)
+            {
+                messageBuilder.Content = "Please provide an ID";
+            }
+            else
+            {
+                messageBuilder.Content = $"https://www.e621.net/posts/{postID}";
+            }
+
+            messageBuilder.AsEphemeral(true);
+            await ctx.CreateResponseAsync(messageBuilder);
+        }
+
         [SlashCommand("spin", "Spin the wheel and get a random bonus!")]
         public async Task SlashSpin(InteractionContext ctx,
             [Option("bet", "Amount to bet.")] double betConvert)
