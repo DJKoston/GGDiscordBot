@@ -88,7 +88,9 @@ namespace DiscordBot.Core.Services.Music
         }
 
 
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<string> GetQueueAsync(ulong guildId)
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             using var context = new RPGContext(_options);
 
