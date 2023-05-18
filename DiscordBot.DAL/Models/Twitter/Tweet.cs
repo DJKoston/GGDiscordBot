@@ -7,5 +7,6 @@
         public string TwitterUser { get; set; }
         public string LastTweetLink { get; set; }
         public string LastTweetDateTime { get; set; }
+        public bool IsPosted { get; set; }
     }
 }

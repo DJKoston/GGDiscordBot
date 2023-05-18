@@ -1,8 +1,10 @@
 ﻿using DiscordBot.Core.Services.Music;
+using DiscordBot.DAL.Models.Twitter;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
 using DSharpPlus.Net;
 using Microsoft.AspNetCore.Identity;
+using System.Timers;
 using Tweetinvi;
 using Tweetinvi.Core.Parameters;
 using Tweetinvi.Parameters.V2;
@@ -22,9 +24,7 @@ namespace DiscordBot.Bots
         public LavalinkConfiguration LavalinkConfiguration;
         public LavalinkNodeConnection nodeConnection;
 
-        //public System.Timers.Timer TwitterTimer = new();
-
-        public TwitterClient TwitterClient { get; private set; }
+        public System.Timers.Timer TweetTimer = new();
 
         private readonly IConfiguration _configuration;
         public string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -89,17 +89,6 @@ namespace DiscordBot.Bots
             Twitch.Settings.ClientId = twitchClientId;
             Twitch.Settings.AccessToken = twitchAccessToken;
             Log("Twitch API Access Created.");
-
-            Log("Creating Twitter API Access...", twitterColor);
-            TwitterClient = new TwitterClient(twitterAPIKey, twitterAPIToken, twitterBearerToken);
-            Log("Created Twitter API Access.", twitterColor);
-
-            Log("Creating Twitter Timer...");
-            //TwitterTimer.Interval = 60000;
-            //TwitterTimer.AutoReset = true;
-            //TwitterTimer.Elapsed += TwitterTimer_Elapsed;
-            //TwitterTimer.Start();
-            Log("Twitter Timer Started.");
 
             //Discord Connection
             Log("Creating Discord Bot Configuration...");
@@ -250,6 +239,13 @@ namespace DiscordBot.Bots
             DiscordSlashCommands.RegisterCommands<ProfileSlashCommands>();
             DiscordSlashCommands.RegisterCommands<MusicSlashCommands>();
             Log("Slash Commands Registered.");
+
+            Log("Starting Tweet Timer...", twitterColor);
+            TweetTimer.Interval = 30000;
+            TweetTimer.Elapsed += OnTweetTimerElapsed;
+            TweetTimer.AutoReset = true;
+            TweetTimer.Start();
+            Log("Tweet Timer Started.", twitterColor);
         }
 
         public string currencyName;
@@ -271,60 +267,28 @@ namespace DiscordBot.Bots
         private readonly IXPToggleService _xpToggleService;
         private readonly ITwitterService _twitterService;
 
-        private async void TwitterTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private async void OnTweetTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            var users = _twitterService.GetAllMonitoredAccounts();
+            var tweets = _twitterService.GetTweetsToPost();
 
-            foreach (var user in users)
+            foreach (Tweet tweet in tweets)
             {
-                var monitors = _twitterService.GetMonitorGuildInfo(user);
-                SearchTweetsV2Parameters searchParams;
+                var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == tweet.GuildID);
 
-                var lastDateTime = DateTime.Parse(monitors.FirstOrDefault().LastTweetDateTime);
-                var maxDateTime = DateTime.UtcNow.AddDays(-7).AddMinutes(1);
+                if (guild == null) { continue; }
 
-                if(lastDateTime < maxDateTime)
-                {
-                    searchParams = new SearchTweetsV2Parameters($"(from:{user}) -is:retweet -is:reply")
-                    {
-                        PageSize = 10,
-                    };
-                }
-                else
-                {
-                    searchParams = new SearchTweetsV2Parameters($"(from:{user}) -is:retweet -is:reply")
-                    {
-                        SinceId = monitors.FirstOrDefault().LastTweetLink,
-                    };
-                }
+                Log($"New Tweet found for: {tweet.TwitterUser}", twitterColor);
 
-                var tweetSearch = await TwitterClient.SearchV2.SearchTweetsAsync(searchParams);
-                var firstTweet = tweetSearch.Tweets.FirstOrDefault();
+                var channel = guild.GetChannel(tweet.ChannelID);
 
-                if(firstTweet == null) { continue; }
+                if (channel == null) { Log("Channel not found. Skipping Tweet.", fail); continue; }
 
-                var tweetUrl = $"https://twitter.com/{tweetSearch.Includes.Users.FirstOrDefault().Username}/status/{firstTweet.Id}";
+                var message = await channel.SendMessageAsync($"https://twitter.com/{tweet.TwitterUser}/status/{tweet.LastTweetLink}");
 
-                foreach (var monitor in monitors)
-                {
-                    var monitorId = Int64.Parse(monitor.LastTweetLink);
-                    var tweetId = Int64.Parse(firstTweet.Id);
+                if (message == null) { Log("Message not sent successfully. Will try again in 60 seconds.", fail);  continue; }
 
-                    if (monitorId >= tweetId){ continue; }
-
-                    var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == monitor.GuildID);
-
-                    if (guild == null) { continue; }
-
-                    var channel = guild.GetChannel(monitor.ChannelID);
-
-                    if (channel == null) { continue; }
-
-                    await channel.SendMessageAsync(tweetUrl);
-                    Log($"New Tweet from: {user}. Posted to: {guild.Name}", twitterColor);
-
-                    await _twitterService.UpdateTweetLinkAsync(monitor, firstTweet.Id.ToString(), firstTweet.CreatedAt.ToString());
-                }
+                await _twitterService.MarkTweetAsPosted(tweet);
+                Log($"Tweet by: {tweet.TwitterUser} posted in {guild.Name}", twitterColor);
             }
         }
 

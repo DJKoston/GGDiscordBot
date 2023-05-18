@@ -8,10 +8,10 @@ namespace DiscordBot.Core.Services.Twitter
     {
         Task AddNewMonitorAsync(ulong guildId, ulong channelId, string twitterUserName, string lastTweetId, string dateTime);
         Task RemoveMonitorAsync(ulong guildId, string twitterUserName);
-        Task UpdateTweetLinkAsync(Tweet monitor, string newTweetLink, string dateTime);
-        List<Tweet> GetMonitorGuildInfo(string twitterUserName);
-        List<string> GetAllMonitoredAccounts();
         List<Tweet> GetGuildMonitors(ulong guildId);
+        Task MarkTweetAsPosted (Tweet tweet);
+        List<Tweet> GetTweetsToPost();
+        List<Tweet> GetAllMonitoredAccounts();
     }
 
     public class TwitterService : ITwitterService
@@ -33,7 +33,8 @@ namespace DiscordBot.Core.Services.Twitter
                 ChannelID = channelId,
                 TwitterUser = twitterUserName,
                 LastTweetLink = lastTweetId,
-                LastTweetDateTime = dateTime
+                LastTweetDateTime = dateTime,
+                IsPosted = true
             };
 
             await context.AddAsync(newMonitor);
@@ -51,36 +52,34 @@ namespace DiscordBot.Core.Services.Twitter
             await context.SaveChangesAsync();
         }
 
-        public async Task UpdateTweetLinkAsync(Tweet monitor, string newTweetLink, string dateTime)
-        {
-            using var context = new RPGContext(_options);
-
-            monitor.LastTweetLink = newTweetLink;
-            monitor.LastTweetDateTime = dateTime;
-
-            context.Update(monitor);
-            await context.SaveChangesAsync();
-        }
-
-        public List<Tweet> GetMonitorGuildInfo(string twitterUserName)
-        {
-            using var context = new RPGContext(_options);
-
-            return context.Tweets.Where(x => x.TwitterUser == twitterUserName).ToList();
-        }
-
-        public List<string> GetAllMonitoredAccounts()
-        {
-            using var context = new RPGContext(_options);
-
-            return context.Tweets.Where(x => x.TwitterUser != null).Select(x => x.TwitterUser).Distinct().ToList();
-        }
-
         public List<Tweet> GetGuildMonitors(ulong guildId)
         {
             using var context = new RPGContext(_options);
 
             return context.Tweets.Where(x => x.GuildID == guildId).ToList();
+        }
+
+        public async Task MarkTweetAsPosted(Tweet tweet)
+        {
+            using var context = new RPGContext(_options);
+
+            tweet.IsPosted = true;
+            context.Update(tweet);
+            await context.SaveChangesAsync();
+        }
+
+        public List<Tweet> GetTweetsToPost()
+        {
+            using var context = new RPGContext(_options);
+
+            return context.Tweets.Where(x => x.IsPosted == false).ToList();
+        }
+
+        public List<Tweet> GetAllMonitoredAccounts()
+        {
+            using var context = new RPGContext(_options);
+
+            return context.Tweets.Where(x=> x.TwitterUser != null).Distinct().ToList();
         }
     }
 }
