@@ -163,14 +163,14 @@
 
             embed.WithFooter($"Stats last updated: {DateTime.Now} (UK Time)");
             embed.AddField("Discord Guilds:", guildCount.ToString("###,###,###,###"), false);
-            embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), true);
+            embed.AddField("Discord Members:", memberCount.ToString("###,###,###,###"), false);
             embed.AddField("Discord Channels:", channelCount.ToString("###,###,###,###"), false);
             if (nowLiveChannelCount > 0) { embed.AddField("Twitch Channels:", nowLiveChannelCount.ToString("###,###,###,###"), false); }
             if (nowLiveChannelCount == 0) { embed.AddField("Twitch Channels:", "0", false); }
-            if (tweetsMonitored > 0) { embed.AddField("Twitter Accounts:", $"{tweetsMonitored:###,###,###,###}", true); }
-            if (tweetsMonitored > 0) { embed.AddField("Twitter Accounts:", "0", true); }
+            if (tweetsMonitored > 0) { embed.AddField("Twitter Accounts:", $"{tweetsMonitored:###,###,###,###}", false); }
+            if (tweetsMonitored == 0) { embed.AddField("Twitter Accounts:", "0", false); }
             embed.AddField("Bot Version:", botVersion, false);
-            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes:00}m", true);
+            embed.AddField("Uptime:", $"{botUptime.Days}d {botUptime.Hours}h {botUptime.Minutes:00}m", false);
             embed.AddField("Ping:", $"{ctx.Client.Ping:###,###,###,###}ms", false);
 
             DiscordInteractionResponseBuilder messageBuilder = new();
