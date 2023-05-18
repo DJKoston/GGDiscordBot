@@ -4,8 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
-    <Version>2023.5.15.45</Version>
+    <IncrementVersionOnBuild>yyyy.MM.dd</IncrementVersionOnBuild>
+    <Version>2023.5.18.0</Version>
     <Title>GG-Bot Database Migration Layer</Title>
     <Authors>DJKoston</Authors>
     <Company>Koston Media Group</Company>

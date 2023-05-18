@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<Configurations>Debug;Release;</Configurations>
     <Nullable>disable</Nullable>
-    <IncrementVersionOnBuild>yyyy.MM.dd.HHmm</IncrementVersionOnBuild>
-    <Version>2023.5.16.14</Version>
+    <IncrementVersionOnBuild>yyyy.MM.dd</IncrementVersionOnBuild>
+    <Version>2023.5.18.0</Version>
     <Title>GG-Bot Database Layer</Title>
     <Authors>DJKoston</Authors>
     <Company>Koston Media Group</Company>
