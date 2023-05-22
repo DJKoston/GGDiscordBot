@@ -10,6 +10,7 @@ using DiscordBot.DAL.Models.Quotes;
 using DiscordBot.DAL.Models.ReactionRoles;
 using DiscordBot.DAL.Models.Suggestions;
 using DiscordBot.DAL.Models.Twitter;
+using DiscordBot.DAL.Models.YouTube;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot.DAL
@@ -67,5 +68,9 @@ namespace DiscordBot.DAL
 
         //Twitter
         public DbSet<Tweet> Tweets { get; set; }
+
+        //YouTube
+        public DbSet<YTAccounts> YouTubeAccounts { get; set; }
+        public DbSet<YTVideos> YouTubeToAnnounce { get; set; }
     }
 }

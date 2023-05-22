@@ -1,4 +1,6 @@
-﻿namespace DiscordBot.Bots
+﻿using DiscordBot.Core.Services.YouTube;
+
+namespace DiscordBot.Bots
 {
     public class Startup
     {
@@ -68,6 +70,7 @@
 
             //Social Services
             services.AddScoped<ITwitterService, TwitterService>();
+            services.AddScoped<IYouTubeService, YTService>();
 
             services.AddRazorPages();
 

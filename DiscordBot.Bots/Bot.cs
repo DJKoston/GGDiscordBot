@@ -1,4 +1,5 @@
 ﻿using DiscordBot.Core.Services.Music;
+using DiscordBot.Core.Services.YouTube;
 using DiscordBot.DAL.Models.Twitter;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
@@ -6,8 +7,10 @@ using DSharpPlus.Net;
 using Microsoft.AspNetCore.Identity;
 using System.Timers;
 using Tweetinvi;
+using Tweetinvi.Core.Models;
 using Tweetinvi.Core.Parameters;
 using Tweetinvi.Parameters.V2;
+using TwitchLib.Api.Helix.Models.Extensions.ReleasedExtensions;
 using TwitchLib.Communication.Interfaces;
 
 
@@ -25,6 +28,7 @@ namespace DiscordBot.Bots
         public LavalinkNodeConnection nodeConnection;
 
         public System.Timers.Timer TweetTimer = new();
+        public System.Timers.Timer YouTubeTimer = new();
 
         private readonly IConfiguration _configuration;
         public string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -35,7 +39,8 @@ namespace DiscordBot.Bots
         public ConsoleColor twitchColor = ConsoleColor.DarkMagenta;
         public ConsoleColor discordColor = ConsoleColor.DarkCyan;
         public ConsoleColor twitterColor = ConsoleColor.Cyan;
-        public ConsoleColor fail = ConsoleColor.Red;
+        public ConsoleColor fail = ConsoleColor.DarkRed;
+        public ConsoleColor youtubeColor = ConsoleColor.Red;
         public int statusPosition = 0;
         public int messageDeletionStatus = 0;
 
@@ -66,6 +71,7 @@ namespace DiscordBot.Bots
             _reactionRoleService = services.GetService<IReactionRoleService>();
             _xpToggleService = services.GetService<IXPToggleService>();
             _twitterService = services.GetService<ITwitterService>();
+            _youtubeService = services.GetService<IYouTubeService>();
             Log("Loaded Core Services.");
 
             //Get Configuration Information from appsettings.json
@@ -157,6 +163,7 @@ namespace DiscordBot.Bots
             DiscordCommands.RegisterCommands<ReactionRoleCommands>();
             DiscordCommands.RegisterCommands<SuggestionCommands>();
             DiscordCommands.RegisterCommands<TwitterCommands>();
+            DiscordCommands.RegisterCommands<YouTubeCommands>();
             Log("Discord Commands Registered.");
 
             Log("Registering Discord Client Interactivity...");
@@ -246,6 +253,13 @@ namespace DiscordBot.Bots
             TweetTimer.AutoReset = true;
             TweetTimer.Start();
             Log("Tweet Timer Started.", twitterColor);
+
+            Log("Starting YouTube Timer...", youtubeColor);
+            YouTubeTimer.Interval = 30000;
+            YouTubeTimer.Elapsed += OnYouTubeTimerElapsed;
+            YouTubeTimer.AutoReset = true;
+            YouTubeTimer.Start();
+            Log("YouTube Timer Started.", youtubeColor);
         }
 
         public string currencyName;
@@ -266,12 +280,55 @@ namespace DiscordBot.Bots
         private readonly IReactionRoleService _reactionRoleService;
         private readonly IXPToggleService _xpToggleService;
         private readonly ITwitterService _twitterService;
+        private readonly IYouTubeService _youtubeService;
+
+        private async void OnYouTubeTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            var youtubeLogo = "https://cdn.discordapp.com/emojis/844040506321141800.png";
+            var videos = _youtubeService.GetVideosToPost();
+
+            if (!videos.Any()) { return; }
+
+            foreach (var video in videos)
+            {
+                var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == video.GuildId);
+
+                if (guild == null) { continue; }
+
+                Log($"New Video found for: {video.UserName}", youtubeColor);
+
+                var channel = guild.GetChannel(video.ChannelId);
+
+                if (channel == null) { Log("Channel not found. Skipping Tweet.", fail); continue; }
+
+                var color = new DiscordColor("FF0000");
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Color = color,
+                };
+
+                embed.WithAuthor($"{video.UserName} has published a new video!", video.VideoURL, DiscordClient.CurrentUser.AvatarUrl);
+                embed.WithDescription($"[{video.VideoTitle}]({video.VideoURL})");
+                embed.AddField("Description:", $"{video.VideoDescription}");
+                embed.WithThumbnail(video.UserThumbnail);
+                embed.WithImageUrl(video.VideoThumbnail);
+                embed.WithFooter($"Video was published at: {video.VideoPublishedDate.Remove(16)} UTC", youtubeLogo);
+
+                DiscordMessage sentMessage = await channel.SendMessageAsync($"Hey there! {video.UserName} just uploaded a new video to YouTube! Check it out: {video.VideoURL}", embed: embed);
+
+                if (sentMessage == null) { Log("Message not sent successfully. Will try again in 30 seconds.", fail); continue; }
+
+                Log($"New Video by: {video.UserName} posted in {guild.Name}", youtubeColor);
+                await _youtubeService.MarkAsPosted(video);
+            }
+        }
 
         private async void OnTweetTimerElapsed(object sender, ElapsedEventArgs e)
         {
             var tweets = _twitterService.GetTweetsToPost();
 
-            foreach (Tweet tweet in tweets)
+            foreach (var tweet in tweets)
             {
                 var guild = DiscordClient.Guilds.Values.FirstOrDefault(x => x.Id == tweet.GuildID);
 

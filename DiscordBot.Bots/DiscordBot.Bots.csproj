@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
 	<Configurations>Debug;Release</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>2023.5.18.0</Version>
+	<Version>2023.5.22.0</Version>
     <Authors>DJKoston</Authors>
 	<Company>Koston Media Group</Company>
 	<Product>GG Discord Bot</Product>
@@ -29,6 +29,7 @@
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.0" />
     <PackageReference Include="DSharpPlus.Lavalink" Version="4.4.0" />
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.0" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.60.0.3043" />
     <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.5.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.16">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
