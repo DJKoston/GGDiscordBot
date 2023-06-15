@@ -27,7 +27,7 @@ namespace DiscordBot.Bots
         public LavalinkConfiguration LavalinkConfiguration;
         public LavalinkNodeConnection nodeConnection;
 
-        public System.Timers.Timer TweetTimer = new();
+        //public System.Timers.Timer TweetTimer = new();
         public System.Timers.Timer YouTubeTimer = new();
 
         private readonly IConfiguration _configuration;
@@ -247,12 +247,12 @@ namespace DiscordBot.Bots
             DiscordSlashCommands.RegisterCommands<MusicSlashCommands>();
             Log("Slash Commands Registered.");
 
-            Log("Starting Tweet Timer...", twitterColor);
+            /*Log("Starting Tweet Timer...", twitterColor);
             TweetTimer.Interval = 30000;
             TweetTimer.Elapsed += OnTweetTimerElapsed;
             TweetTimer.AutoReset = true;
             TweetTimer.Start();
-            Log("Tweet Timer Started.", twitterColor);
+            Log("Tweet Timer Started.", twitterColor);*/
 
             Log("Starting YouTube Timer...", youtubeColor);
             YouTubeTimer.Interval = 30000;
@@ -299,7 +299,7 @@ namespace DiscordBot.Bots
 
                 var channel = guild.GetChannel(video.ChannelId);
 
-                if (channel == null) { Log("Channel not found. Skipping Tweet.", fail); continue; }
+                if (channel == null) { Log("Channel not found. Skipping Post.", fail); continue; }
 
                 var color = new DiscordColor("FF0000");
 
@@ -310,7 +310,7 @@ namespace DiscordBot.Bots
 
                 embed.WithAuthor($"{video.UserName} has published a new video!", video.VideoURL, DiscordClient.CurrentUser.AvatarUrl);
                 embed.WithDescription($"[{video.VideoTitle}]({video.VideoURL})");
-                embed.AddField("Description:", $"{video.VideoDescription}");
+                if (video.VideoDescription != "") { embed.AddField("Description:", $"{video.VideoDescription}"); }
                 embed.WithThumbnail(video.UserThumbnail);
                 embed.WithImageUrl(video.VideoThumbnail);
                 embed.WithFooter($"Video was published at: {video.VideoPublishedDate.Remove(16)} UTC", youtubeLogo);
