@@ -42,7 +42,7 @@
             List<string> quoteCommands = new();
             List<string> reactionRoleCommands = new();
             List<string> suggestionCommands = new();
-            List<string> twitterCommands = new();
+            List<string> youTubeCommands = new();
 
 
             foreach (var cmd in cmds)
@@ -297,7 +297,7 @@
                     }
                 }
 
-                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("TwitterCommands"))
+                if (cmd.Module.ModuleType.UnderlyingSystemType.FullName.Contains("YouTubeCommands"))
                 {
                     if (cmd is CommandGroup commandGroup)
                     {
@@ -305,13 +305,13 @@
 
                         foreach (var childCommand in childCommands)
                         {
-                            twitterCommands.Add($"`!{childCommand.QualifiedName}`");
+                            youTubeCommands.Add($"`!{childCommand.QualifiedName}`");
                         }
                     }
 
                     else
                     {
-                        twitterCommands.Add($"`!{cmd.QualifiedName}`");
+                        youTubeCommands.Add($"`!{cmd.QualifiedName}`");
                     }
                 }
             }
@@ -376,9 +376,9 @@
                 _embed.AddField("Suggestion Commands:", String.Join(", ", suggestionCommands.ToArray()));
             }
 
-            if(twitterCommands.Count != 0)
+            if(youTubeCommands.Count != 0)
             {
-                _embed.AddField("Twitter Commands:", String.Join(", ", twitterCommands.ToArray()));
+                _embed.AddField("YouTube Commands:", String.Join(", ", youTubeCommands.ToArray()));
             }
 
             return this;
