@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<Configurations>Debug;Release</Configurations>
 	<IncrementVersionOnBuild>yyyy.MM.dd</IncrementVersionOnBuild>
-	<Version>2023.5.22.0</Version>
+	<Version>2023.5.27.0</Version>
 	<Title>GG-Bot Service Manager</Title>
 	<Authors>DJKoston</Authors>
 	<Company>Koston Media Group</Company>

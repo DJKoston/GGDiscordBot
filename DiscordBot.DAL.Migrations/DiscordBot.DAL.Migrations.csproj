@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IncrementVersionOnBuild>yyyy.MM.dd</IncrementVersionOnBuild>
-    <Version>2023.5.22.0</Version>
+    <Version>2023.5.27.0</Version>
     <Title>GG-Bot Database Migration Layer</Title>
     <Authors>DJKoston</Authors>
     <Company>Koston Media Group</Company>
