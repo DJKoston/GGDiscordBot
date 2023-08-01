@@ -52,6 +52,7 @@ namespace DiscordBot.Bots
             Log("-----------------------------");
             Log("Logging Started.");
             Log($"Bot Version: {botVersion}");
+            Log($"Bot is currently using dotNET version: {Environment.Version}");
 
             //Load Services
             Log("Loading Core Services...");
