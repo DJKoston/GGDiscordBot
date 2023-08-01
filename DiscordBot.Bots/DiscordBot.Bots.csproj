@@ -29,8 +29,8 @@
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.0" />
     <PackageReference Include="DSharpPlus.Lavalink" Version="4.4.0" />
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.60.0.3043" />
-    <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.5.0" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.61.0.3113" />
+    <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
