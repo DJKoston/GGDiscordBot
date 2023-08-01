@@ -37,7 +37,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
-    <PackageReference Include="Octokit" Version="5.1.0" />
+    <PackageReference Include="Octokit" Version="7.1.0" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
     <PackageReference Include="TwitchLib" Version="3.5.3" />
   </ItemGroup>
