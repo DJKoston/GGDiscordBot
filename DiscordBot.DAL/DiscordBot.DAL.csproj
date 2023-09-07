@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<Configurations>Debug;Release;</Configurations>
     <Nullable>disable</Nullable>
     <IncrementVersionOnBuild>yyyy.MM.dd</IncrementVersionOnBuild>
-    <Version>2023.6.15.0</Version>
+    <Version>2023.9.7.0</Version>
     <Title>GG-Bot Database Layer</Title>
     <Authors>DJKoston</Authors>
     <Company>Koston Media Group</Company>
@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.21" />
   </ItemGroup>
 
 </Project>

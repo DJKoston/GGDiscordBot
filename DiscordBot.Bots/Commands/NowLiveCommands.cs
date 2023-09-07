@@ -47,6 +47,7 @@
 
                 var searchStreamerStep1 = await api.Helix.Search.SearchChannelsAsync(twitchStreamer);
                 var searchStreamer = searchStreamerStep1.Channels.FirstOrDefault(x => x.DisplayName.ToLower() == twitchStreamer.ToLower());
+                var streamerId = searchStreamer.Id;
 
                 if (searchStreamer == null)
                 {
@@ -62,7 +63,21 @@
                     return;
                 }
 
-                var streamerId = searchStreamer.Id;
+                var streamerCheckDB = await _context.NowLiveStreamers.FirstOrDefaultAsync(x => x.GuildId == ctx.Guild.Id && x.StreamerId == streamerId);
+
+                if (streamerCheckDB != null) 
+                {
+                    var messageBuilder1 = new DiscordMessageBuilder
+                    {
+                        Content = $"{twitchStreamer} is already being announced in this server.",
+                    };
+
+                    messageBuilder1.WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(messageBuilder1);
+
+                    return;
+                }
 
                 var config = new NowLiveStreamer
                 {
