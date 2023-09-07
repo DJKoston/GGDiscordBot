@@ -27,8 +27,7 @@ namespace DiscordBot.Bots
         public LavalinkConfiguration LavalinkConfiguration;
         public LavalinkNodeConnection nodeConnection;
 
-        //public System.Timers.Timer TweetTimer = new();
-        public System.Timers.Timer YouTubeTimer = new();
+        public System.Timers.Timer GINATimer = new();
 
         private readonly IConfiguration _configuration;
         public string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -255,12 +254,12 @@ namespace DiscordBot.Bots
             TweetTimer.Start();
             Log("Tweet Timer Started.", twitterColor);*/
 
-            Log("Starting YouTube Timer...", youtubeColor);
-            YouTubeTimer.Interval = 30000;
-            YouTubeTimer.Elapsed += OnYouTubeTimerElapsed;
-            YouTubeTimer.AutoReset = true;
-            YouTubeTimer.Start();
-            Log("YouTube Timer Started.", youtubeColor);
+            Log("Starting GINA Timer...", youtubeColor);
+            GINATimer.Interval = 30000;
+            GINATimer.Elapsed += OnGINATimerElapsed;
+            GINATimer.AutoReset = true;
+            GINATimer.Start();
+            Log("GINA Timer Started.", youtubeColor);
         }
 
         public string currencyName;
@@ -283,7 +282,7 @@ namespace DiscordBot.Bots
         private readonly ITwitterService _twitterService;
         private readonly IYouTubeService _youtubeService;
 
-        private async void OnYouTubeTimerElapsed(object sender, ElapsedEventArgs e)
+        private async void OnGINATimerElapsed(object sender, ElapsedEventArgs e)
         {
             var youtubeLogo = "https://cdn.discordapp.com/emojis/844040506321141800.png";
             var videos = _youtubeService.GetVideosToPost();
@@ -477,7 +476,7 @@ namespace DiscordBot.Bots
                 e.Channel
             };
             
-            var followers = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result.TotalFollows.ToString("###,###,###,###,###,###");
+            //var followers = Twitch.Helix.Users.GetUsersFollowsAsync(toId: e.Channel).Result.TotalFollows.ToString("###,###,###,###,###,###");
             var userLogo = Twitch.Helix.Users.GetUsersAsync(id).Result.Users.FirstOrDefault(x => x.DisplayName.ToLower() == e.Stream.UserName.ToLower()).ProfileImageUrl;
             var twitchLogo = "https://www.freepnglogos.com/uploads/purple-twitch-logo-png-18.png";
 
@@ -532,7 +531,7 @@ namespace DiscordBot.Bots
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    embed.AddField("Followers:", followers, true);
+                    //embed.AddField("Followers:", followers, true);
                     embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
                     embed.WithThumbnail(userLogo);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
@@ -579,7 +578,7 @@ namespace DiscordBot.Bots
 
                     if (e.Stream.Title != null) { embed.WithDescription($"[{e.Stream.Title}](https://twitch.tv/{e.Stream.UserName})"); }
 
-                    embed.AddField("Followers:", followers, true);
+                    //embed.AddField("Followers:", followers, true);
                     embed.AddField("Went Live:", $"<t:{secondsSinceEpoch}:R>", true);
                     embed.WithThumbnail(userLogo);
                     embed.WithFooter($"Stream went live at: {e.Stream.StartedAt} UTC", twitchLogo);
